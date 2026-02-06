@@ -14,13 +14,23 @@ This folder contains **all** the specifications, requirements, rules, and guidel
 | **[ARCHITECTURE.md](ARCHITECTURE.md)** | System architecture, patterns, design decisions | **BEFORE** making architectural changes |
 | **[API-SPECIFICATION.md](API-SPECIFICATION.md)** | REST API endpoints, requests, responses | **WHEN** implementing API endpoints or calling them |
 | **[PROJECT-STRUCTURE.md](PROJECT-STRUCTURE.md)** | Folder structure, naming conventions | **WHEN** creating new files or organizing code |
+| **[PHASE-COMPLETION-WORKFLOW.md](PHASE-COMPLETION-WORKFLOW.md)** ⚠️ | **Required workflow after EVERY phase** | **AFTER** completing each phase |
 
 ### Agent Guidelines
 
 | Document | Purpose | For |
 |:---------|:--------|:----|
+| **[agents/SETUP-AGENT.md](agents/SETUP-AGENT.md)** | Environment setup & prerequisite verification | Setup/onboarding agents |
 | **[agents/BACKEND-AGENT.md](agents/BACKEND-AGENT.md)** | .NET backend development guide | Backend AI agents |
 | **[agents/FRONTEND-AGENT.md](agents/FRONTEND-AGENT.md)** | Angular frontend development guide | Frontend AI agents |
+| **[agents/CODE-REVIEWER-AGENT.md](agents/CODE-REVIEWER-AGENT.md)** | Code review & quality assurance guide | Code review agents |
+
+### Command References
+
+| Document | Purpose | Used By |
+|:---------|:--------|:--------|
+| **[commands/setup-backend.md](commands/setup-backend.md)** | Backend setup procedure with version checks | Setup Agent, Backend Agent |
+| **[commands/database-operations.md](commands/database-operations.md)** | Database migrations, queries, troubleshooting | Backend Agent, Database Admin |
 
 ### Coding Standards
 

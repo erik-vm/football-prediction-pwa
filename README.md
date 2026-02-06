@@ -25,21 +25,22 @@ football-prediction-pwa/
 │   ├── GAME-RULES.md         # Official scoring rules (CRITICAL)
 │   ├── REQUIREMENTS.md        # Functional requirements
 │   ├── TECH-STACK.md         # Technology decisions
+│   ├── PHASE-COMPLETION-WORKFLOW.md  # ⚠️ Required workflow after every phase
 │   ├── agents/               # AI agent guidelines
-│   │   ├── SETUP-AGENT.md            # ✨ NEW: Setup verification
-│   │   ├── BACKEND-AGENT.md          # Updated with troubleshooting
-│   │   ├── FRONTEND-AGENT.md
-│   │   └── CODE-REVIEWER-AGENT.md    # ✨ NEW: Code review
-│   ├── commands/             # ✨ NEW: Reusable command references
+│   │   ├── SETUP-AGENT.md            # Setup verification
+│   │   ├── BACKEND-AGENT.md          # Backend development guide
+│   │   ├── FRONTEND-AGENT.md         # Frontend development guide
+│   │   └── CODE-REVIEWER-AGENT.md    # Code review guide
+│   ├── commands/             # Reusable command references
 │   │   ├── setup-backend.md
 │   │   └── database-operations.md
 │   └── rules/                # Coding standards
-├── .analysis/                 # ✨ NEW: Session analysis documents
+├── .analysis/                 # Session analysis documents
 │   └── 2026-02-06-phase-0-1-session.md
 ├── backend/                   # ✅ .NET 9 Web API (6 projects created)
 ├── frontend/                  # Angular 19 PWA (to be created)
-├── PROGRESS.md               # ✨ NEW: Development tracking
-├── TEST-RESULTS.md           # ✨ NEW: Test documentation
+├── PROGRESS.md               # Development tracking
+├── TEST-RESULTS.md           # Test documentation
 └── README.md                 # This file
 ```
 
@@ -58,6 +59,7 @@ football-prediction-pwa/
    - Code Review: `.specs/agents/CODE-REVIEWER-AGENT.md`
 
 4. **Quick Commands**: `.specs/commands/` - Reusable command references
+5. **⚠️ AFTER EVERY PHASE**: Follow `.specs/PHASE-COMPLETION-WORKFLOW.md` - Analyze, document, update specs
 
 ### For Developers
 
@@ -317,20 +319,39 @@ curl http://localhost:5206/health
 
 ---
 
-## 📊 Session Analysis
+## 📊 Phase Completion Workflow
 
-After each development phase, create an analysis document in `.analysis/`:
+**⚠️ CRITICAL: Follow this after EVERY phase**
 
-**Example:** `.analysis/2026-02-06-phase-0-1-session.md`
+See: **`.specs/PHASE-COMPLETION-WORKFLOW.md`** for complete workflow
 
-**Contents:**
-- What was accomplished
-- Issues encountered and solutions
-- Time spent on blockers
-- Lessons learned
-- Prevention strategies for future sessions
+### Required Steps After Each Phase:
 
-**Purpose:** Help future sessions avoid the same issues.
+1. ✅ **Complete implementation** - All features, tests passing
+2. 📝 **Create session analysis** - Document in `.analysis/YYYY-MM-DD-phase-X.md`
+3. 🔍 **Analyze issues** - What went wrong, root causes, solutions, time spent
+4. 📚 **Update specifications** - Update agent guides with troubleshooting
+5. 💻 **Update commands** - Add new command patterns to `.specs/commands/`
+6. 📖 **Update README** - Add to troubleshooting, progress tracking
+7. ✅ **Update PROGRESS.md** - Mark phase complete with notes
+8. 🆕 **Create new agents** - If new roles identified
+9. 💾 **Commit all docs** - Comprehensive commit message
+10. 🚀 **Push changes** - Make available for future sessions
+
+### Why This Matters:
+
+- **Knowledge preservation** - Future sessions avoid past mistakes
+- **Continuous improvement** - Documentation gets better each phase
+- **Time savings** - Issues solved once, documented forever
+- **Quality assurance** - Forces reflection and proper testing
+
+### Session Analysis Example:
+
+`.analysis/2026-02-06-phase-0-1-session.md` - Comprehensive analysis of Phase 0-1:
+- 4 blockers documented (90 minutes total)
+- Root causes identified
+- Solutions with exact commands
+- Prevention strategies for future
 
 ---
 
