@@ -2,6 +2,21 @@
 
 A Progressive Web App for friends to predict football match scores and compete on leaderboards during tournament seasons (primarily Champions League).
 
+---
+
+## 🚀 Starting a New Session?
+
+**👉 Point Claude to: `START-HERE.md`**
+
+This startup file will:
+- Guide you through session initialization
+- Assess current project state
+- Present status report
+- Recommend next actions
+- Orchestrate development workflow
+
+---
+
 ## 🎯 Project Status
 
 **Status**: Phase 0-1 Complete - Backend Foundation Ready
@@ -20,6 +35,7 @@ A Progressive Web App for friends to predict football match scores and compete o
 
 ```
 football-prediction-pwa/
+├── START-HERE.md             # 🎯 Point Claude here when starting new session
 ├── .specs/                    # Complete project specifications
 │   ├── README.md             # Specification index and guide
 │   ├── GAME-RULES.md         # Official scoring rules (CRITICAL)
@@ -27,6 +43,7 @@ football-prediction-pwa/
 │   ├── TECH-STACK.md         # Technology decisions
 │   ├── PHASE-COMPLETION-WORKFLOW.md  # ⚠️ Required workflow after every phase
 │   ├── agents/               # AI agent guidelines
+│   │   ├── ORCHESTRATOR-AGENT.md     # 🎯 Master coordinator (read first!)
 │   │   ├── SETUP-AGENT.md            # Setup verification
 │   │   ├── BACKEND-AGENT.md          # Backend development guide
 │   │   ├── FRONTEND-AGENT.md         # Frontend development guide

@@ -20,6 +20,7 @@ This folder contains **all** the specifications, requirements, rules, and guidel
 
 | Document | Purpose | For |
 |:---------|:--------|:----|
+| **[agents/ORCHESTRATOR-AGENT.md](agents/ORCHESTRATOR-AGENT.md)** 🎯 | **Master coordinator - Start here every session!** | Session startup & workflow orchestration |
 | **[agents/SETUP-AGENT.md](agents/SETUP-AGENT.md)** | Environment setup & prerequisite verification | Setup/onboarding agents |
 | **[agents/BACKEND-AGENT.md](agents/BACKEND-AGENT.md)** | .NET backend development guide | Backend AI agents |
 | **[agents/FRONTEND-AGENT.md](agents/FRONTEND-AGENT.md)** | Angular frontend development guide | Frontend AI agents |
