@@ -17,8 +17,9 @@
 - [x] Create TEST-RESULTS.md for test documentation
 - [x] Set up backend project structure (.NET 9)
 - [ ] Set up frontend project structure (Angular 19)
-- [ ] Set up PostgreSQL database (requires Docker Desktop)
-- [x] Initial commit and push (pending)
+- [x] Set up PostgreSQL database with Docker
+- [x] Apply EF Core migrations
+- [x] Initial commit and push
 
 **Notes:**
 - Branch created successfully
@@ -58,8 +59,11 @@
 - Composite unique index on Prediction (UserId, MatchId)
 - Connection string configured for local PostgreSQL
 - Docker Compose file created for PostgreSQL 16
-- Migration creation pending (requires Docker Desktop to be running)
+- ✅ Database migrations applied successfully using SQL script method
 - Using .NET 9 with EF Core 9.0 packages
+- PostgreSQL 16 running in Docker container (healthy)
+- All 5 tables created: Users, Tournaments, GameWeeks, Matches, Predictions
+- Foreign key constraints configured with CASCADE delete
 
 ---
 
@@ -351,12 +355,13 @@
 ## 🚨 Blockers & Issues
 
 **Current:**
-- Docker Desktop not running - needed for PostgreSQL container and EF migrations
-- Once Docker is available, need to run: `cd backend && docker-compose up -d`
-- Then create migration: `dotnet ef migrations add InitialCreate --project src/FootballPrediction.Infrastructure --startup-project src/FootballPrediction.Api`
+- None
 
 **Resolved:**
 - .NET 10/9 package compatibility - resolved by using EF Core 9.0 packages with .NET 9 target framework
+- Docker Desktop not running - ✅ Started and PostgreSQL container running
+- EF Core migrations - ✅ Successfully applied using SQL script method
+- Global dotnet-ef tool version mismatch - downgraded from v10 to v9 to match project
 
 ---
 
