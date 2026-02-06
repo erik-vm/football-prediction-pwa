@@ -4,9 +4,15 @@ A Progressive Web App for friends to predict football match scores and compete o
 
 ## 🎯 Project Status
 
-**Status**: Specification Complete - Ready for Development
+**Status**: Phase 0-1 Complete - Backend Foundation Ready
+**Current Phase**: Ready for Phase 2 (Authentication & Authorization)
 **Tech Stack**: Angular 19 + .NET 9 + PostgreSQL
 **Based On**: Correct Spring Boot + React implementation
+
+**Latest Progress:**
+- ✅ Phase 0: Project Setup
+- ✅ Phase 1: Backend Foundation (6 projects, database migrations applied)
+- 🔜 Phase 2: Authentication & Authorization
 
 ---
 
@@ -20,11 +26,20 @@ football-prediction-pwa/
 │   ├── REQUIREMENTS.md        # Functional requirements
 │   ├── TECH-STACK.md         # Technology decisions
 │   ├── agents/               # AI agent guidelines
-│   │   ├── BACKEND-AGENT.md
-│   │   └── FRONTEND-AGENT.md
+│   │   ├── SETUP-AGENT.md            # ✨ NEW: Setup verification
+│   │   ├── BACKEND-AGENT.md          # Updated with troubleshooting
+│   │   ├── FRONTEND-AGENT.md
+│   │   └── CODE-REVIEWER-AGENT.md    # ✨ NEW: Code review
+│   ├── commands/             # ✨ NEW: Reusable command references
+│   │   ├── setup-backend.md
+│   │   └── database-operations.md
 │   └── rules/                # Coding standards
-├── backend/                   # .NET 9 Web API (to be created)
+├── .analysis/                 # ✨ NEW: Session analysis documents
+│   └── 2026-02-06-phase-0-1-session.md
+├── backend/                   # ✅ .NET 9 Web API (6 projects created)
 ├── frontend/                  # Angular 19 PWA (to be created)
+├── PROGRESS.md               # ✨ NEW: Development tracking
+├── TEST-RESULTS.md           # ✨ NEW: Test documentation
 └── README.md                 # This file
 ```
 
@@ -36,16 +51,21 @@ football-prediction-pwa/
 
 1. **Read First**: `.specs/README.md` - Complete specification index
 2. **Critical**: `.specs/GAME-RULES.md` - Scoring logic MUST match exactly
-3. **Your Guide**:
-   - Backend: `.specs/agents/BACKEND-AGENT.md`
-   - Frontend: `.specs/agents/FRONTEND-AGENT.md`
+3. **Your Guide**: Choose your role
+   - Setup/Onboarding: `.specs/agents/SETUP-AGENT.md` ⭐ **Start here if new**
+   - Backend Development: `.specs/agents/BACKEND-AGENT.md`
+   - Frontend Development: `.specs/agents/FRONTEND-AGENT.md`
+   - Code Review: `.specs/agents/CODE-REVIEWER-AGENT.md`
+
+4. **Quick Commands**: `.specs/commands/` - Reusable command references
 
 ### For Developers
 
-1. Read `.specs/README.md` completely
-2. Set up development environment (see `.specs/TECH-STACK.md`)
-3. Follow your role's agent guide
-4. Start with project scaffolding
+1. **Verify Prerequisites** - Run version checks (see setup-backend.md)
+2. Read `.specs/README.md` completely
+3. Set up development environment (follow `.specs/commands/setup-backend.md`)
+4. Check `PROGRESS.md` for current status
+5. Follow your role's agent guide
 
 ---
 
@@ -61,10 +81,19 @@ football-prediction-pwa/
 
 ### Agent Guidelines
 
-| Role | Guide |
-|:-----|:------|
-| Backend Developer | [.specs/agents/BACKEND-AGENT.md](.specs/agents/BACKEND-AGENT.md) |
-| Frontend Developer | [.specs/agents/FRONTEND-AGENT.md](.specs/agents/FRONTEND-AGENT.md) |
+| Role | Guide | Purpose |
+|:-----|:------|:--------|
+| **Setup Agent** | [SETUP-AGENT.md](.specs/agents/SETUP-AGENT.md) | Environment setup, prerequisite verification |
+| **Backend Developer** | [BACKEND-AGENT.md](.specs/agents/BACKEND-AGENT.md) | .NET 9 API development (updated with troubleshooting) |
+| **Frontend Developer** | [FRONTEND-AGENT.md](.specs/agents/FRONTEND-AGENT.md) | Angular 19 PWA development |
+| **Code Reviewer** | [CODE-REVIEWER-AGENT.md](.specs/agents/CODE-REVIEWER-AGENT.md) | Code review, quality assurance |
+
+### Command References
+
+| Command Set | File | Contains |
+|:------------|:-----|:---------|
+| **Backend Setup** | [setup-backend.md](.specs/commands/setup-backend.md) | Complete backend setup procedure |
+| **Database Operations** | [database-operations.md](.specs/commands/database-operations.md) | Migrations, queries, troubleshooting |
 
 ---
 
@@ -230,29 +259,102 @@ This is a complete rewrite of an existing Flutter mobile app using Angular PWA +
 
 ---
 
-## 📦 Next Steps
+## 🛠️ Quick Setup
 
-1. **Project Scaffolding**
-   - Create .NET solution structure
-   - Create Angular application
-   - Set up Git repository
+**Prerequisites Check:**
+```bash
+# Verify versions
+dotnet --version  # Need 9.x or 10.x
+dotnet ef --version  # MUST be 9.0.0 (not 10.x!)
+docker --version
 
-2. **Database Setup**
-   - PostgreSQL installation
-   - Initial migration
-   - Seed data
+# Fix dotnet-ef if wrong version
+dotnet tool uninstall --global dotnet-ef
+dotnet tool install --global dotnet-ef --version 9.0.0
+```
 
-3. **CI/CD Pipeline**
-   - GitHub Actions setup
-   - Automated testing
-   - Deployment configuration
+**Backend Setup:**
+```bash
+cd backend
 
-4. **MVP Development**
-   - Authentication system
-   - Match management
-   - Prediction submission
-   - Scoring calculation
-   - Leaderboards
+# Start PostgreSQL
+docker-compose up -d
+
+# Apply migrations (SQL script method - most reliable)
+cd src/FootballPrediction.Infrastructure
+dotnet ef migrations script --output migration.sql
+cd ../..
+docker exec -i football_prediction_db psql -U postgres -d football_prediction < src/FootballPrediction.Infrastructure/migration.sql
+
+# Verify (should show 6 tables)
+docker exec football_prediction_db psql -U postgres -d football_prediction -c '\dt'
+
+# Build and run
+dotnet build
+dotnet run --project src/FootballPrediction.Api
+
+# Test health endpoint
+curl http://localhost:5206/health
+```
+
+**Full Setup Guide:** See `.specs/commands/setup-backend.md`
+
+---
+
+## 🔍 Troubleshooting
+
+### Common Issues
+
+| Issue | Cause | Solution |
+|:------|:------|:---------|
+| `System.Runtime, Version=10.0.0.0` not found | dotnet-ef v10 with .NET 9 project | Downgrade to `dotnet-ef 9.0.0` |
+| Migration says "Done" but no tables | EF Core state issue | Use SQL script method (see setup-backend.md) |
+| `Package X not compatible with net9.0` | Wrong package version | Use version 9.x packages |
+| Docker connection refused | Docker not running | Start Docker Desktop |
+| Port 5432 already in use | Another PostgreSQL running | Stop other instance or change port |
+
+**Full Troubleshooting Guide:** See `.specs/agents/BACKEND-AGENT.md` → Troubleshooting section
+
+---
+
+## 📊 Session Analysis
+
+After each development phase, create an analysis document in `.analysis/`:
+
+**Example:** `.analysis/2026-02-06-phase-0-1-session.md`
+
+**Contents:**
+- What was accomplished
+- Issues encountered and solutions
+- Time spent on blockers
+- Lessons learned
+- Prevention strategies for future sessions
+
+**Purpose:** Help future sessions avoid the same issues.
+
+---
+
+## 📦 Development Progress
+
+**Phase 0: Project Setup** ✅
+- Development branch created
+- Tracking documents (PROGRESS.md, TEST-RESULTS.md)
+- Backend project structure (6 projects)
+
+**Phase 1: Backend Foundation** ✅
+- Domain entities and configurations
+- EF Core migrations applied
+- PostgreSQL database operational
+- API health check working
+- Solution builds with 0 errors
+
+**Phase 2: Authentication & Authorization** 🔜
+- JWT token generation
+- User registration/login
+- Password hashing (BCrypt)
+- Authorization policies
+
+**See PROGRESS.md for detailed phase breakdown**
 
 ---
 
@@ -266,9 +368,20 @@ This is a complete rewrite of an existing Flutter mobile app using Angular PWA +
 
 ---
 
-**Version**: 1.0
+**Version**: 1.1
 **Created**: 2025-01-27
-**Status**: Specification Complete
-**Ready For**: Development Phase
+**Last Updated**: 2026-02-06
+**Status**: Phase 1 Complete
+**Ready For**: Phase 2 - Authentication & Authorization
 
-**Start building! 🚀**
+**Continue building! 🚀**
+
+---
+
+## 📚 Additional Resources
+
+- **Progress Tracking:** `PROGRESS.md`
+- **Test Results:** `TEST-RESULTS.md`
+- **Session Analysis:** `.analysis/` directory
+- **Command References:** `.specs/commands/` directory
+- **Agent Guidelines:** `.specs/agents/` directory

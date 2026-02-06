@@ -35,6 +35,110 @@ Before making changes, consult these project files:
 
 ---
 
+## Prerequisites & Version Requirements
+
+**CRITICAL**: Version mismatches cause cryptic errors. Verify all versions before starting.
+
+### Required Tools
+
+| Tool | Required Version | Check Command | Install/Fix Command |
+|:-----|:----------------|:--------------|:-------------------|
+| **.NET SDK** | 9.0.x | `dotnet --version` | Download from https://dot.net |
+| **dotnet-ef (global tool)** | 9.0.x | `dotnet ef --version` | `dotnet tool install --global dotnet-ef --version 9.0.0` |
+| **Docker Desktop** | Latest | `docker --version` | Download from https://docker.com |
+| **PostgreSQL** | 16+ | Via Docker | `docker-compose up -d` |
+
+### Version Verification Script
+
+Run this BEFORE starting development:
+
+```bash
+#!/bin/bash
+# Save as: verify-versions.sh
+
+echo "=== Version Verification ==="
+
+# Check .NET SDK
+SDK_VERSION=$(dotnet --version | cut -d'.' -f1)
+if [ "$SDK_VERSION" -lt "9" ]; then
+    echo "❌ .NET SDK: $SDK_VERSION (Need 9.x or 10.x)"
+    exit 1
+else
+    echo "✅ .NET SDK: $(dotnet --version)"
+fi
+
+# Check dotnet-ef tool
+if ! command -v dotnet-ef &> /dev/null; then
+    echo "❌ dotnet-ef: Not installed"
+    echo "   Install: dotnet tool install --global dotnet-ef --version 9.0.0"
+    exit 1
+else
+    EF_VERSION=$(dotnet ef --version | grep -oP '\d+\.\d+\.\d+' | head -1)
+    EF_MAJOR=$(echo $EF_VERSION | cut -d'.' -f1)
+    if [ "$EF_MAJOR" != "9" ]; then
+        echo "❌ dotnet-ef: $EF_VERSION (Need 9.0.x for .NET 9 projects)"
+        echo "   Fix: dotnet tool uninstall --global dotnet-ef"
+        echo "        dotnet tool install --global dotnet-ef --version 9.0.0"
+        exit 1
+    else
+        echo "✅ dotnet-ef: $EF_VERSION"
+    fi
+fi
+
+# Check Docker
+if ! command -v docker &> /dev/null; then
+    echo "❌ Docker: Not installed"
+    exit 1
+else
+    echo "✅ Docker: $(docker --version | grep -oP '\d+\.\d+\.\d+')"
+fi
+
+# Check Docker running
+if ! docker info &> /dev/null; then
+    echo "⚠️  Docker: Installed but not running"
+    echo "   Start Docker Desktop"
+    exit 1
+else
+    echo "✅ Docker: Running"
+fi
+
+echo ""
+echo "=== All Prerequisites Met ==="
+```
+
+### Common Version Issues
+
+#### Issue: "Could not load file or assembly 'System.Runtime, Version=10.0.0.0'"
+
+**Cause:** Global `dotnet-ef` tool version doesn't match project EF Core version
+
+**Solution:**
+```bash
+# Uninstall wrong version
+dotnet tool uninstall --global dotnet-ef
+
+# Install correct version (9.0.0 for .NET 9 projects)
+dotnet tool install --global dotnet-ef --version 9.0.0
+
+# Verify
+dotnet ef --version
+```
+
+#### Issue: "Package Npgsql.EntityFrameworkCore.PostgreSQL 10.0.0 is not compatible with net9.0"
+
+**Cause:** NuGet package version doesn't match target framework
+
+**Solution:** Use version 9.x packages for net9.0 projects:
+```xml
+<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.2" />
+<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.0" />
+<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0" />
+```
+
+**Rule:** Package major version should match `<TargetFramework>` version, NOT SDK version.
+
+---
+
 ## Commands
 
 ### Quick Start
@@ -523,6 +627,170 @@ When testing in browser:
 
 ---
 
+## Troubleshooting
+
+### Database Migration Issues
+
+#### Problem: `dotnet ef database update` says "Done" but tables not created
+
+**Symptoms:**
+- Command reports success
+- PostgreSQL shows no tables
+- Re-running claims tables already exist
+
+**Solution:** Use SQL script method (more reliable):
+```bash
+cd backend/src/FootballPrediction.Infrastructure
+
+# Generate SQL script
+dotnet ef migrations script --output migration.sql
+
+# Apply directly to PostgreSQL
+cd ../..
+docker exec -i football_prediction_db psql -U postgres -d football_prediction < src/FootballPrediction.Infrastructure/migration.sql
+
+# Verify tables created
+docker exec football_prediction_db psql -U postgres -d football_prediction -c '\dt'
+```
+
+**Why this works:** Bypasses EF Core's migration execution engine and state tracking.
+
+#### Problem: Migration fails with "relation already exists"
+
+**Solution 1:** Clean slate approach
+```bash
+# Stop and remove container + data
+cd backend
+docker-compose down
+docker volume rm backend_postgres_data
+
+# Recreate
+docker-compose up -d
+sleep 5  # Wait for PostgreSQL to be ready
+
+# Apply migration
+cd src/FootballPrediction.Infrastructure
+dotnet ef migrations script --output migration.sql
+cd ../..
+docker exec -i football_prediction_db psql -U postgres -d football_prediction < src/FootballPrediction.Infrastructure/migration.sql
+```
+
+**Solution 2:** Remove migration and recreate
+```bash
+# Delete migration files
+rm -rf src/FootballPrediction.Infrastructure/Migrations
+
+# Recreate
+cd src/FootballPrediction.Infrastructure
+dotnet ef migrations add InitialCreate
+```
+
+### Database Connection Issues
+
+#### Problem: "Cannot connect to database"
+
+**Check Docker status:**
+```bash
+docker ps  # Should show football_prediction_db running
+docker logs football_prediction_db  # Check for errors
+```
+
+**Check database exists:**
+```bash
+docker exec football_prediction_db psql -U postgres -l
+```
+
+**Test connection manually:**
+```bash
+docker exec -it football_prediction_db psql -U postgres -d football_prediction
+```
+
+### Build Issues
+
+#### Problem: "Restore failed" or package conflicts
+
+**Solution:**
+```bash
+# Clean all build artifacts
+dotnet clean
+
+# Delete bin and obj folders
+find . -name "bin" -o -name "obj" | xargs rm -rf
+
+# Restore fresh
+dotnet restore
+
+# Rebuild
+dotnet build
+```
+
+### Docker Issues
+
+#### Problem: Docker Desktop not running
+
+**Windows:**
+1. Start Docker Desktop from Start menu
+2. Wait for "Docker Desktop is running" notification
+3. Verify: `docker info`
+
+**Linux/Mac:**
+```bash
+sudo systemctl start docker  # Linux
+open -a Docker  # Mac
+```
+
+#### Problem: Port 5432 already in use
+
+**Find what's using the port:**
+```bash
+# Windows
+netstat -ano | findstr :5432
+
+# Linux/Mac
+lsof -i :5432
+```
+
+**Solutions:**
+1. Stop other PostgreSQL instance
+2. Change port in `docker-compose.yml` and `appsettings.json`
+
+### Verification Commands
+
+**Check everything is working:**
+```bash
+# 1. Versions
+dotnet --version
+dotnet ef --version
+
+# 2. Docker
+docker ps
+docker logs football_prediction_db
+
+# 3. Database
+docker exec football_prediction_db psql -U postgres -d football_prediction -c '\dt'
+
+# 4. Build
+cd backend
+dotnet build
+
+# 5. API
+dotnet run --project src/FootballPrediction.Api
+# Then in another terminal:
+curl http://localhost:5206/health
+```
+
+### Common Error Messages
+
+| Error | Cause | Solution |
+|:------|:------|:---------|
+| `System.Runtime, Version=10.0.0.0` not found | dotnet-ef v10 with .NET 9 project | Downgrade to ef 9.0.0 |
+| `Package X is not compatible with net9.0` | Wrong package version | Use version 9.x packages |
+| `Unable to connect to database` | Docker not running | Start Docker Desktop |
+| `42P07: relation already exists` | Migration state corrupted | Use SQL script method |
+| `Could not find a part of the path` | Wrong directory | `cd backend` first |
+
+---
+
 ## Updating This File
 
 Update `BACKEND-AGENT.md` when:
@@ -531,10 +799,11 @@ Update `BACKEND-AGENT.md` when:
 - Changing project structure
 - Discovering new common pitfalls
 - Modifying development workflow
+- Resolving new issues
 
 ---
 
-**Version**: 1.0
-**Created**: 2025-01-27
+**Version**: 1.1
+**Last Updated**: 2026-02-06
 **Framework**: ASP.NET Core 9
 **Language**: C# 13
