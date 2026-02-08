@@ -102,6 +102,34 @@ else
     echo "✅ Docker: Running"
 fi
 
+# CRITICAL: Check for port conflicts (Phase 2 Lesson)
+echo ""
+echo "=== Port Availability Check ==="
+
+# Check PostgreSQL port (5433 is our standard, not 5432)
+PG_PORTS=$(netstat -ano 2>/dev/null | grep -E ':5432|:5433' || echo "")
+if [ -n "$PG_PORTS" ]; then
+    echo "⚠️  PostgreSQL ports in use:"
+    echo "$PG_PORTS"
+    # Check for multiple instances on same port
+    PORT_5432_COUNT=$(echo "$PG_PORTS" | grep -c ":5432" || echo "0")
+    if [ "$PORT_5432_COUNT" -gt "1" ]; then
+        echo "❌ CRITICAL: Multiple services on port 5432 detected!"
+        echo "   This causes EF Core to connect to wrong database."
+        echo "   Solution: Use port 5433 for Docker PostgreSQL (see docker-compose.yml)"
+        exit 1
+    fi
+else
+    echo "✅ PostgreSQL ports available"
+fi
+
+# Check API port (5206)
+if netstat -ano 2>/dev/null | grep -q ":5206"; then
+    echo "⚠️  API port 5206 already in use"
+else
+    echo "✅ API port 5206 available"
+fi
+
 echo ""
 echo "=== All Prerequisites Met ==="
 ```
@@ -136,6 +164,97 @@ dotnet ef --version
 ```
 
 **Rule:** Package major version should match `<TargetFramework>` version, NOT SDK version.
+
+### Critical Environment Issues (Phase 2 Lessons)
+
+#### Issue: PostgreSQL Port Conflict - Multiple Instances
+
+**Symptoms:**
+- EF Core error: "column [ColumnName] does not exist"
+- Database schema appears correct when checked directly
+- Migrations show as applied in `__EFMigrationsHistory`
+- Problem persists despite clean builds and fresh migrations
+
+**Root Cause:**
+Multiple PostgreSQL instances listening on the same port (typically 5432):
+- Docker PostgreSQL container (intended instance)
+- Native Windows PostgreSQL service (interference)
+
+EF Core connects to the **wrong instance** with old schema.
+
+**Diagnosis:**
+```bash
+# Windows (Command Prompt or PowerShell)
+netstat -ano | findstr :5432
+
+# Git Bash (use double slashes for Windows commands)
+netstat -ano | grep :5432
+
+# Expected output if conflict exists:
+# TCP    0.0.0.0:5432    ...    LISTENING    19092  # Docker
+# TCP    0.0.0.0:5432    ...    LISTENING    7332   # Windows service
+```
+
+**Solution:**
+Use port 5433 for Docker to avoid conflicts:
+
+1. Update `docker-compose.yml`:
+```yaml
+ports:
+  - "5433:5432"  # Changed from "5432:5432"
+```
+
+2. Update `appsettings.json`:
+```json
+"ConnectionStrings": {
+  "DefaultConnection": "Host=localhost;Port=5433;Database=football_prediction;..."
+}
+```
+
+3. Restart Docker:
+```bash
+docker-compose down -v
+docker-compose up -d
+```
+
+**Prevention:**
+- Always use non-default ports for Docker services (5433 instead of 5432)
+- Run port conflict check before starting development (see verification script above)
+- Document port usage in project README
+
+#### Issue: Git Bash Windows Command Syntax
+
+**Problem:**
+Commands like `taskkill /F /PID 1234` fail with "Invalid argument/option - 'F:/'"
+
+**Cause:**
+Git Bash interprets `/F` as a path starting with drive letter F:
+
+**Solution:**
+Use double slashes for Windows command flags in Git Bash:
+```bash
+# Wrong (Git Bash)
+taskkill /F /PID 1234
+
+# Correct (Git Bash)
+taskkill //F //PID 1234
+
+# Also works (PowerShell/CMD)
+taskkill /F /PID 1234
+```
+
+**Common Windows Commands in Git Bash:**
+```bash
+# Kill process
+taskkill //F //IM dotnet.exe
+taskkill //F //PID 12345
+
+# Find process using port
+netstat -ano | findstr :5206
+
+# List processes
+tasklist | findstr dotnet
+```
 
 ---
 

@@ -15,6 +15,7 @@ This folder contains **all** the specifications, requirements, rules, and guidel
 | **[API-SPECIFICATION.md](API-SPECIFICATION.md)** | REST API endpoints, requests, responses | **WHEN** implementing API endpoints or calling them |
 | **[PROJECT-STRUCTURE.md](PROJECT-STRUCTURE.md)** | Folder structure, naming conventions | **WHEN** creating new files or organizing code |
 | **[PHASE-COMPLETION-WORKFLOW.md](PHASE-COMPLETION-WORKFLOW.md)** ⚠️ | **Required workflow after EVERY phase** | **AFTER** completing each phase |
+| **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** 🔧 | Common issues and solutions | **WHEN** encountering errors or unexpected behavior |
 
 ### Agent Guidelines
 
@@ -362,10 +363,24 @@ For questions or clarifications:
 
 ---
 
-**Version**: 1.0
+**Version**: 1.1
 **Created**: 2025-01-27
+**Updated**: 2026-02-08 (Added troubleshooting and analysis documentation)
 **Status**: Complete Specification Package
 **Ready For**: Project Scaffolding and Development
+
+---
+
+## 📊 Phase Analysis
+
+After each phase completion, a comprehensive analysis is created in the `../.analysis/` directory:
+
+- **Phase Analysis Files**: Document lessons learned, issues encountered, and solutions
+- **Purpose**: Prevent recurring problems in future phases
+- **Usage**: Review before starting similar work
+
+**Available Analyses:**
+- `../.analysis/PHASE-2-ANALYSIS.md` - Authentication & Authorization (PostgreSQL port conflict, EF Core design-time issues, Windows command syntax)
 
 ---
 

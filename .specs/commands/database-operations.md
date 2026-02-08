@@ -47,18 +47,25 @@ docker exec football_prediction_db psql -U postgres -d football_prediction -c '\
 
 ### Method 2: EF Direct Update
 
+**IMPORTANT:** Always use explicit `--connection` parameter to ensure EF Core connects to the correct database instance.
+
 ```bash
 cd backend/src/FootballPrediction.Infrastructure
 
-# Apply all pending migrations
-dotnet ef database update
+# Apply all pending migrations (ALWAYS use explicit connection string)
+dotnet ef database update --connection "Host=localhost;Port=5433;Database=football_prediction;Username=postgres;Password=postgres" --startup-project ../FootballPrediction.Api
 
 # Apply specific migration
-dotnet ef database update <MigrationName>
+dotnet ef database update <MigrationName> --connection "Host=localhost;Port=5433;Database=football_prediction;Username=postgres;Password=postgres" --startup-project ../FootballPrediction.Api
 
 # Rollback to specific migration
-dotnet ef database update <PreviousMigrationName>
+dotnet ef database update <PreviousMigrationName> --connection "Host=localhost;Port=5433;Database=football_prediction;Username=postgres;Password=postgres" --startup-project ../FootballPrediction.Api
 ```
+
+**Why Explicit Connection String?**
+- EF Core design-time tools may cache or ignore appsettings.json
+- Prevents connection to wrong database instance (e.g., Windows PostgreSQL service vs Docker container)
+- Ensures repeatability and eliminates ambiguity
 
 ---
 
@@ -238,6 +245,41 @@ GROUP BY datname;"
 ---
 
 ## Troubleshooting
+
+### PostgreSQL Port Conflict (Multiple Instances)
+
+**Symptoms:**
+- EF Core error: "column [ColumnName] does not exist"
+- Database schema appears correct when checked via `psql`
+- Migrations show as applied in `__EFMigrationsHistory`
+- Problem persists despite clean builds and fresh migrations
+
+**Diagnosis:**
+```bash
+# Check for multiple PostgreSQL instances on same port
+netstat -ano | findstr :5432
+netstat -ano | findstr :5433
+
+# If you see multiple entries for same port, you have a conflict
+# Example of conflict:
+# TCP    0.0.0.0:5432    LISTENING    19092  # Docker
+# TCP    0.0.0.0:5432    LISTENING    7332   # Windows service
+```
+
+**Solution:**
+1. Use different port for Docker (5433 instead of 5432)
+2. Update `docker-compose.yml`:
+   ```yaml
+   ports:
+     - "5433:5432"
+   ```
+3. Update `appsettings.json` connection string to use Port=5433
+4. Restart Docker and apply migrations with explicit connection string
+
+**Prevention:**
+- Always use non-default ports for Docker services
+- Run port conflict check before starting development
+- See `.specs/TROUBLESHOOTING.md` for detailed guidance
 
 ### Can't connect to database
 
