@@ -8,6 +8,7 @@ This folder contains **all** the specifications, requirements, rules, and guidel
 
 | Document | Purpose | Read When |
 |:---------|:--------|:----------|
+| **[START-HERE.md](START-HERE.md)** 🚀 | **Agent orchestration entry point - START EVERY SESSION HERE** | **FIRST** - Beginning of EVERY development session |
 | **[GAME-RULES.md](GAME-RULES.md)** | Official scoring rules and game logic | **BEFORE** implementing any scoring logic |
 | **[REQUIREMENTS.md](REQUIREMENTS.md)** | Complete functional and non-functional requirements | **BEFORE** starting any feature |
 | **[TECH-STACK.md](TECH-STACK.md)** | Technology choices, dependencies, versions | **BEFORE** adding dependencies or setting up project |
