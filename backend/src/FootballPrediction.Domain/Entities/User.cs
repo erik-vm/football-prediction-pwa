@@ -11,6 +11,8 @@ public class User
     public UserRole Role { get; set; } = UserRole.USER;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? LastLoginAt { get; set; }
+    public string? RefreshToken { get; set; }
+    public DateTime? RefreshTokenExpiry { get; set; }
 
     public ICollection<Prediction> Predictions { get; set; } = new List<Prediction>();
 }

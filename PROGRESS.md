@@ -67,24 +67,46 @@
 
 ---
 
-### Phase 2: Authentication & Authorization (Planned)
-**Status:** 🔜 Not Started
-**Estimated Duration:** 2-3 days
+### Phase 2: Authentication & Authorization ✅
+**Status:** Completed
+**Date:** 2026-02-08
+**Duration:** ~4 hours (including extensive troubleshooting)
 
 #### Tasks
-- [ ] Implement JWT token generation
-- [ ] Create authentication service
-- [ ] Implement user registration endpoint
-- [ ] Implement user login endpoint
-- [ ] Implement refresh token mechanism
-- [ ] Set up password hashing (BCrypt)
-- [ ] Configure authorization policies
-- [ ] Write authentication tests
+- [x] Implement JWT token generation
+- [x] Create authentication service
+- [x] Implement user registration endpoint
+- [x] Implement user login endpoint
+- [x] Implement refresh token mechanism
+- [x] Set up password hashing (BCrypt)
+- [x] Configure authorization policies
+- [x] Test authentication endpoints
 
 **Deliverables:**
-- Working registration/login endpoints
-- JWT authentication configured
-- Role-based authorization ready
+- ✅ Working registration/login endpoints
+- ✅ JWT authentication configured with Bearer scheme
+- ✅ Role-based authorization ready (User/Admin roles)
+- ✅ BCrypt password hashing (work factor 12)
+- ✅ Refresh token rotation with 7-day expiration
+- ✅ Access token expiration (60 minutes)
+- ✅ FluentValidation for input validation
+
+**Implementation Details:**
+- **DTOs Created:** RegisterRequest, LoginRequest, TokenResponse
+- **Services:** TokenService (JWT generation), PasswordService (BCrypt), AuthService (orchestration)
+- **Controller:** AuthController with /register, /login, /refresh endpoints
+- **Security:** Symmetric key signing, token validation, ClockSkew = Zero
+- **Database:** User entity extended with RefreshToken and RefreshTokenExpiry columns
+
+**Critical Issue Resolved:**
+- **Problem:** Two PostgreSQL instances running on port 5432 (Docker + Windows service)
+- **Root Cause:** EF Core connecting to Windows PostgreSQL service with old schema (no RefreshToken columns)
+- **Solution:** Changed Docker port to 5433, updated connection string, applied migrations to correct instance
+- **Files Modified:** docker-compose.yml (port mapping), appsettings.json (connection string)
+
+**Test Results:**
+- ✅ Registration endpoint: HTTP 200, returns access token, refresh token, expiration
+- ✅ Login endpoint: HTTP 200, returns JWT with correct claims (user ID, username, email, role)
 
 ---
 
@@ -333,10 +355,10 @@
 ## 📊 Overall Progress
 
 **Total Phases:** 15 (including setup)
-**Completed:** 2 (Phase 0, Phase 1)
+**Completed:** 3 (Phase 0, Phase 1, Phase 2)
 **In Progress:** 0
-**Not Started:** 13
-**Overall Completion:** ~13%
+**Not Started:** 12
+**Overall Completion:** ~20%
 
 ---
 
@@ -362,6 +384,7 @@
 - Docker Desktop not running - ✅ Started and PostgreSQL container running
 - EF Core migrations - ✅ Successfully applied using SQL script method
 - Global dotnet-ef tool version mismatch - downgraded from v10 to v9 to match project
+- PostgreSQL port conflict - ✅ Two instances on port 5432 (Docker + Windows service), resolved by changing Docker to port 5433
 
 ---
 
@@ -385,4 +408,4 @@
 
 ---
 
-**Last Updated:** 2026-02-06 (Phase 0-1 Complete)
+**Last Updated:** 2026-02-08 (Phase 0-2 Complete)

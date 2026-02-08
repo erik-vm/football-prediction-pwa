@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\FootballPrediction.Domain\FootballPrediction.Domain.csproj" />
+    <ProjectReference Include="..\FootballPrediction.Application\FootballPrediction.Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>

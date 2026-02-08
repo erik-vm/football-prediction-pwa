@@ -28,6 +28,10 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.CreatedAt)
             .IsRequired();
 
+        builder.Property(u => u.RefreshToken);
+
+        builder.Property(u => u.RefreshTokenExpiry);
+
         builder.HasIndex(u => u.Email)
             .IsUnique();
 
