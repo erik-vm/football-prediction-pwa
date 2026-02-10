@@ -51,6 +51,10 @@
         "net9.0": {
           "targetAlias": "net9.0",
           "dependencies": {
+            "Microsoft.AspNetCore.Authentication.JwtBearer": {
+              "target": "Package",
+              "version": "[9.0.0, )"
+            },
             "Microsoft.AspNetCore.OpenApi": {
               "target": "Package",
               "version": "[9.0.6, )"
@@ -150,6 +154,20 @@
       "frameworks": {
         "net9.0": {
           "targetAlias": "net9.0",
+          "dependencies": {
+            "BCrypt.Net-Next": {
+              "target": "Package",
+              "version": "[4.0.3, )"
+            },
+            "FluentValidation.AspNetCore": {
+              "target": "Package",
+              "version": "[11.3.0, )"
+            },
+            "System.IdentityModel.Tokens.Jwt": {
+              "target": "Package",
+              "version": "[8.2.1, )"
+            }
+          },
           "imports": [
             "net461",
             "net462",
@@ -279,6 +297,9 @@
           "net9.0": {
             "targetAlias": "net9.0",
             "projectReferences": {
+              "C:\\Projects\\football-prediction-pwa\\backend\\src\\FootballPrediction.Application\\FootballPrediction.Application.csproj": {
+                "projectPath": "C:\\Projects\\football-prediction-pwa\\backend\\src\\FootballPrediction.Application\\FootballPrediction.Application.csproj"
+              },
               "C:\\Projects\\football-prediction-pwa\\backend\\src\\FootballPrediction.Domain\\FootballPrediction.Domain.csproj": {
                 "projectPath": "C:\\Projects\\football-prediction-pwa\\backend\\src\\FootballPrediction.Domain\\FootballPrediction.Domain.csproj"
               }

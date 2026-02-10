@@ -6,7 +6,12 @@ C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Api\bin\Debug
 C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Api\bin\Debug\net9.0\FootballPrediction.Api.runtimeconfig.json
 C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Api\bin\Debug\net9.0\FootballPrediction.Api.dll
 C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Api\bin\Debug\net9.0\FootballPrediction.Api.pdb
+C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Api\bin\Debug\net9.0\BCrypt.Net-Next.dll
+C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Api\bin\Debug\net9.0\FluentValidation.dll
+C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Api\bin\Debug\net9.0\FluentValidation.AspNetCore.dll
+C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Api\bin\Debug\net9.0\FluentValidation.DependencyInjectionExtensions.dll
 C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Api\bin\Debug\net9.0\Humanizer.dll
+C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Api\bin\Debug\net9.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
 C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Api\bin\Debug\net9.0\Microsoft.AspNetCore.OpenApi.dll
 C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Api\bin\Debug\net9.0\Microsoft.Bcl.AsyncInterfaces.dll
 C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Api\bin\Debug\net9.0\Microsoft.Build.Locator.dll
@@ -21,6 +26,12 @@ C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Api\bin\Debug
 C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Api\bin\Debug\net9.0\Microsoft.EntityFrameworkCore.Design.dll
 C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Api\bin\Debug\net9.0\Microsoft.EntityFrameworkCore.Relational.dll
 C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Api\bin\Debug\net9.0\Microsoft.Extensions.DependencyModel.dll
+C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Api\bin\Debug\net9.0\Microsoft.IdentityModel.Abstractions.dll
+C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Api\bin\Debug\net9.0\Microsoft.IdentityModel.JsonWebTokens.dll
+C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Api\bin\Debug\net9.0\Microsoft.IdentityModel.Logging.dll
+C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Api\bin\Debug\net9.0\Microsoft.IdentityModel.Protocols.dll
+C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Api\bin\Debug\net9.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Api\bin\Debug\net9.0\Microsoft.IdentityModel.Tokens.dll
 C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Api\bin\Debug\net9.0\Microsoft.OpenApi.dll
 C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Api\bin\Debug\net9.0\Mono.TextTemplating.dll
 C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Api\bin\Debug\net9.0\Npgsql.dll
@@ -31,6 +42,7 @@ C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Api\bin\Debug
 C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Api\bin\Debug\net9.0\System.Composition.Hosting.dll
 C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Api\bin\Debug\net9.0\System.Composition.Runtime.dll
 C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Api\bin\Debug\net9.0\System.Composition.TypedParts.dll
+C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Api\bin\Debug\net9.0\System.IdentityModel.Tokens.Jwt.dll
 C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Api\bin\Debug\net9.0\cs\Microsoft.CodeAnalysis.resources.dll
 C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Api\bin\Debug\net9.0\de\Microsoft.CodeAnalysis.resources.dll
 C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Api\bin\Debug\net9.0\es\Microsoft.CodeAnalysis.resources.dll

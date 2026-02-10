@@ -2,8 +2,10 @@ C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Infrastructur
 C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Infrastructure\bin\Debug\net9.0\FootballPrediction.Infrastructure.runtimeconfig.json
 C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Infrastructure\bin\Debug\net9.0\FootballPrediction.Infrastructure.dll
 C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Infrastructure\bin\Debug\net9.0\FootballPrediction.Infrastructure.pdb
+C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Infrastructure\bin\Debug\net9.0\FootballPrediction.Application.dll
 C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Infrastructure\bin\Debug\net9.0\FootballPrediction.Domain.dll
 C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Infrastructure\bin\Debug\net9.0\FootballPrediction.Domain.pdb
+C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Infrastructure\bin\Debug\net9.0\FootballPrediction.Application.pdb
 C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Infrastructure\obj\Debug\net9.0\FootballPrediction.Infrastructure.csproj.AssemblyReference.cache
 C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Infrastructure\obj\Debug\net9.0\FootballPrediction.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
 C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Infrastructure\obj\Debug\net9.0\FootballPrediction.Infrastructure.AssemblyInfoInputs.cache

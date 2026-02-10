@@ -1,0 +1,16 @@
+C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Application\bin\Release\net9.0\FootballPrediction.Application.deps.json
+C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Application\bin\Release\net9.0\FootballPrediction.Application.dll
+C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Application\bin\Release\net9.0\FootballPrediction.Application.pdb
+C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Application\bin\Release\net9.0\FootballPrediction.Domain.dll
+C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Application\bin\Release\net9.0\FootballPrediction.Domain.pdb
+C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Application\obj\Release\net9.0\FootballPrediction.Application.csproj.AssemblyReference.cache
+C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Application\obj\Release\net9.0\FootballPrediction.Application.GeneratedMSBuildEditorConfig.editorconfig
+C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Application\obj\Release\net9.0\FootballPrediction.Application.AssemblyInfoInputs.cache
+C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Application\obj\Release\net9.0\FootballPrediction.Application.AssemblyInfo.cs
+C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Application\obj\Release\net9.0\FootballPrediction.Application.csproj.CoreCompileInputs.cache
+C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Application\obj\Release\net9.0\FootballPrediction.Application.sourcelink.json
+C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Application\obj\Release\net9.0\Football.9B43323E.Up2Date
+C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Application\obj\Release\net9.0\FootballPrediction.Application.dll
+C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Application\obj\Release\net9.0\refint\FootballPrediction.Application.dll
+C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Application\obj\Release\net9.0\FootballPrediction.Application.pdb
+C:\Projects\football-prediction-pwa\backend\src\FootballPrediction.Application\obj\Release\net9.0\ref\FootballPrediction.Application.dll

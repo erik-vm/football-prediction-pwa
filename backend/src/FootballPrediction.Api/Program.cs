@@ -29,6 +29,7 @@ builder.Services.AddScoped<IUserRepository, FootballPrediction.Infrastructure.Re
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IPasswordService, PasswordService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IScoringService, ScoringService>();
 
 // Register validators
 builder.Services.AddValidatorsFromAssemblyContaining<RegisterRequestValidator>();

@@ -110,22 +110,44 @@
 
 ---
 
-### Phase 3: Core Scoring Logic (Planned)
-**Status:** 🔜 Not Started
-**Estimated Duration:** 1-2 days
+### Phase 3: Core Scoring Logic ✅
+**Status:** Completed
+**Date:** 2026-02-10
+**Duration:** ~2 hours
 
 #### Tasks
-- [ ] Implement ScoringService.cs (following GAME-RULES.md)
-- [ ] Implement CalculatePoints method
-- [ ] Implement HasSameWinner helper method
-- [ ] Implement stage multiplier logic
-- [ ] Write comprehensive unit tests (all test cases from spec)
-- [ ] Validate against reference implementation
+- [x] Implement ScoringService.cs (following GAME-RULES.md)
+- [x] Implement CalculatePoints method
+- [x] Implement HasSameWinner helper method
+- [ ] Implement stage multiplier logic (deferred to Phase 4)
+- [x] Write comprehensive unit tests (all test cases from spec)
+- [x] Validate against reference implementation
 
 **Deliverables:**
-- ✅ Scoring logic matches GAME-RULES.md exactly
-- 100% test coverage on scoring logic
-- All edge cases validated
+- ✅ ScoringService.cs implements exact algorithm from Java reference
+- ✅ 29 comprehensive unit tests covering all scenarios
+- ✅ All tests passing (0 errors, 0 warnings)
+- ✅ Validated against Spring Boot reference implementation
+- ✅ Service registered in DI container
+
+**Implementation Details:**
+- **Service**: `IScoringService` interface, `ScoringService` class
+- **Algorithm**: Exact match to reference Java implementation (ScoringService.java)
+- **Test Coverage**:
+  - Exact score (5 points)
+  - Correct winner + difference (4 points)
+  - Correct winner only (3 points)
+  - One score correct (1 point)
+  - No match (0 points)
+  - Null value handling
+  - Edge cases (high scores, draws, large differences)
+
+**Notes:**
+- Discovered minor documentation inconsistencies in GAME-RULES.md examples
+- Test case 4 (0:1 vs 0:2): Doc says 1 point, but reference implementation returns 3 points (correct winner precedence)
+- Test case 5 (1:1 vs 2:2): Doc says 3 points, but both draws with diff=0 means 4 points (correct winner AND difference)
+- Our implementation matches the Java reference exactly, not the potentially incorrect documentation examples
+- Stage multiplier logic deferred to Phase 4 when match management is implemented
 
 ---
 
@@ -355,10 +377,10 @@
 ## 📊 Overall Progress
 
 **Total Phases:** 15 (including setup)
-**Completed:** 3 (Phase 0, Phase 1, Phase 2)
+**Completed:** 4 (Phase 0, Phase 1, Phase 2, Phase 3)
 **In Progress:** 0
-**Not Started:** 12
-**Overall Completion:** ~20%
+**Not Started:** 11
+**Overall Completion:** ~27%
 
 ---
 
@@ -408,4 +430,4 @@
 
 ---
 
-**Last Updated:** 2026-02-08 (Phase 0-2 Complete)
+**Last Updated:** 2026-02-10 (Phase 0-3 Complete)
