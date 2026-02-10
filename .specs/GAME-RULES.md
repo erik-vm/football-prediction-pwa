@@ -433,53 +433,119 @@ private bool HasSameWinner(int predictedDiff, int actualDiff)
 
 ---
 
-## 11. Testing Scenarios
+## 11. Algorithm Precedence Order
 
-### Test Case 1: Exact Score
+⚠️ **CRITICAL**: Rules are checked in STRICT ORDER (first match wins)
+
+The algorithm evaluates rules in the following sequence:
+
+```
+1. Exact score match → Return 5 points (DONE)
+2. Correct winner AND correct goal difference → Return 4 points (DONE)
+3. Correct winner only → Return 3 points (DONE)
+4. One team score correct → Return 1 point (DONE)
+5. No match → Return 0 points (DONE)
+```
+
+**Important Consequences:**
+- **If Rule 3 matches, Rule 4 is never checked** (winner takes precedence over one score)
+- **"Winner only" (3 pts) cannot occur with draws** (both draws always have diff=0, so it's always 4 pts)
+- **"One score correct" (1 pt) requires WRONG winner** (otherwise Rule 3 catches it first)
+
+---
+
+## 12. Testing Scenarios
+
+### Test Case 1: Exact Score (5 points)
 ```
 Predicted: 2-1
 Actual: 2-1
 Expected: 5 points (×1 = 5 total in group stage)
+Reason: Both scores match exactly
 ```
 
-### Test Case 2: Winner + Difference
+### Test Case 2: Winner + Difference (4 points)
 ```
 Predicted: 1-0
 Actual: 2-1
 Expected: 4 points (×1 = 4 total in group stage)
+Reason: Home wins by 1 in both cases (same winner, same diff)
 ```
 
-### Test Case 3: Winner Only
+### Test Case 3: Winner Only (3 points)
 ```
 Predicted: 3-0
 Actual: 2-1
 Expected: 3 points (×1 = 3 total in group stage)
+Reason: Home wins both, but by different amounts (3 vs 1)
 ```
 
-### Test Case 4: One Score Correct
+### Test Case 4: Correct Winner Takes Precedence (3 points, NOT 1!)
 ```
 Predicted: 0-1
 Actual: 0-2
-Expected: 1 point (×1 = 1 total in group stage)
+Expected: 3 points (×1 = 3 total in group stage)
+Reason: Both away wins (correct winner = 3 pts) - precedence over home score match (1 pt)
+⚠️ NOTE: Rule 3 checked BEFORE Rule 4, so winner takes precedence!
 ```
 
-### Test Case 5: Draw Prediction
+### Test Case 5: Draw Prediction (4 points, NOT 3!)
 ```
 Predicted: 1-1
 Actual: 2-2
-Expected: 3 points (both draws, correct winner)
+Expected: 4 points (×1 = 4 total in group stage)
+Reason: Both draws (diff=0), so correct winner AND diff match
+⚠️ NOTE: All draws have diff=0, so matching draws ALWAYS = 4 points, never 3!
 ```
 
-### Test Case 6: Stage Multiplier (Final)
+### Test Case 6: One Score Correct - Wrong Winner Required (1 point)
+```
+Predicted: 2-1 (home wins)
+Actual: 2-3 (away wins)
+Expected: 1 point (×1 = 1 total in group stage)
+Reason: Home score matches (2==2), but OPPOSITE winners
+⚠️ NOTE: Winner must be WRONG for this rule to apply!
+```
+
+### Test Case 7: Stage Multiplier (Final)
 ```
 Predicted: 2-1
 Actual: 2-1
 Expected: 5 × 5 = 25 points
+Reason: Exact score in final (5 pts base × 5x multiplier)
 ```
 
 ---
 
-**Version**: 1.0
+## 13. Test Case Design Guidelines
+
+### For Testing "One Score Correct" (1 pt):
+```csharp
+// ❌ BAD - Both away wins triggers "Correct Winner" (3 pts)!
+Predicted: 0:1 (away wins), Actual: 0:2 (away wins)
+
+// ✅ GOOD - One score matches, but WRONG winner
+Predicted: 2:1 (home wins), Actual: 2:3 (away wins)
+```
+
+### For Testing "Winner Only" (3 pts):
+```csharp
+// ❌ BAD - Both draws always match diff (4 pts)!
+Predicted: 1:1 (diff 0), Actual: 2:2 (diff 0)
+
+// ✅ GOOD - Same winner, different diff
+Predicted: 3:0 (home by 3), Actual: 2:1 (home by 1)
+```
+
+### Mathematical Edge Cases:
+- **Two draws**: Always 4 points (never 3) because abs(0) == abs(0)
+- **Opposite winners**: Maximum 1 point (if one score matches)
+- **Same winner**: Minimum 3 points (correct winner guaranteed)
+
+---
+
+**Version**: 1.1
 **Source**: Spring Boot + React Implementation (C:\Projects\football-prediciton-game)
-**Status**: Official Rules (Correct)
-**Last Updated**: 2025-01-27
+**Status**: Official Rules (Corrected based on Phase 3 implementation)
+**Last Updated**: 2026-02-10
+**Change Log**: Added algorithm precedence, corrected test cases 4-5, added test case design guidelines

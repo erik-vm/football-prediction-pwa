@@ -910,6 +910,246 @@ curl http://localhost:5206/health
 
 ---
 
+## Implementing Algorithm-Based Services
+
+### Pre-Implementation Validation
+
+**CRITICAL**: Before implementing any algorithm (scoring, calculations, business rules):
+
+#### Step 1: Validate Specification Against Reference
+
+```bash
+# 1. Locate reference implementation
+# Example: C:\Projects\football-prediciton-game\backend\...\ScoringService.java
+
+# 2. Read specification document
+# Example: .specs/GAME-RULES.md
+
+# 3. Validate ALL examples in spec against reference code
+# Run each test case through reference implementation
+# Verify expected outputs match actual outputs
+
+# 4. Document any discrepancies immediately
+```
+
+**Time Saved**: 30-45 minutes per algorithm (prevents debugging wrong test cases)
+
+#### Step 2: Understand Algorithm Precedence
+
+For algorithms with multiple rules (like scoring):
+
+1. **Identify check order**: Which rules are evaluated first?
+2. **Note early returns**: Does matching one rule skip others?
+3. **Document precedence**: Higher-priority rules take precedence
+
+**Example: Scoring Algorithm**
+```
+1. Exact score → 5 pts (checked first)
+2. Winner + diff → 4 pts (checked second)
+3. Winner only → 3 pts (checked third)  ← blocks rule 4 if matched
+4. One score → 1 pt (checked fourth)
+5. No match → 0 pts (default)
+```
+
+**Consequence**: If rule 3 matches, rule 4 never executes. Test cases must account for this!
+
+#### Step 3: Identify Edge Cases
+
+Common edge cases in algorithms:
+- **Mathematical impossibilities**: e.g., two draws always have diff=0
+- **Boundary conditions**: null values, zero values, maximum values
+- **Precedence conflicts**: scenarios that trigger multiple rules
+
+**Example: Scoring Edge Cases**
+- Two draws: Always 4 points (never 3) because abs(0)==abs(0)
+- Same winner: Minimum 3 points (never 1, even if one score matches)
+- Opposite winners: Maximum 1 point (if one score matches)
+
+---
+
+### Test Case Design for Algorithms
+
+#### Rule Isolation Strategy
+
+Each test should target **ONE specific rule** without accidentally triggering higher-precedence rules.
+
+**Anti-Pattern**: Naive test design
+```csharp
+// ❌ BAD - Intended to test "one score correct" (1 pt)
+// Actually tests "correct winner" (3 pts) - wrong rule!
+[Fact]
+public void TestOneScore()
+{
+    // Predicted: 0:1 (away wins), Actual: 0:2 (away wins)
+    var result = _service.CalculatePoints(0, 1, 0, 2);
+    Assert.Equal(1, result); // FAILS - returns 3!
+}
+```
+
+**Correct Pattern**: Isolated rule testing
+```csharp
+// ✅ GOOD - Tests "one score correct" (1 pt) correctly
+// Winner is WRONG, so higher rule doesn't trigger
+[Fact]
+public void CalculatePoints_OneScore_WrongWinner_Returns1Point()
+{
+    // Predicted: 2:1 (home wins), Actual: 2:3 (AWAY wins)
+    var result = _service.CalculatePoints(2, 1, 2, 3);
+    Assert.Equal(1, result); // Home score matches, but opposite winners
+}
+```
+
+#### Test Case Design Checklist
+
+Before writing test assertions:
+
+- [ ] Identify which rule you're testing
+- [ ] Check if higher-precedence rules could trigger
+- [ ] Manually calculate expected value considering precedence
+- [ ] Validate against reference implementation if available
+- [ ] Write test with clear comments explaining logic
+
+#### Common Test Design Patterns
+
+**Pattern 1: Testing Lower-Precedence Rules**
+
+To test rule N, ensure rules 1 through N-1 don't match:
+
+```csharp
+// Testing Rule 4 (one score) when Rules 1-3 exist
+// Must ensure:
+// - NOT exact score (rule 1)
+// - NOT winner + diff (rule 2)
+// - NOT winner only (rule 3) ← KEY: wrong winner required
+// - IS one score (rule 4)
+
+Predicted: 2:1 (home wins by 1)
+Actual:    2:3 (away wins by 1)
+// Home=2 matches, but winners opposite → Rule 4 applies
+```
+
+**Pattern 2: Testing Edge Cases**
+
+```csharp
+// Testing mathematical edge case: draws always match diff
+[Fact]
+public void CalculatePoints_BothDraws_Returns4Points()
+{
+    // Both draws → diff=0 for both
+    // abs(0) == abs(0) → correct winner AND diff
+    var result = _service.CalculatePoints(1, 1, 2, 2);
+    Assert.Equal(4, result); // Never 3!
+}
+```
+
+**Pattern 3: Testing Null/Boundary Values**
+
+```csharp
+[Fact]
+public void CalculatePoints_NullValues_Returns0Points()
+{
+    var result = _service.CalculatePoints(null, 1, 2, 3);
+    Assert.Equal(0, result);
+}
+```
+
+---
+
+### Implementation Workflow for Algorithms
+
+```mermaid
+flowchart TD
+    A[Read Specification] --> B[Validate Against Reference]
+    B --> C{Errors Found?}
+    C -->|Yes| D[Update Specification]
+    C -->|No| E[Understand Precedence]
+    D --> E
+    E --> F[Identify Edge Cases]
+    F --> G[Design Test Cases]
+    G --> H[Validate Test Expectations]
+    H --> I[Write Implementation]
+    I --> J[Write Tests]
+    J --> K[Run Tests]
+    K --> L{All Pass?}
+    L -->|No| M[Debug - Check Precedence]
+    L -->|Yes| N[Complete]
+    M --> G
+```
+
+#### Step-by-Step Process
+
+1. **Read & Validate** (10-15 min)
+   - Read specification document completely
+   - Locate reference implementation
+   - Run spec examples through reference
+   - Document any errors found
+   - Update spec if needed
+
+2. **Understand Logic** (5-10 min)
+   - Identify rule precedence order
+   - Note early returns
+   - Find edge cases
+   - Document mathematical properties
+
+3. **Design Tests** (15-20 min)
+   - Plan test cases for each rule
+   - Ensure rule isolation
+   - Include edge cases
+   - Validate expectations manually
+
+4. **Implement** (10-15 min)
+   - Copy template from spec if available
+   - Match reference implementation structure
+   - Use same variable names
+   - Add clarifying comments
+
+5. **Write Tests** (20-30 min)
+   - Write comprehensive test suite
+   - Test each rule in isolation
+   - Test edge cases
+   - Test null/boundary values
+
+6. **Validate** (5-10 min)
+   - Run all tests
+   - Verify 0 warnings, 0 errors
+   - Check coverage
+   - Compare behavior with reference
+
+**Total Time**: 65-100 minutes for complex algorithms
+
+**Time Savings vs Naive Approach**: 30-45 minutes (by avoiding test debugging due to spec errors)
+
+---
+
+### Algorithm Testing Checklist
+
+Before marking algorithm implementation complete:
+
+**Validation:**
+- [ ] Specification validated against reference implementation
+- [ ] All spec examples tested and corrected if needed
+- [ ] Algorithm precedence order documented
+
+**Test Coverage:**
+- [ ] One test per rule/scenario
+- [ ] All rules tested in isolation
+- [ ] Edge cases identified and tested
+- [ ] Null/boundary values tested
+- [ ] Test expectations validated manually
+
+**Code Quality:**
+- [ ] Implementation matches reference exactly
+- [ ] Variable names clear and consistent
+- [ ] Comments explain non-obvious logic
+- [ ] No compiler warnings
+
+**Build:**
+- [ ] Solution builds successfully
+- [ ] All tests passing (100%)
+- [ ] No warnings or errors
+
+---
+
 ## Updating This File
 
 Update `BACKEND-AGENT.md` when:
@@ -919,10 +1159,12 @@ Update `BACKEND-AGENT.md` when:
 - Discovering new common pitfalls
 - Modifying development workflow
 - Resolving new issues
+- Learning new test design patterns
 
 ---
 
-**Version**: 1.1
-**Last Updated**: 2026-02-06
+**Version**: 1.2
+**Last Updated**: 2026-02-10
 **Framework**: ASP.NET Core 9
 **Language**: C# 13
+**Change Log**: Added algorithm implementation and test design guidance (Phase 3 lessons)
