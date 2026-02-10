@@ -1163,8 +1163,37 @@ Update `BACKEND-AGENT.md` when:
 
 ---
 
-**Version**: 1.2
+---
+
+## Phase Completion Requirement
+
+**🔴 MANDATORY**: After completing a phase:
+
+1. **Create Post-Phase Analysis** (20-30 min)
+   - Document in `.analysis/YYYY-MM-DD-phase-N-<name>-analysis.md`
+   - Follow `.specs/workflows/POST-PHASE-ANALYSIS-WORKFLOW.md`
+   - Include timeline, issues, lessons, time analysis
+
+2. **Update Specifications** (10-20 min)
+   - Fix errors discovered
+   - Add missing guidance
+   - Create new specs if needed
+   - Update version numbers
+
+3. **Two-Commit Sequence**
+   - Commit 1: Analysis + spec updates
+   - Commit 2: Implementation code
+
+**Do NOT mark phase complete without analysis.**
+
+See: `.specs/workflows/PHASE-COMPLETION-WORKFLOW.md`
+
+---
+
+**Version**: 1.3
 **Last Updated**: 2026-02-10
 **Framework**: ASP.NET Core 9
 **Language**: C# 13
-**Change Log**: Added algorithm implementation and test design guidance (Phase 3 lessons)
+**Change Log**:
+- v1.2: Added algorithm implementation and test design guidance (Phase 3 lessons)
+- v1.3: Added mandatory post-phase analysis requirement
