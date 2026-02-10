@@ -14,6 +14,10 @@ C:\Projects\football-prediction-pwa\backend\tests\FootballPrediction.UnitTests\b
 C:\Projects\football-prediction-pwa\backend\tests\FootballPrediction.UnitTests\bin\Debug\net9.0\FluentValidation.AspNetCore.dll
 C:\Projects\football-prediction-pwa\backend\tests\FootballPrediction.UnitTests\bin\Debug\net9.0\FluentValidation.DependencyInjectionExtensions.dll
 C:\Projects\football-prediction-pwa\backend\tests\FootballPrediction.UnitTests\bin\Debug\net9.0\Microsoft.VisualStudio.CodeCoverage.Shim.dll
+C:\Projects\football-prediction-pwa\backend\tests\FootballPrediction.UnitTests\bin\Debug\net9.0\Microsoft.EntityFrameworkCore.dll
+C:\Projects\football-prediction-pwa\backend\tests\FootballPrediction.UnitTests\bin\Debug\net9.0\Microsoft.EntityFrameworkCore.Abstractions.dll
+C:\Projects\football-prediction-pwa\backend\tests\FootballPrediction.UnitTests\bin\Debug\net9.0\Microsoft.EntityFrameworkCore.InMemory.dll
+C:\Projects\football-prediction-pwa\backend\tests\FootballPrediction.UnitTests\bin\Debug\net9.0\Microsoft.EntityFrameworkCore.Relational.dll
 C:\Projects\football-prediction-pwa\backend\tests\FootballPrediction.UnitTests\bin\Debug\net9.0\Microsoft.IdentityModel.Abstractions.dll
 C:\Projects\football-prediction-pwa\backend\tests\FootballPrediction.UnitTests\bin\Debug\net9.0\Microsoft.IdentityModel.JsonWebTokens.dll
 C:\Projects\football-prediction-pwa\backend\tests\FootballPrediction.UnitTests\bin\Debug\net9.0\Microsoft.IdentityModel.Logging.dll
@@ -26,6 +30,8 @@ C:\Projects\football-prediction-pwa\backend\tests\FootballPrediction.UnitTests\b
 C:\Projects\football-prediction-pwa\backend\tests\FootballPrediction.UnitTests\bin\Debug\net9.0\Microsoft.TestPlatform.Utilities.dll
 C:\Projects\football-prediction-pwa\backend\tests\FootballPrediction.UnitTests\bin\Debug\net9.0\Microsoft.VisualStudio.TestPlatform.Common.dll
 C:\Projects\football-prediction-pwa\backend\tests\FootballPrediction.UnitTests\bin\Debug\net9.0\Newtonsoft.Json.dll
+C:\Projects\football-prediction-pwa\backend\tests\FootballPrediction.UnitTests\bin\Debug\net9.0\Npgsql.dll
+C:\Projects\football-prediction-pwa\backend\tests\FootballPrediction.UnitTests\bin\Debug\net9.0\Npgsql.EntityFrameworkCore.PostgreSQL.dll
 C:\Projects\football-prediction-pwa\backend\tests\FootballPrediction.UnitTests\bin\Debug\net9.0\System.IdentityModel.Tokens.Jwt.dll
 C:\Projects\football-prediction-pwa\backend\tests\FootballPrediction.UnitTests\bin\Debug\net9.0\xunit.abstractions.dll
 C:\Projects\football-prediction-pwa\backend\tests\FootballPrediction.UnitTests\bin\Debug\net9.0\xunit.assert.dll
@@ -98,8 +104,10 @@ C:\Projects\football-prediction-pwa\backend\tests\FootballPrediction.UnitTests\b
 C:\Projects\football-prediction-pwa\backend\tests\FootballPrediction.UnitTests\bin\Debug\net9.0\zh-Hant\Microsoft.VisualStudio.TestPlatform.Common.resources.dll
 C:\Projects\football-prediction-pwa\backend\tests\FootballPrediction.UnitTests\bin\Debug\net9.0\FootballPrediction.Application.dll
 C:\Projects\football-prediction-pwa\backend\tests\FootballPrediction.UnitTests\bin\Debug\net9.0\FootballPrediction.Domain.dll
+C:\Projects\football-prediction-pwa\backend\tests\FootballPrediction.UnitTests\bin\Debug\net9.0\FootballPrediction.Infrastructure.dll
 C:\Projects\football-prediction-pwa\backend\tests\FootballPrediction.UnitTests\bin\Debug\net9.0\FootballPrediction.Application.pdb
 C:\Projects\football-prediction-pwa\backend\tests\FootballPrediction.UnitTests\bin\Debug\net9.0\FootballPrediction.Domain.pdb
+C:\Projects\football-prediction-pwa\backend\tests\FootballPrediction.UnitTests\bin\Debug\net9.0\FootballPrediction.Infrastructure.pdb
 C:\Projects\football-prediction-pwa\backend\tests\FootballPrediction.UnitTests\obj\Debug\net9.0\FootballPrediction.UnitTests.csproj.AssemblyReference.cache
 C:\Projects\football-prediction-pwa\backend\tests\FootballPrediction.UnitTests\obj\Debug\net9.0\FootballPrediction.UnitTests.GeneratedMSBuildEditorConfig.editorconfig
 C:\Projects\football-prediction-pwa\backend\tests\FootballPrediction.UnitTests\obj\Debug\net9.0\FootballPrediction.UnitTests.AssemblyInfoInputs.cache
@@ -112,3 +120,5 @@ C:\Projects\football-prediction-pwa\backend\tests\FootballPrediction.UnitTests\o
 C:\Projects\football-prediction-pwa\backend\tests\FootballPrediction.UnitTests\obj\Debug\net9.0\FootballPrediction.UnitTests.pdb
 C:\Projects\football-prediction-pwa\backend\tests\FootballPrediction.UnitTests\obj\Debug\net9.0\FootballPrediction.UnitTests.genruntimeconfig.cache
 C:\Projects\football-prediction-pwa\backend\tests\FootballPrediction.UnitTests\obj\Debug\net9.0\ref\FootballPrediction.UnitTests.dll
+C:\Projects\football-prediction-pwa\backend\tests\FootballPrediction.UnitTests\bin\Debug\net9.0\Castle.Core.dll
+C:\Projects\football-prediction-pwa\backend\tests\FootballPrediction.UnitTests\bin\Debug\net9.0\Moq.dll

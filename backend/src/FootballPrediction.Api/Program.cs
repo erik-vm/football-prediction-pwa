@@ -24,12 +24,17 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 // Register repositories
 builder.Services.AddScoped<IUserRepository, FootballPrediction.Infrastructure.Repositories.UserRepository>();
+builder.Services.AddScoped<ITournamentRepository, FootballPrediction.Infrastructure.Repositories.TournamentRepository>();
+builder.Services.AddScoped<IGameWeekRepository, FootballPrediction.Infrastructure.Repositories.GameWeekRepository>();
+builder.Services.AddScoped<IMatchRepository, FootballPrediction.Infrastructure.Repositories.MatchRepository>();
+builder.Services.AddScoped<IPredictionRepository, FootballPrediction.Infrastructure.Repositories.PredictionRepository>();
 
 // Register application services
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IPasswordService, PasswordService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IScoringService, ScoringService>();
+builder.Services.AddScoped<IMatchResultService, MatchResultService>();
 
 // Register validators
 builder.Services.AddValidatorsFromAssemblyContaining<RegisterRequestValidator>();
@@ -97,3 +102,5 @@ app.MapGet("/health", () => Results.Ok(new { status = "healthy", timestamp = Dat
     .WithName("HealthCheck");
 
 app.Run();
+
+public partial class Program { }
