@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("FootballPrediction.Application")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+71469ab175fadf9f57cb2cf6f4e2f3166096e7c2")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6708ed4c8a53b681a6fdb47e61e7858f9f2e7af7")]
 [assembly: System.Reflection.AssemblyProductAttribute("FootballPrediction.Application")]
 [assembly: System.Reflection.AssemblyTitleAttribute("FootballPrediction.Application")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
