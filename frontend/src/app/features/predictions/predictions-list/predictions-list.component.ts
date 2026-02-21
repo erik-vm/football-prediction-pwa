@@ -1,7 +1,8 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatchService } from '../../../core/services/match.service';
 import { PredictionService } from '../../../core/services/prediction.service';
+import { SignalRService } from '../../../core/services/signalr.service';
 import { Match, Tournament, GameWeek } from '../../../core/models/match.model';
 import { PredictionWithMatch } from '../../../core/models/prediction.model';
 import { MatchCardComponent } from '../match-card/match-card.component';
@@ -24,9 +25,10 @@ interface GroupedMatches {
   templateUrl: './predictions-list.component.html',
   styles: []
 })
-export class PredictionsListComponent implements OnInit {
+export class PredictionsListComponent implements OnInit, OnDestroy {
   private matchService = inject(MatchService);
   private predictionService = inject(PredictionService);
+  private signalRService = inject(SignalRService);
 
   private activeTournamentSignal = signal<Tournament | null>(null);
   private gameWeeksSignal = signal<GameWeek[]>([]);
@@ -36,6 +38,9 @@ export class PredictionsListComponent implements OnInit {
   private errorSignal = signal<string | null>(null);
   private activeStatusTabSignal = signal<MatchStatus>('upcoming');
   private selectedMatchdaySignal = signal<number | null>(null);
+
+  private autoRefreshIntervalId: any = null;
+  private matchUpdateCallback: ((matchId: string) => void) | null = null;
 
   activeTournament = this.activeTournamentSignal.asReadonly();
   isLoading = this.isLoadingSignal.asReadonly();
@@ -118,6 +123,43 @@ export class PredictionsListComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadData();
+    this.setupSignalRListeners();
+  }
+
+  ngOnDestroy(): void {
+    this.clearAutoRefresh();
+    if (this.matchUpdateCallback) {
+      this.signalRService.removeMatchUpdateCallback(this.matchUpdateCallback);
+    }
+  }
+
+  private setupSignalRListeners(): void {
+    this.matchUpdateCallback = (matchId: string) => {
+      this.refreshMatchData(matchId);
+    };
+    this.signalRService.onMatchUpdate(this.matchUpdateCallback);
+  }
+
+  private refreshMatchData(matchId: string): void {
+    const tournament = this.activeTournamentSignal();
+    if (!tournament) return;
+
+    this.matchService.getMatch(matchId).subscribe({
+      next: (response) => {
+        if (response.data) {
+          const matches = this.matchesSignal();
+          const index = matches.findIndex(m => m.id === matchId);
+          if (index > -1) {
+            const updatedMatches = [...matches];
+            updatedMatches[index] = { ...response.data, prediction: matches[index].prediction };
+            this.matchesSignal.set(updatedMatches);
+          }
+        }
+      },
+      error: (error) => {
+        console.error('Failed to refresh match data:', error);
+      }
+    });
   }
 
   private loadData(): void {
@@ -211,6 +253,42 @@ export class PredictionsListComponent implements OnInit {
 
   onStatusTabChange(status: MatchStatus): void {
     this.activeStatusTabSignal.set(status);
+    this.clearAutoRefresh();
+
+    if (status === 'live') {
+      this.startAutoRefresh();
+    }
+  }
+
+  private startAutoRefresh(): void {
+    this.clearAutoRefresh();
+
+    this.autoRefreshIntervalId = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        this.refreshLiveMatches();
+      }
+    }, 30000);
+  }
+
+  private clearAutoRefresh(): void {
+    if (this.autoRefreshIntervalId) {
+      clearInterval(this.autoRefreshIntervalId);
+      this.autoRefreshIntervalId = null;
+    }
+  }
+
+  private refreshLiveMatches(): void {
+    const tournament = this.activeTournamentSignal();
+    if (!tournament) return;
+
+    const now = new Date();
+    const liveMatches = this.matchesSignal().filter(m =>
+      !m.isFinished && new Date(m.kickoffTime) <= now
+    );
+
+    liveMatches.forEach(match => {
+      this.refreshMatchData(match.id);
+    });
   }
 
   onMatchdayChange(matchday: number | null): void {

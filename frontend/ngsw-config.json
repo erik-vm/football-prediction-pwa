@@ -30,14 +30,38 @@
   ],
   "dataGroups": [
     {
-      "name": "api-cache",
-      "urls": ["/api/v1/**"],
+      "name": "api-fresh",
+      "urls": [
+        "/api/v1/tournaments/**",
+        "/api/v1/matches/upcoming**",
+        "/api/v1/predictions/user**",
+        "/api/v1/leaderboard/**"
+      ],
       "cacheConfig": {
         "strategy": "freshness",
         "maxSize": 100,
         "maxAge": "1h",
-        "timeout": "10s"
+        "timeout": "10s",
+        "networkTimeoutMs": 5000
+      }
+    },
+    {
+      "name": "api-performance",
+      "urls": [
+        "/api/v1/matches/**",
+        "/api/v1/competitions/**"
+      ],
+      "cacheConfig": {
+        "strategy": "performance",
+        "maxSize": 50,
+        "maxAge": "6h"
       }
     }
+  ],
+  "navigationUrls": [
+    "/**",
+    "!/**/*.*",
+    "!/**/*__*",
+    "!/**/*__*/**"
   ]
 }
