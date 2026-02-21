@@ -32,6 +32,7 @@ builder.Services.AddScoped<IMatchRepository, FootballPrediction.Infrastructure.R
 builder.Services.AddScoped<IPredictionRepository, FootballPrediction.Infrastructure.Repositories.PredictionRepository>();
 builder.Services.AddScoped<IWeeklyBonusRepository, FootballPrediction.Infrastructure.Repositories.WeeklyBonusRepository>();
 builder.Services.AddScoped<IUserCompetitionStatsRepository, FootballPrediction.Infrastructure.Repositories.UserCompetitionStatsRepository>();
+builder.Services.AddScoped<IUserPreferenceRepository, FootballPrediction.Infrastructure.Repositories.UserPreferenceRepository>();
 
 // Register application services
 builder.Services.AddScoped<ITokenService, TokenService>();

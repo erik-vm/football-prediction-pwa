@@ -18,12 +18,14 @@ export class LeaderboardService {
   private overallLeaderboardSignal = signal<LeaderboardEntry[]>([]);
   private weeklyLeaderboardSignal = signal<WeeklyLeaderboardEntry[]>([]);
   private userStatsSignal = signal<UserStats | null>(null);
+  private competitionLeaderboardSignal = signal<any[]>([]);
 
   isLoading = this.isLoadingSignal.asReadonly();
   error = this.errorSignal.asReadonly();
   overallLeaderboard = this.overallLeaderboardSignal.asReadonly();
   weeklyLeaderboard = this.weeklyLeaderboardSignal.asReadonly();
   userStats = this.userStatsSignal.asReadonly();
+  competitionLeaderboard = this.competitionLeaderboardSignal.asReadonly();
 
   getOverallLeaderboard(tournamentId: string, limit?: number): Observable<ApiResponse<LeaderboardEntry[]>> {
     this.isLoadingSignal.set(true);
@@ -80,6 +82,25 @@ export class LeaderboardService {
       }),
       catchError(error => {
         this.errorSignal.set(error.error?.message || 'Failed to load user stats');
+        this.isLoadingSignal.set(false);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  getCompetitionLeaderboard(competitionCode: string, limit: number = 100): Observable<any[]> {
+    this.isLoadingSignal.set(true);
+    this.errorSignal.set(null);
+
+    const url = `${this.apiUrl}/competition/${competitionCode}?limit=${limit}`;
+
+    return this.http.get<any[]>(url).pipe(
+      tap(leaderboard => {
+        this.competitionLeaderboardSignal.set(leaderboard);
+        this.isLoadingSignal.set(false);
+      }),
+      catchError(error => {
+        this.errorSignal.set(error.error?.message || 'Failed to load competition leaderboard');
         this.isLoadingSignal.set(false);
         return throwError(() => error);
       })

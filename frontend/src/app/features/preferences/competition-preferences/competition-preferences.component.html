@@ -1,0 +1,58 @@
+<div class="container">
+  <div class="header">
+    <h2>Competition Preferences</h2>
+    <p class="subtitle">Select the competitions you want to follow</p>
+  </div>
+
+  @if (error()) {
+    <div class="alert alert-error">
+      {{ error() }}
+    </div>
+  }
+
+  @if (successMessage()) {
+    <div class="alert alert-success">
+      {{ successMessage() }}
+    </div>
+  }
+
+  <div class="actions">
+    <button
+      class="btn btn-secondary"
+      (click)="selectAll()"
+      [disabled]="isSaving() || isLoading()">
+      Select All
+    </button>
+    <button
+      class="btn btn-secondary"
+      (click)="deselectAll()"
+      [disabled]="isSaving() || isLoading()">
+      Deselect All
+    </button>
+  </div>
+
+  @if (isLoading()) {
+    <div class="loading">Loading competitions...</div>
+  } @else {
+    <div class="competition-grid">
+      @for (competition of competitions(); track competition.code) {
+        <div
+          class="competition-card"
+          [class.selected]="isSelected(competition.code)"
+          (click)="togglePreference(competition.code)">
+          <div class="competition-checkbox">
+            <input
+              type="checkbox"
+              [checked]="isSelected(competition.code)"
+              [disabled]="isSaving()"
+              (click)="$event.stopPropagation()">
+          </div>
+          @if (competition.emblem) {
+            <img [src]="competition.emblem" [alt]="competition.name" class="competition-emblem">
+          }
+          <div class="competition-name">{{ competition.name }}</div>
+        </div>
+      }
+    </div>
+  }
+</div>

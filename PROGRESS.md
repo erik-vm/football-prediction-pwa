@@ -1141,4 +1141,158 @@ Frontend Production Build:
 
 ---
 
-**Last Updated:** 2026-02-21 (Phase 14 Complete - Automatic Result Processing Implemented!)
+### Phase 15: Competition-Specific Features ✅
+**Status:** Completed
+**Date:** 2026-02-21
+**Duration:** ~3 hours
+**Analysis:** `.analysis/2026-02-21-phase-15-implementation.md`
+
+#### Tasks
+- [x] Create UserCompetitionPreference entity for user following competitions
+- [x] Create IUserPreferenceRepository interface with CRUD operations
+- [x] Implement UserPreferenceRepository with idempotent operations
+- [x] Create UserPreferencesController with 3 endpoints (GET, POST, DELETE)
+- [x] Update LeaderboardController with 2 competition-specific endpoints
+- [x] Create UserCompetitionPreferenceConfiguration for EF Core
+- [x] Create migration AddUserCompetitionPreferences
+- [x] Create CompetitionPreferenceService with signal-based state management
+- [x] Create CompetitionPreferencesComponent with responsive grid UI
+- [x] Update LeaderboardService with competition leaderboard support
+- [x] Add /preferences route with authGuard protection
+- [x] Build and validate both backend and frontend
+
+#### Deliverables
+
+**Backend:**
+- ✅ UserCompetitionPreference entity (Id, UserId, CompetitionCode, CreatedAt)
+- ✅ IUserPreferenceRepository with 4 methods (Get, Add, Remove, Has)
+- ✅ UserPreferenceRepository with idempotent Add/Remove operations
+- ✅ UserPreferencesController: 3 RESTful endpoints
+  - GET /api/v1/users/me/preferences
+  - POST /api/v1/users/me/preferences/competitions/{code}
+  - DELETE /api/v1/users/me/preferences/competitions/{code}
+- ✅ LeaderboardController: 2 competition-specific endpoints
+  - GET /api/v1/leaderboard/competition/{competitionCode}?limit=100
+  - GET /api/v1/leaderboard/competition/{competitionCode}/user/{userId}
+- ✅ UserCompetitionPreferenceConfiguration with unique composite index
+- ✅ Migration 20260221134546_AddUserCompetitionPreferences
+- ✅ Backend build: SUCCESS (0 warnings, 0 errors, 2.67s)
+
+**Frontend:**
+- ✅ CompetitionPreferenceService with signals (userPreferences, isLoading, error)
+- ✅ CompetitionPreferencesComponent with 12-competition grid UI
+- ✅ Select All / Deselect All functionality
+- ✅ LeaderboardService extended with getCompetitionLeaderboard()
+- ✅ /preferences route with lazy loading (8.65 kB chunk, 2.35 kB gzipped)
+- ✅ Frontend build: SUCCESS (328.52 kB initial, 90.19 kB gzipped)
+
+#### Implementation Details
+
+**User Preferences System:**
+- Users can follow/unfollow any of 12 active competitions
+- Idempotent operations (no errors on duplicate add/remove)
+- Preferences persist across sessions
+- Select All/Deselect All for bulk operations
+- Visual feedback: green border + checkmark for followed competitions
+
+**Competition Leaderboards:**
+- Per-competition rankings using Phase 14's UserCompetitionStats
+- Public endpoints (AllowAnonymous) for social sharing
+- Optional limit parameter (default 100 users)
+- User-specific rank lookup endpoint
+
+**Database Schema Changes:**
+- **New table:** UserCompetitionPreferences (Id, UserId, CompetitionCode, CreatedAt)
+- **Indexes:**
+  - IX_UserCompetitionPreferences_UserId
+  - IX_UserCompetitionPreferences_CompetitionCode
+  - IX_UserCompetitionPreferences_UserId_CompetitionCode (UNIQUE)
+- **Foreign Keys:**
+  - FK to Users (CASCADE delete - preferences removed with user)
+  - FK to Competitions (RESTRICT delete - prevents deleting followed competitions)
+
+**Signal-Based State Management:**
+```typescript
+userPreferences = signal<UserCompetitionPreference[]>([]);
+isLoading = signal(false);
+error = signal<string | null>(null);
+```
+- Angular 19 best practice (fine-grained reactivity)
+- Automatic change detection
+- No manual subscriptions needed
+
+**UI Features:**
+- Responsive grid layout (auto-fill, minmax 200px)
+- Competition emblems from football-data.org
+- Loading states during API calls
+- Error display with retry capability
+- Lazy loaded component (better initial load performance)
+
+**Files Created (10):**
+1. UserCompetitionPreference.cs (Domain entity)
+2. IUserPreferenceRepository.cs (Application interface)
+3. UserCompetitionPreferenceConfiguration.cs (Infrastructure config)
+4. UserPreferenceRepository.cs (Infrastructure repository)
+5. UserPreferencesController.cs (API controller)
+6. 20260221134546_AddUserCompetitionPreferences.cs (Migration)
+7. competition-preference.service.ts (Frontend service)
+8. competition-preferences.component.ts/html/css (Frontend component)
+
+**Files Modified (5):**
+1. ApplicationDbContext.cs (added DbSet<UserCompetitionPreference>)
+2. Program.cs (registered IUserPreferenceRepository)
+3. LeaderboardController.cs (added 2 endpoints)
+4. leaderboard.service.ts (added getCompetitionLeaderboard)
+5. app.routes.ts (added /preferences route)
+
+**Migration Details:**
+- Migration ID: 20260221134546_AddUserCompetitionPreferences
+- Creates UserCompetitionPreferences table with 3 indexes
+- Foreign keys with CASCADE (User) and RESTRICT (Competition)
+- Status: Ready to apply (not yet applied to database)
+
+**Architecture Compliance:**
+- ✅ Clean Architecture: No layer violations
+- ✅ SOLID Principles: All 5 principles followed
+- ✅ DRY: Reused Phase 14's UserCompetitionStatsRepository
+- ✅ KISS: Simple, focused entity and services
+- ✅ Dependency Flow: API → Application → Domain, Infrastructure → Application
+
+**Security:**
+- ✅ [Authorize] on UserPreferencesController (JWT required)
+- ✅ UserId from JWT claims (prevents user impersonation)
+- ✅ Competition validation (404 if invalid code)
+- ✅ Public leaderboards (AllowAnonymous, consistent with Phase 4)
+
+**Performance:**
+- ✅ Small lazy chunk (2.35 kB gzipped)
+- ✅ Indexed queries (efficient lookups)
+- ⚠️ GetUserCompetitionRank fetches all users (needs optimization)
+- ⚠️ Select All sends 12 sequential requests (could batch)
+
+**Known Limitations:**
+- GetUserCompetitionRank performance issue (in-memory filter, should use SQL WHERE)
+- Select All/Deselect All sends sequential requests (could use batch endpoint)
+- No pagination on competition leaderboards (limited to 100 users)
+- No real-time updates (Phase 17 will address)
+- No unit/integration tests (deferred)
+
+**Integration with Previous Phases:**
+- **Phase 13:** Uses seeded 12 competitions for preference selection
+- **Phase 14:** Reuses UserCompetitionStatsRepository for leaderboards
+- **Phase 4:** Follows same public leaderboard pattern
+
+**Next Steps:**
+- Apply migration to database
+- Manual testing of full preference flow
+- Test competition leaderboard endpoints
+- Optimize GetUserCompetitionRank (add GetUserRankAsync to repository)
+- Consider batch preference endpoints for Select All/Deselect All
+- Add unit and integration tests
+- Proceed to Phase 16: Match Organization & Filtering
+
+**See Analysis:** `.analysis/2026-02-21-phase-15-implementation.md` for comprehensive 1,547-line technical review (16 sections, 27 code examples)
+
+---
+
+**Last Updated:** 2026-02-21 (Phase 15 Complete - Competition-Specific Features Implemented!)

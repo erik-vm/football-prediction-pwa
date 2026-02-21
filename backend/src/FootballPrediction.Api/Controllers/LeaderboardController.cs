@@ -9,10 +9,12 @@ namespace FootballPrediction.Api.Controllers;
 public class LeaderboardController : ControllerBase
 {
     private readonly ILeaderboardService _leaderboardService;
+    private readonly IUserCompetitionStatsRepository _statsRepository;
 
-    public LeaderboardController(ILeaderboardService leaderboardService)
+    public LeaderboardController(ILeaderboardService leaderboardService, IUserCompetitionStatsRepository statsRepository)
     {
         _leaderboardService = leaderboardService;
+        _statsRepository = statsRepository;
     }
 
     [HttpGet("overall/{tournamentId}")]
@@ -37,5 +39,28 @@ public class LeaderboardController : ControllerBase
     {
         await _leaderboardService.CalculateAndApplyWeeklyBonusesAsync(gameWeekId);
         return Ok(new { message = "Weekly bonuses calculated and applied successfully" });
+    }
+
+    [HttpGet("competition/{competitionCode}")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetCompetitionLeaderboard(string competitionCode, [FromQuery] int limit = 100)
+    {
+        var leaderboard = await _statsRepository.GetLeaderboardAsync(competitionCode, limit);
+        return Ok(leaderboard);
+    }
+
+    [HttpGet("competition/{competitionCode}/user/{userId}")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetUserCompetitionRank(string competitionCode, Guid userId)
+    {
+        var allStats = await _statsRepository.GetLeaderboardAsync(competitionCode, int.MaxValue);
+        var userStats = allStats.FirstOrDefault(s => s.UserId == userId);
+
+        if (userStats == null)
+        {
+            return NotFound(new { message = "User stats not found for this competition" });
+        }
+
+        return Ok(userStats);
     }
 }

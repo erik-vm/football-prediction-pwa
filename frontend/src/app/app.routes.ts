@@ -49,6 +49,11 @@ export const routes: Routes = [
     ]
   },
   {
+    path: 'preferences',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/preferences/competition-preferences/competition-preferences.component').then(m => m.CompetitionPreferencesComponent)
+  },
+  {
     path: 'admin',
     canActivate: [adminGuard],
     children: [

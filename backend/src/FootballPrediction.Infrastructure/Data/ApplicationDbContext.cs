@@ -18,6 +18,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<WeeklyBonus> WeeklyBonuses { get; set; } = null!;
     public DbSet<Competition> Competitions { get; set; } = null!;
     public DbSet<UserCompetitionStats> UserCompetitionStats { get; set; } = null!;
+    public DbSet<UserCompetitionPreference> UserCompetitionPreferences { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
