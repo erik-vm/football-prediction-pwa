@@ -8,6 +8,18 @@
               ⚽ Football Predictions
             </a>
           </div>
+          @if (isAuthenticated()) {
+            <div class="hidden sm:ml-8 sm:flex sm:space-x-8">
+              <a
+                routerLink="/predictions"
+                routerLinkActive="border-primary-500 text-gray-900"
+                [routerLinkActiveOptions]="{exact: false}"
+                class="border-transparent text-gray-700 hover:border-gray-300 hover:text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+              >
+                Predictions
+              </a>
+            </div>
+          }
         </div>
 
         <div class="flex items-center space-x-4">

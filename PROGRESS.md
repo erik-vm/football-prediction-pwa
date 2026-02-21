@@ -467,24 +467,81 @@
 
 ---
 
-### Phase 9: Frontend Predictions (Planned)
-**Status:** 🔜 Not Started
-**Estimated Duration:** 3-4 days
+### Phase 9: Frontend Predictions UI ✅
+**Status:** Completed
+**Date:** 2026-02-21
+**Duration:** ~1.5 hours
 
 #### Tasks
-- [ ] Create predictions list component
-- [ ] Create prediction form component
-- [ ] Implement prediction service
-- [ ] Create match card component
-- [ ] Implement deadline countdown
-- [ ] Add form validation
-- [ ] Write component tests
-- [ ] Test prediction submission
+- [x] Create predictions list component
+- [x] Create prediction form component
+- [x] Create match card component
+- [x] Implement deadline countdown
+- [x] Add form validation
+- [x] Implement filtering (All, Upcoming, Finished)
+- [x] Group matches by game week
+- [x] Add prediction status indicators
+- [x] Configure protected routes
+- [x] Update navigation
+- [ ] Write component tests (deferred)
+- [x] Build and test application
 
 **Deliverables:**
-- Users can view matches
-- Users can submit predictions
-- Form validation working
+- ✅ MatchCardComponent with countdown timer and status indicators
+- ✅ PredictionFormComponent with validation (0-20 score range)
+- ✅ PredictionsListComponent with filtering and grouping
+- ✅ Protected routes with authGuard
+- ✅ Navigation integration (authenticated users only)
+- ✅ Lazy loading for all components (separate chunks)
+- ✅ Build successful (309.77 kB initial, 85.40 kB gzipped)
+- ✅ 0 warnings, 0 errors
+
+**Implementation Details:**
+- **Components:** 3 standalone components (680 lines total)
+- **Match Card Features:**
+  - Live countdown timer (updates every minute)
+  - Match status (Upcoming, In Progress, Finished)
+  - Prediction status indicator (green checkmark)
+  - Points earned display (after match finishes)
+  - Action button (Make/Edit Prediction)
+- **Prediction Form Features:**
+  - Reactive form with validation
+  - Create and update predictions
+  - Deadline enforcement (cannot submit after kickoff)
+  - Loading states and error handling
+  - Success confirmation with auto-redirect
+- **Predictions List Features:**
+  - Filter by status (All, Upcoming, Finished)
+  - Group by game week with date ranges
+  - Responsive grid (1/2/3 columns)
+  - Match and prediction count summary
+  - Optimized prediction merging (O(n) performance)
+- **Routing:** Nested routes (/predictions, /predictions/:matchId)
+- **Signals:** Used throughout for reactive state
+- **Computed Signals:** Countdown, filtering, grouping logic
+- **Lazy Loading:** 3 separate chunks (12.05 kB, 10.32 kB, 1.82 kB)
+
+**Bundle Analysis:**
+```
+Lazy chunks:
+- predictions-list: 12.05 kB (3.34 kB gzipped)
+- prediction-form:  10.32 kB (2.91 kB gzipped)
+- match-card:       1.82 kB  (524 bytes gzipped)
+```
+
+**Issues Resolved:**
+- **Missing RouterLinkActive import** (2 min)
+  - Added RouterLinkActive to AppComponent imports
+- **Unused RouterLink import** (1 min)
+  - Removed from PredictionsListComponent
+
+**Notes:**
+- Followed Phase 8 AuthService pattern (Signals, inject(), computed)
+- Zero backend changes required (API already complete)
+- Countdown timer uses Effect hook for cleanup
+- Type-safe filter types ('all' | 'upcoming' | 'finished')
+- Signal-based state management throughout
+- See PHASE-9-ANALYSIS.md for detailed analysis
 
 ---
 
@@ -591,15 +648,16 @@
 ## 📊 Overall Progress
 
 **Total Phases:** 15 (including setup)
-**Completed:** 7 (Phase 0, Phase 1, Phase 2, Phase 3, Phase 4, Phase 5, Phase 6)
+**Completed:** 9 (Phase 0-6 Backend, Phase 7-9 Frontend)
 **In Progress:** 0
-**Not Started:** 8
-**Overall Completion:** ~47%
+**Not Started:** 6
+**Overall Completion:** ~60%
 
 ---
 
 ## 🎯 Current Sprint Goals
 
+**Backend Complete (Phases 0-6):**
 1. ✅ Phase 0: Project Setup
 2. ✅ Phase 1: Backend Foundation
 3. ✅ Phase 2: Authentication & Authorization
@@ -607,7 +665,12 @@
 5. ✅ Phase 4: Tournament & Match Management
 6. ✅ Phase 5: Prediction Submission
 7. ✅ Phase 6: Leaderboard System
-8. 🔜 Phase 7: Frontend Foundation
+
+**Frontend In Progress (Phases 7-14):**
+8. ✅ Phase 7: Frontend Foundation
+9. ✅ Phase 8: Frontend Authentication
+10. ✅ Phase 9: Frontend Predictions UI
+11. 🔜 Phase 10: Frontend Leaderboards (Next)
 
 ---
 
@@ -645,4 +708,4 @@
 
 ---
 
-**Last Updated:** 2026-02-21 (Phase 0-6 Complete - Backend Complete!)
+**Last Updated:** 2026-02-21 (Phase 9 Complete - Predictions UI Complete!)
