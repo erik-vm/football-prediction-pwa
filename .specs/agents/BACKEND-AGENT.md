@@ -735,6 +735,372 @@ public class IntegrationTestBase : IAsyncLifetime
 
 ---
 
+## Implementation Patterns (Phase 6 Learnings)
+
+### Pattern: Testing with Moq and Match Entity
+
+**Issue:** `Moq.Match` class conflicts with `Domain.Entities.Match` entity.
+
+**Solution:** Always use fully qualified name in tests:
+
+```csharp
+// ✅ CORRECT
+var match = new Domain.Entities.Match {
+    Id = matchId,
+    HomeTeam = "Team A",
+    AwayTeam = "Team B",
+    Stage = TournamentStage.GROUP_STAGE,
+    IsFinished = true
+};
+
+// ❌ WRONG - Ambiguous reference
+var match = new Match { ... };
+```
+
+**Why:** `Moq.Match` is used for argument matching in mock setups. Using just `Match` creates namespace conflict.
+
+**Prevention:** Add `using DomainMatch = FootballPrediction.Domain.Entities.Match;` if needed repeatedly.
+
+---
+
+### Pattern: Match Entity Initialization in Tests
+
+**Requirements:**
+1. `HomeTeam` and `AwayTeam` are **required** properties
+2. `StageMultiplier` is **computed** from `Stage` enum (read-only)
+3. Set `Stage` enum value, not `StageMultiplier`
+
+```csharp
+// ✅ CORRECT initialization
+var match = new Domain.Entities.Match {
+    Id = Guid.NewGuid(),
+    HomeTeam = "Manchester United",     // Required
+    AwayTeam = "Barcelona",              // Required
+    Stage = TournamentStage.GROUP_STAGE, // Sets multiplier (1)
+    KickoffTime = DateTime.UtcNow,
+    IsFinished = true
+};
+
+// ❌ WRONG - Missing required properties
+var match = new Domain.Entities.Match {
+    StageMultiplier = 1,  // Read-only, cannot set
+    IsFinished = true     // Missing HomeTeam, AwayTeam
+};
+```
+
+**Stage Multiplier Values:**
+- `GROUP_STAGE` → 1
+- `ROUND_OF_16` → 2
+- `QUARTER_FINALS` → 3
+- `SEMI_FINALS` → 4
+- `FINAL` → 5
+
+**Pre-Test Checklist:**
+1. Review entity: Check for `required` keyword on properties
+2. Review computed properties: Look for get-only properties
+3. Review enums: Verify correct enum value names
+
+---
+
+### Pattern: Complex Queries with Clean Architecture
+
+**Rule:** Never use `DbContext` directly in Application layer. Always use repositories.
+
+**Problem:**
+```csharp
+// ❌ WRONG - Violates Clean Architecture
+public class LeaderboardService : ILeaderboardService
+{
+    private readonly ApplicationDbContext _context; // Application depends on Infrastructure
+
+    public async Task<List<LeaderboardEntry>> GetLeaderboardAsync(Guid tournamentId)
+    {
+        return await _context.Predictions
+            .Include(p => p.User)
+            .Where(p => p.Match.GameWeek.TournamentId == tournamentId)
+            .ToListAsync(); // Direct EF Core query in Application layer
+    }
+}
+```
+
+**Solution:** Create specific repository methods for data fetching, aggregate in service:
+
+```csharp
+// ✅ CORRECT - Repository provides data
+public interface IMatchRepository
+{
+    Task<IEnumerable<Guid>> GetFinishedMatchIdsByTournamentAsync(Guid tournamentId);
+}
+
+public interface IPredictionRepository
+{
+    Task<IEnumerable<Prediction>> GetByMatchIdsWithUserAndMatchAsync(IEnumerable<Guid> matchIds);
+}
+
+// ✅ CORRECT - Service fetches via repositories, aggregates in memory
+public class LeaderboardService : ILeaderboardService
+{
+    private readonly IMatchRepository _matchRepository;
+    private readonly IPredictionRepository _predictionRepository;
+
+    public async Task<List<LeaderboardEntry>> GetLeaderboardAsync(Guid tournamentId)
+    {
+        // 1. Fetch data via repositories
+        var matchIds = await _matchRepository.GetFinishedMatchIdsByTournamentAsync(tournamentId);
+        var predictions = await _predictionRepository.GetByMatchIdsWithUserAndMatchAsync(matchIds);
+
+        // 2. Aggregate in memory (LINQ to Objects)
+        var leaderboard = predictions
+            .GroupBy(p => p.UserId)
+            .Select(g => new LeaderboardEntry {
+                UserId = g.Key,
+                TotalPoints = g.Sum(p => p.PointsEarned ?? 0)
+            })
+            .OrderByDescending(e => e.TotalPoints)
+            .ToList();
+
+        return leaderboard;
+    }
+}
+```
+
+**Pattern Benefits:**
+- Clean Architecture maintained (Application → Interfaces only)
+- Repositories are testable with mocks
+- EF Core queries isolated in Infrastructure layer
+- Business logic (aggregation) stays in Application layer
+
+**When to Extend Repositories:**
+- Need to filter by related entity (e.g., Match by Tournament)
+- Need specific projections (e.g., Select IDs only for performance)
+- Need eager loading (Include) for aggregations
+- Complex WHERE clauses specific to use case
+
+---
+
+### Pattern: Position-Based Awards with Tie Handling
+
+**Use Case:** Rankings with prizes (1st/2nd/3rd) where ties split the award.
+
+**Problem:** Naive rank-based skipping awards users multiple times when tied.
+
+**Example Scenario:**
+- 2 users tied for 1st with 10 points
+- Position 1: Skip(0), both get 1st place bonus ✅
+- Position 2: Skip(1), 2nd user gets ANOTHER bonus ❌ (duplicate!)
+
+**Solution:** Use index tracking instead of rank-based skipping:
+
+```csharp
+public async Task CalculateWeeklyBonusesAsync(Guid gameWeekId)
+{
+    // Get sorted user points
+    var userPoints = await GetUserPointsSortedDescendingAsync(gameWeekId);
+
+    var bonuses = new List<WeeklyBonus>();
+    var positions = new[] {
+        (rank: 1, points: 5),
+        (rank: 2, points: 3),
+        (rank: 3, points: 1)
+    };
+
+    var currentIndex = 0;
+    var awardedUserIds = new HashSet<Guid>();
+
+    foreach (var position in positions)
+    {
+        // Stop if we've run out of users
+        if (currentIndex >= userPoints.Count) break;
+
+        // Find all users tied at current position
+        var usersAtPosition = userPoints
+            .Skip(currentIndex)
+            .TakeWhile(u => u.Points == userPoints[currentIndex].Points)
+            .ToList();
+
+        // Split bonus among tied users (integer division)
+        var bonusPerUser = position.points / usersAtPosition.Count;
+
+        foreach (var user in usersAtPosition)
+        {
+            // Prevent duplicate awards
+            if (!awardedUserIds.Contains(user.UserId))
+            {
+                bonuses.Add(new WeeklyBonus {
+                    UserId = user.UserId,
+                    BonusPoints = bonusPerUser
+                });
+                awardedUserIds.Add(user.UserId);
+            }
+        }
+
+        // Move index forward by number of users awarded
+        currentIndex += usersAtPosition.Count;
+    }
+
+    await SaveBonusesAsync(bonuses);
+}
+```
+
+**Key Principles:**
+1. **Index tracking:** `currentIndex` tracks position in sorted list
+2. **TakeWhile:** Get all users with same score as user at currentIndex
+3. **Integer division:** `5 / 2 = 2` for ties (per GAME-RULES.md)
+4. **Duplicate prevention:** HashSet guards against multi-award
+5. **Forward movement:** `currentIndex += count` skips awarded users
+
+**Example Results:**
+
+| Scenario | Users | Points | Awards |
+|----------|-------|--------|--------|
+| Clear winner | User1: 10<br>User2: 8<br>User3: 6 | 1st: 5<br>2nd: 3<br>3rd: 1 | User1: 5<br>User2: 3<br>User3: 1 |
+| Tied for 1st | User1: 10<br>User2: 10<br>User3: 6 | 1st: 5 (split)<br>3rd: 1 | User1: 2<br>User2: 2<br>User3: 1 |
+| All tied | User1: 10<br>User2: 10<br>User3: 10 | 1st: 5 (split) | User1: 1<br>User2: 1<br>User3: 1 |
+
+**Other Use Cases:**
+- Tournament prizes
+- MVP awards
+- Any ranked rewards with tie scenarios
+
+---
+
+### Pattern: Base Points Calculation with Stage Multipliers
+
+**Context:** Points are stored multiplied by stage (e.g., 5 × 2 = 10 in Round of 16). Need to calculate "base points" for statistics (exact scores, correct winners).
+
+**Problem:** Can't directly compare `PointsEarned` to base values (5, 4, 3, 1):
+
+```csharp
+// ❌ WRONG - Doesn't account for multiplier
+var exactScores = predictions.Count(p => p.PointsEarned == 5); // Misses 10, 15, 20, 25
+```
+
+**Solution:** Divide by stage multiplier to get base points:
+
+```csharp
+// ✅ CORRECT - Helper method to get base points
+private static int GetBasePoints(Prediction prediction)
+{
+    if (!prediction.PointsEarned.HasValue)
+    {
+        return 0;
+    }
+
+    // Get multiplier from match stage (1, 2, 3, 4, or 5)
+    var multiplier = prediction.Match.StageMultiplier > 0
+        ? prediction.Match.StageMultiplier
+        : 1;
+
+    // Divide to get base points
+    return prediction.PointsEarned.Value / multiplier;
+}
+
+// Usage in aggregations
+var stats = predictions.GroupBy(p => p.UserId).Select(g => new {
+    ExactScores = g.Count(p => GetBasePoints(p) == 5),        // 5 = exact score
+    CorrectWinners = g.Count(p => GetBasePoints(p) >= 3),     // 3+ = winner correct
+    CorrectGoalDiff = g.Count(p => GetBasePoints(p) == 4)     // 4 = winner + diff
+});
+```
+
+**Important Notes:**
+- Always guard against division by zero (multiplier default to 1)
+- Base points: 5 = exact, 4 = winner+diff, 3 = winner, 1 = one score, 0 = nothing
+- Used for statistics and tie-breaking, NOT for scoring (scoring uses multiplied points)
+
+**GAME-RULES.md Reference:**
+```
+Base Points (before multiplier):
+- Exact score: 5 points
+- Correct winner AND goal difference: 4 points
+- Correct winner only: 3 points
+- One team score correct: 1 point
+- No match: 0 points
+
+Stage Multipliers:
+- GROUP_STAGE: ×1
+- ROUND_OF_16: ×2
+- QUARTER_FINALS: ×3
+- SEMI_FINALS: ×4
+- FINAL: ×5
+```
+
+---
+
+### Pattern: Pre-Implementation Entity Review
+
+**Purpose:** Prevent property naming issues and initialization errors.
+
+**When:** Before implementing any service, controller, or test that works with entities.
+
+**Checklist:**
+
+```markdown
+## Entity Review: [EntityName]
+
+### Properties
+| Property | Type | Nullable | Required | Computed | Notes |
+|----------|------|----------|----------|----------|-------|
+| Id | Guid | No | Yes (PK) | No | |
+| ... | ... | ... | ... | ... | ... |
+
+### Relationships
+| Navigation Property | Type | Cardinality | Notes |
+|---------------------|------|-------------|-------|
+| User | User | Many-to-One | Required FK |
+| ... | ... | ... | ... |
+
+### Naming Observations
+- [ ] Any properties with similar names to related entities?
+- [ ] Any nullable vs non-nullable that could cause confusion?
+- [ ] Any computed/read-only properties?
+
+### Initialization Requirements
+- [ ] What properties are required (required keyword)?
+- [ ] What properties are computed (get-only)?
+- [ ] What enum values are valid?
+```
+
+**Example: Prediction Entity Review**
+
+```markdown
+## Entity Review: Prediction
+
+### Properties
+| Property | Type | Nullable | Required | Computed | Notes |
+|----------|------|----------|----------|----------|-------|
+| Id | Guid | No | Yes | No | Primary key |
+| UserId | Guid | No | Yes | No | FK to User |
+| MatchId | Guid | No | Yes | No | FK to Match |
+| HomeScore | int | No | Yes | No | Predicted home score |
+| AwayScore | int | No | Yes | No | Predicted away score |
+| PointsEarned | int? | Yes | No | No | Calculated after match |
+| CreatedAt | DateTime | No | No | No | Auto-set |
+| UpdatedAt | DateTime | No | No | No | Auto-set |
+
+### Relationships
+| Navigation Property | Type | Cardinality | Notes |
+|---------------------|------|-------------|-------|
+| User | User | Many-to-One | Required, eager load for leaderboard |
+| Match | Match | Many-to-One | Required, eager load for points calc |
+
+### Naming Observations
+- ⚠️ `Prediction.HomeScore` vs `Match.HomeScore` - same names, different context
+  - Prediction: user's predicted score
+  - Match: actual match score
+- PointsEarned is nullable (null until match finishes)
+
+### Initialization Requirements
+- Required: UserId, MatchId, HomeScore, AwayScore
+- Optional: PointsEarned (set by system after match)
+- Auto-set: Id, CreatedAt, UpdatedAt
+```
+
+**Time Investment:** 5 minutes per entity
+**Time Saved:** 10-30 minutes debugging property issues
+
+---
+
 ## Browser Testing (Swagger)
 
 When testing in browser:
