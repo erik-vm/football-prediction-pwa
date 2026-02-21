@@ -1,11 +1,14 @@
 import { Component } from '@angular/core';
+import { InstallPromptComponent } from '../../shared/components/install-prompt/install-prompt.component';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [],
+  imports: [InstallPromptComponent],
   template: `
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <app-install-prompt />
+
       <div class="text-center">
         <h2 class="text-4xl font-bold text-gray-900 mb-4">
           Welcome to Football Prediction Game

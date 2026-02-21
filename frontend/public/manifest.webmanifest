@@ -1,9 +1,13 @@
 {
-  "name": "frontend",
-  "short_name": "frontend",
+  "name": "Football Prediction PWA",
+  "short_name": "FootballPWA",
+  "description": "Predict football match outcomes and compete with friends",
   "display": "standalone",
-  "scope": "./",
-  "start_url": "./",
+  "scope": "/",
+  "start_url": "/",
+  "theme_color": "#0ea5e9",
+  "background_color": "#ffffff",
+  "categories": ["sports", "entertainment"],
   "icons": [
     {
       "src": "icons/icon-72x72.png",
