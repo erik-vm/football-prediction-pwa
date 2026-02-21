@@ -1,9 +1,11 @@
 using System.Text;
 using FluentValidation;
 using FootballPrediction.Application.Interfaces;
+using FootballPrediction.Application.Jobs;
 using FootballPrediction.Application.Services;
 using FootballPrediction.Application.Validators;
 using FootballPrediction.Infrastructure.Data;
+using FootballPrediction.Infrastructure.Data.Seed;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -37,6 +39,10 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IScoringService, ScoringService>();
 builder.Services.AddScoped<IMatchResultService, MatchResultService>();
 builder.Services.AddScoped<ILeaderboardService, LeaderboardService>();
+builder.Services.AddHttpClient<FootballDataService>();
+
+// Register background services
+builder.Services.AddHostedService<MatchSyncBackgroundJob>();
 
 // Register validators
 builder.Services.AddValidatorsFromAssemblyContaining<RegisterRequestValidator>();
@@ -84,6 +90,23 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+// Seed database
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<ApplicationDbContext>();
+        await context.Database.MigrateAsync();
+        await CompetitionSeeder.SeedCompetitionsAsync(context);
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while seeding the database.");
+    }
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

@@ -13,9 +13,13 @@ public class Match
     public int? HomeScore { get; set; }
     public int? AwayScore { get; set; }
     public bool IsFinished { get; set; }
+    public string CompetitionCode { get; set; } = string.Empty;
+    public string? Venue { get; set; }
+    public int? Matchday { get; set; }
 
     public int StageMultiplier => Stage.GetMultiplier();
 
     public GameWeek GameWeek { get; set; } = null!;
+    public Competition Competition { get; set; } = null!;
     public ICollection<Prediction> Predictions { get; set; } = new List<Prediction>();
 }

@@ -28,12 +28,26 @@ public class MatchConfiguration : IEntityTypeConfiguration<Match>
         builder.Property(m => m.IsFinished)
             .IsRequired();
 
+        builder.Property(m => m.CompetitionCode)
+            .IsRequired()
+            .HasMaxLength(10);
+
+        builder.Property(m => m.Venue)
+            .HasMaxLength(200);
+
+        builder.Property(m => m.Matchday);
+
         builder.Ignore(m => m.StageMultiplier);
 
         builder.HasOne(m => m.GameWeek)
             .WithMany(g => g.Matches)
             .HasForeignKey(m => m.GameWeekId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne(m => m.Competition)
+            .WithMany(c => c.Matches)
+            .HasForeignKey(m => m.CompetitionCode)
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasMany(m => m.Predictions)
             .WithOne(p => p.Match)
@@ -43,5 +57,7 @@ public class MatchConfiguration : IEntityTypeConfiguration<Match>
         builder.HasIndex(m => m.GameWeekId);
         builder.HasIndex(m => m.KickoffTime);
         builder.HasIndex(m => m.IsFinished);
+        builder.HasIndex(m => m.CompetitionCode);
+        builder.HasIndex(m => m.Matchday);
     }
 }
