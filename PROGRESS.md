@@ -991,4 +991,54 @@ Frontend Production Build:
 
 ---
 
-**Last Updated:** 2026-02-21 (Phase 13 v2 Complete - football-data.org API Integration with Critical Issues Identified!)
+### Phase 13 (v3): Critical Blocker Fixes ✅
+**Status:** Completed
+**Date:** 2026-02-21
+**Duration:** ~2 hours
+**Analysis:** `.analysis/2026-02-21-phase-13-blocker-fixes-analysis.md`
+
+#### Tasks
+- [x] Move API key from source code to User Secrets
+- [x] Implement idempotent match creation logic
+- [x] Add ExternalMatchId property to Match entity
+- [x] Make GameWeekId nullable to fix FK constraint
+- [x] Update DTOs and validators for nullable GameWeekId
+- [x] Move MatchSyncBackgroundJob to Infrastructure layer
+- [x] Complete background job implementation with duplicate checking
+- [x] Create UpdateMatchForIdempotency database migration
+- [x] Build and validate all changes
+- [x] Commit blocker fixes to version control
+
+**Deliverables:**
+- ✅ API key security: User Secrets (dev) + Environment Variables (prod)
+- ✅ Idempotent match sync: ExternalMatchId with unique index
+- ✅ Nullable GameWeekId: Allows API-synced matches without GameWeek
+- ✅ Complete MatchSyncBackgroundJob: Fetches, deduplicates, and saves matches
+- ✅ Clean Architecture compliance: Background job moved to Infrastructure
+- ✅ Database migration: UpdateMatchForIdempotency
+- ✅ Build status: Success (1 pre-existing warning, 0 errors)
+
+**Blockers Fixed:**
+- ✅ 🔴 **Blocker #1:** Hardcoded API key → User Secrets + IConfiguration
+- ✅ 🔴 **Blocker #2:** Non-idempotent match creation → ExternalMatchId + duplicate checking
+- ✅ 🔴 **Blocker #3:** Invalid GameWeekId FK → Nullable GameWeekId
+- ✅ 🟡 **Architecture:** Application layer violation → Moved to Infrastructure
+
+**Key Implementation Details:**
+- **Security:** No secrets in version control, configuration-based management
+- **Idempotency:** Unique index on ExternalMatchId prevents duplicates at DB level
+- **Flexibility:** Matches can exist without GameWeek assignment (API-synced matches)
+- **Sync Logic:** Updates existing matches instead of creating duplicates
+- **Migration:** Both Up and Down migrations implemented for safe rollback
+
+**Next Steps:**
+- Apply UpdateMatchForIdempotency migration to database
+- Test match synchronization with real API data
+- Write automated tests for blocker fixes
+- Proceed to Phase 14: Automatic Result Processing
+
+**See Analysis:** `.analysis/2026-02-21-phase-13-blocker-fixes-analysis.md` for comprehensive review
+
+---
+
+**Last Updated:** 2026-02-21 (Phase 13 v3 Complete - All Critical Blockers Fixed!)
