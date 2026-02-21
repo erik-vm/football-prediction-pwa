@@ -4,8 +4,37 @@
       <div class="flex justify-between h-16">
         <div class="flex">
           <div class="flex-shrink-0 flex items-center">
-            <h1 class="text-xl font-bold text-primary-600">⚽ Football Predictions</h1>
+            <a routerLink="/" class="text-xl font-bold text-primary-600 hover:text-primary-700">
+              ⚽ Football Predictions
+            </a>
           </div>
+        </div>
+
+        <div class="flex items-center space-x-4">
+          @if (isAuthenticated()) {
+            <span class="text-sm text-gray-700">
+              Welcome, <span class="font-semibold">{{ currentUser()?.username }}</span>
+            </span>
+            <button
+              (click)="logout()"
+              class="text-sm font-medium text-gray-700 hover:text-primary-600"
+            >
+              Sign out
+            </button>
+          } @else {
+            <a
+              routerLink="/login"
+              class="text-sm font-medium text-gray-700 hover:text-primary-600"
+            >
+              Sign in
+            </a>
+            <a
+              routerLink="/register"
+              class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700"
+            >
+              Sign up
+            </a>
+          }
         </div>
       </div>
     </div>

@@ -2,7 +2,7 @@
 
 **Technology Stack:** Angular 19, TypeScript 5.7, Tailwind CSS v3, PWA
 **Last Updated:** 2026-02-21
-**Current Phase:** Phase 7 Complete - Frontend Foundation
+**Current Phase:** Phase 8 Complete - Authentication UI
 
 ---
 
@@ -15,8 +15,10 @@
 5. [HTTP Interceptors](#http-interceptors)
 6. [Route Guards](#route-guards)
 7. [State Management](#state-management)
-8. [Best Practices](#best-practices)
-9. [Common Issues](#common-issues)
+8. [Angular Signals](#angular-signals)
+9. [Reactive Forms](#reactive-forms)
+10. [Best Practices](#best-practices)
+11. [Common Issues](#common-issues)
 
 ---
 
@@ -495,6 +497,434 @@ export class ApiService {
 
 ---
 
+## Angular Signals
+
+### What Are Signals?
+
+Angular Signals are a new reactive primitive introduced in Angular 16+ for managing state. They provide fine-grained reactivity with automatic change detection.
+
+**Benefits over RxJS:**
+- Simpler API
+- Better performance (fine-grained updates)
+- No memory leaks (no manual unsubscribe)
+- Synchronous by default
+- Built-in computed values
+
+### Basic Signal Usage
+
+```typescript
+import { Component, signal, computed } from '@angular/core';
+
+@Component({
+  selector: 'app-counter',
+  standalone: true,
+  template: `
+    <p>Count: {{ count() }}</p>
+    <p>Double: {{ double() }}</p>
+    <button (click)="increment()">+1</button>
+  `
+})
+export class CounterComponent {
+  // Writable signal
+  count = signal(0);
+
+  // Computed signal (readonly, auto-updates)
+  double = computed(() => this.count() * 2);
+
+  increment() {
+    this.count.update(val => val + 1);  // Update
+    // Or: this.count.set(5);  // Set directly
+  }
+}
+```
+
+**Template Usage:**
+- Call signals like functions: `{{ count() }}`
+- No async pipe needed
+- Automatic change detection
+
+### Signals in Services (AuthService Example)
+
+```typescript
+import { Injectable, signal, computed } from '@angular/core';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class AuthService {
+  // Private writable signals
+  private currentUserSignal = signal<User | null>(null);
+  private isLoadingSignal = signal<boolean>(false);
+  private errorSignal = signal<string | null>(null);
+
+  // Public readonly signals
+  currentUser = this.currentUserSignal.asReadonly();
+  isLoading = this.isLoadingSignal.asReadonly();
+  error = this.errorSignal.asReadonly();
+
+  // Computed signals (derived state)
+  isAuthenticated = computed(() => this.currentUser() !== null);
+  isAdmin = computed(() => this.currentUser()?.role === 'ADMIN');
+
+  login(credentials: LoginRequest) {
+    this.isLoadingSignal.set(true);
+    this.errorSignal.set(null);
+
+    return this.http.post<TokenResponse>('/auth/login', credentials).pipe(
+      tap(response => {
+        this.currentUserSignal.set(this.decodeToken(response.accessToken));
+        this.isLoadingSignal.set(false);
+      }),
+      catchError(error => {
+        this.errorSignal.set(error.message);
+        this.isLoadingSignal.set(false);
+        return throwError(() => error);
+      })
+    );
+  }
+}
+```
+
+### Using Signals in Components
+
+```typescript
+import { Component, inject } from '@angular/core';
+import { AuthService } from './auth.service';
+
+@Component({
+  selector: 'app-header',
+  template: `
+    @if (isAuthenticated()) {
+      <span>Welcome, {{ currentUser()?.username }}</span>
+      <button (click)="logout()">Logout</button>
+    } @else {
+      <a routerLink="/login">Login</a>
+    }
+  `
+})
+export class HeaderComponent {
+  private authService = inject(AuthService);
+
+  // Expose signals to template
+  currentUser = this.authService.currentUser;
+  isAuthenticated = this.authService.isAuthenticated;
+
+  logout() {
+    this.authService.logout();
+  }
+}
+```
+
+### Signal Methods
+
+```typescript
+// Create signal
+const count = signal(0);
+
+// Read value
+console.log(count());  // 0
+
+// Set value
+count.set(5);
+
+// Update value (based on current value)
+count.update(val => val + 1);
+
+// Computed signal (readonly)
+const double = computed(() => count() * 2);
+
+// Effect (runs when dependencies change)
+effect(() => {
+  console.log('Count changed:', count());
+});
+```
+
+### Signals vs RxJS
+
+| Feature | Signals | RxJS |
+|---------|---------|------|
+| **Syntax** | `count()` | `count$ \| async` |
+| **Memory** | No leaks | Manual unsubscribe |
+| **Performance** | Fine-grained | Zone-based |
+| **Async** | Sync by default | Async by default |
+| **Learning Curve** | Easy | Moderate |
+
+**When to use Signals:**
+- Component state
+- Service state
+- Derived/computed values
+- Synchronous data
+
+**When to use RxJS:**
+- HTTP requests
+- WebSocket streams
+- Complex async pipelines
+- Event handling
+
+**Best Practice:** Combine both! Use RxJS for async operations, Signals for state.
+
+---
+
+## Reactive Forms
+
+### Form Validation Patterns
+
+Angular Reactive Forms provide powerful validation with built-in and custom validators.
+
+### Basic Form with Validation
+
+```typescript
+import { Component, OnInit, inject } from '@angular/core';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+
+@Component({
+  selector: 'app-login',
+  standalone: true,
+  imports: [ReactiveFormsModule],
+  template: `
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <input formControlName="email" type="email" />
+      @if (email?.invalid && email?.touched) {
+        <p class="error">
+          @if (email?.errors?.['required']) {
+            Email is required
+          }
+          @if (email?.errors?.['email']) {
+            Invalid email format
+          }
+        </p>
+      }
+
+      <input formControlName="password" type="password" />
+      @if (password?.invalid && password?.touched) {
+        <p class="error">
+          @if (password?.errors?.['required']) {
+            Password is required
+          }
+          @if (password?.errors?.['minlength']) {
+            Must be at least 6 characters
+          }
+        </p>
+      }
+
+      <button type="submit" [disabled]="loginForm.invalid">Login</button>
+    </form>
+  `
+})
+export class LoginComponent implements OnInit {
+  private fb = inject(FormBuilder);
+  loginForm!: FormGroup;
+
+  ngOnInit() {
+    this.loginForm = this.fb.group({
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required, Validators.minLength(6)]]
+    });
+  }
+
+  onSubmit() {
+    if (this.loginForm.valid) {
+      console.log(this.loginForm.value);
+    }
+  }
+
+  get email() {
+    return this.loginForm.get('email');
+  }
+
+  get password() {
+    return this.loginForm.get('password');
+  }
+}
+```
+
+### Built-in Validators
+
+```typescript
+import { Validators } from '@angular/forms';
+
+this.form = this.fb.group({
+  // Required field
+  username: ['', Validators.required],
+
+  // Email validation
+  email: ['', [Validators.required, Validators.email]],
+
+  // Min/max length
+  password: ['', [
+    Validators.required,
+    Validators.minLength(6),
+    Validators.maxLength(100)
+  ]],
+
+  // Pattern validation (regex)
+  username: ['', [
+    Validators.required,
+    Validators.pattern(/^[a-zA-Z0-9_-]+$/)
+  ]],
+
+  // Min/max value (numbers)
+  age: ['', [
+    Validators.required,
+    Validators.min(18),
+    Validators.max(120)
+  ]],
+
+  // Multiple validators
+  field: ['', [Validators.required, Validators.email, Validators.minLength(5)]]
+});
+```
+
+### Custom Validators (Field-Level)
+
+```typescript
+import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
+
+// Custom validator function
+export function passwordStrengthValidator(): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+    const value = control.value;
+
+    if (!value) {
+      return null;  // Don't validate empty values (use Validators.required)
+    }
+
+    const hasNumber = /[0-9]/.test(value);
+    const hasUpper = /[A-Z]/.test(value);
+    const hasLower = /[a-z]/.test(value);
+    const hasSpecial = /[!@#$%^&*]/.test(value);
+
+    const valid = hasNumber && hasUpper && hasLower && hasSpecial;
+
+    return valid ? null : { passwordStrength: true };
+  };
+}
+
+// Usage
+this.form = this.fb.group({
+  password: ['', [
+    Validators.required,
+    Validators.minLength(8),
+    passwordStrengthValidator()
+  ]]
+});
+```
+
+### Form-Level Validators (Cross-Field Validation)
+
+```typescript
+import { AbstractControl, ValidationErrors } from '@angular/forms';
+
+// Password confirmation validator
+export function passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
+  const password = control.get('password');
+  const confirmPassword = control.get('confirmPassword');
+
+  if (!password || !confirmPassword) {
+    return null;
+  }
+
+  return password.value === confirmPassword.value
+    ? null
+    : { passwordMismatch: true };
+}
+
+// Usage
+this.registerForm = this.fb.group({
+  password: ['', [Validators.required, Validators.minLength(6)]],
+  confirmPassword: ['', [Validators.required]]
+}, {
+  validators: passwordMatchValidator  // ← Form-level validator
+});
+
+// Template
+@if (!passwordsMatch && confirmPassword?.touched) {
+  <p class="error">Passwords do not match</p>
+}
+
+// Component
+get passwordsMatch(): boolean {
+  return !this.registerForm.errors?.['passwordMismatch'];
+}
+```
+
+### Form State Properties
+
+```typescript
+// Form validity
+form.valid       // true if all controls valid
+form.invalid     // true if any control invalid
+form.pending     // true if async validation running
+
+// Form interaction
+form.touched     // true if user interacted
+form.untouched   // true if user hasn't interacted
+form.dirty       // true if value changed
+form.pristine    // true if value hasn't changed
+
+// Control-specific
+control.errors   // Validation errors object
+control.value    // Current value
+control.status   // 'VALID' | 'INVALID' | 'PENDING' | 'DISABLED'
+```
+
+### Dynamic Error Messages
+
+```typescript
+getErrorMessage(controlName: string): string {
+  const control = this.form.get(controlName);
+
+  if (control?.hasError('required')) {
+    return `${controlName} is required`;
+  }
+  if (control?.hasError('email')) {
+    return 'Invalid email format';
+  }
+  if (control?.hasError('minlength')) {
+    const min = control.errors?.['minlength'].requiredLength;
+    return `Must be at least ${min} characters`;
+  }
+  if (control?.hasError('pattern')) {
+    return 'Invalid format';
+  }
+
+  return '';
+}
+
+// Template
+<input formControlName="email" />
+@if (email?.invalid && email?.touched) {
+  <p class="error">{{ getErrorMessage('email') }}</p>
+}
+```
+
+### Form Submission Best Practices
+
+```typescript
+onSubmit() {
+  // Mark all fields as touched to show errors
+  if (this.form.invalid) {
+    this.form.markAllAsTouched();
+    return;
+  }
+
+  // Disable form during submission
+  this.form.disable();
+
+  this.authService.login(this.form.value).subscribe({
+    next: () => {
+      this.router.navigate(['/dashboard']);
+    },
+    error: (error) => {
+      this.form.enable();  // Re-enable on error
+      this.errorMessage = error.message;
+    }
+  });
+}
+```
+
+---
+
 ## Best Practices
 
 ### 1. Use Signals for Reactive State (Angular 19)
@@ -616,7 +1046,65 @@ Always specify `tailwindcss@^3` explicitly in package.json.
 
 ---
 
-### Issue #2: Interceptor Not Adding Token
+### Issue #2: Property Initialization with Injected Dependencies
+
+**Error Message:**
+```
+TS2729: Property 'authService' is used before its initialization.
+```
+
+**Cause:**
+Trying to access constructor-injected dependencies in property initializers. TypeScript strict mode doesn't allow this because properties are initialized before the constructor runs.
+
+**Problem Code:**
+```typescript
+export class MyComponent {
+  isLoading = this.authService.isLoading;  // ❌ Error!
+
+  constructor(private authService: AuthService) {}  // Initialized after
+}
+```
+
+**Solution:**
+Use Angular's `inject()` function instead:
+
+```typescript
+import { Component, inject } from '@angular/core';
+
+export class MyComponent {
+  private authService = inject(AuthService);  // ✅ Works!
+
+  isLoading = this.authService.isLoading;    // ✅ Now this works
+  error = this.authService.error;            // ✅ Works too
+}
+```
+
+**Why This Works:**
+- `inject()` can be called during field initialization
+- Fields are initialized top-to-bottom
+- `authService` is initialized before `isLoading`
+
+**When to Use:**
+- Accessing injected dependencies in property initializers
+- Accessing signals from services in component properties
+- Prefer functional style over constructor injection
+
+**Alternative Solution (ngOnInit):**
+```typescript
+export class MyComponent implements OnInit {
+  isLoading!: boolean;
+
+  constructor(private authService: AuthService) {}
+
+  ngOnInit() {
+    this.isLoading = this.authService.isLoading;  // Initialize here
+  }
+}
+```
+
+---
+
+### Issue #3: Interceptor Not Adding Token
 
 **Symptom:**
 API requests return 401 even though token exists in localStorage.
