@@ -286,23 +286,58 @@
 
 ---
 
-### Phase 6: Leaderboard System (Planned)
-**Status:** 🔜 Not Started
-**Estimated Duration:** 2-3 days
+### Phase 6: Leaderboard System ✅
+**Status:** Completed
+**Date:** 2026-02-21
+**Duration:** ~2 hours
 
 #### Tasks
-- [ ] Implement overall leaderboard query
-- [ ] Implement weekly leaderboard query
-- [ ] Implement weekly bonus calculation
-- [ ] Create leaderboard endpoints
-- [ ] Optimize queries with indexes
-- [ ] Write leaderboard tests
-- [ ] Test ranking logic
+- [x] Implement overall leaderboard query
+- [x] Implement weekly leaderboard query
+- [x] Implement weekly bonus calculation
+- [x] Create leaderboard endpoints
+- [x] Optimize queries with indexes
+- [x] Write leaderboard tests
+- [x] Test ranking logic
 
 **Deliverables:**
-- Overall leaderboard working
-- Weekly leaderboard working
-- Weekly bonuses calculated correctly
+- ✅ WeeklyBonus entity and repository created
+- ✅ Extended repositories (Match, Prediction) with filtering methods
+- ✅ LeaderboardService with aggregation logic
+- ✅ 3 API endpoints (overall, weekly, calculate bonuses)
+- ✅ 7 comprehensive service tests (all passing)
+- ✅ 70 total tests passing (63 + 7 new)
+- ✅ Build with 0 warnings, 0 errors
+
+**Implementation Details:**
+- **Entity**: `WeeklyBonus` with composite unique index (UserId, GameWeekId)
+- **Repositories**: Extended IMatchRepository and IPredictionRepository for leaderboard queries
+- **Service**: LeaderboardService with overall/weekly rankings and bonus calculation
+- **DTOs**: LeaderboardEntryDto, WeeklyLeaderboardEntryDto
+- **API Endpoints**:
+  - GET /api/v1/leaderboard/overall/{tournamentId} [Public]
+  - GET /api/v1/leaderboard/weekly/{gameWeekId} [Public]
+  - POST /api/v1/leaderboard/weekly/{gameWeekId}/calculate-bonuses [Admin]
+- **Bonus System**: 1st: +5, 2nd: +3, 3rd: +1 (integer division on ties)
+- **Tie-Breaking**: Total points → Exact scores → Correct winners → Username alphabetically
+- **Base Points Calculation**: Correctly divides PointsEarned by stage multiplier
+
+**Test Coverage:**
+- Overall leaderboard ranking
+- Exact score counting
+- Weekly leaderboard ranking
+- Bonus calculation (1st/2nd/3rd)
+- Bonus splitting on ties
+- Empty match handling
+- Existing bonus removal
+
+**Notes:**
+- Clean Architecture maintained (repositories only, no DbContext in Application layer)
+- Bonus calculation uses index tracking to prevent duplicate awards
+- Proper tie handling matches GAME-RULES.md specification
+- 5 issues encountered, all resolved (22% debugging time)
+- Most issues were compilation errors with known fixes (Moq/Match conflict)
+- Algorithm complexity required careful testing of tie scenarios
 
 ---
 
@@ -472,10 +507,10 @@
 ## 📊 Overall Progress
 
 **Total Phases:** 15 (including setup)
-**Completed:** 6 (Phase 0, Phase 1, Phase 2, Phase 3, Phase 4, Phase 5)
+**Completed:** 7 (Phase 0, Phase 1, Phase 2, Phase 3, Phase 4, Phase 5, Phase 6)
 **In Progress:** 0
-**Not Started:** 9
-**Overall Completion:** ~40%
+**Not Started:** 8
+**Overall Completion:** ~47%
 
 ---
 
@@ -487,7 +522,8 @@
 4. ✅ Phase 3: Core Scoring Logic
 5. ✅ Phase 4: Tournament & Match Management
 6. ✅ Phase 5: Prediction Submission
-7. 🔜 Phase 6: Leaderboard System
+7. ✅ Phase 6: Leaderboard System
+8. 🔜 Phase 7: Frontend Foundation
 
 ---
 
@@ -525,4 +561,4 @@
 
 ---
 
-**Last Updated:** 2026-02-20 (Phase 0-5 Complete)
+**Last Updated:** 2026-02-21 (Phase 0-6 Complete - Backend Complete!)
