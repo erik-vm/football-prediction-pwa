@@ -46,6 +46,15 @@ public class PredictionRepository : IPredictionRepository
             .ToListAsync();
     }
 
+    public async Task<IEnumerable<Prediction>> GetByMatchIdsWithUserAndMatchAsync(IEnumerable<Guid> matchIds)
+    {
+        return await _context.Predictions
+            .Include(p => p.User)
+            .Include(p => p.Match)
+            .Where(p => matchIds.Contains(p.MatchId) && p.PointsEarned.HasValue)
+            .ToListAsync();
+    }
+
     public async Task<Prediction> CreateAsync(Prediction prediction)
     {
         await _context.Predictions.AddAsync(prediction);

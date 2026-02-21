@@ -15,6 +15,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<GameWeek> GameWeeks { get; set; } = null!;
     public DbSet<Match> Matches { get; set; } = null!;
     public DbSet<Prediction> Predictions { get; set; } = null!;
+    public DbSet<WeeklyBonus> WeeklyBonuses { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

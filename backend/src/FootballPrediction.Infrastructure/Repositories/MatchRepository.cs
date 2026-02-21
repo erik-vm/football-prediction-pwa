@@ -45,6 +45,23 @@ public class MatchRepository : IMatchRepository
             .ToListAsync();
     }
 
+    public async Task<IEnumerable<Guid>> GetFinishedMatchIdsByTournamentAsync(Guid tournamentId)
+    {
+        return await _context.Matches
+            .Include(m => m.GameWeek)
+            .Where(m => m.GameWeek.TournamentId == tournamentId && m.IsFinished)
+            .Select(m => m.Id)
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<Guid>> GetFinishedMatchIdsByGameWeekAsync(Guid gameWeekId)
+    {
+        return await _context.Matches
+            .Where(m => m.GameWeekId == gameWeekId && m.IsFinished)
+            .Select(m => m.Id)
+            .ToListAsync();
+    }
+
     public async Task AddAsync(Match match)
     {
         await _context.Matches.AddAsync(match);

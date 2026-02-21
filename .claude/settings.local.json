@@ -28,7 +28,21 @@
       "Bash(docker-compose down:*)",
       "Bash(docker volume rm:*)",
       "Bash(docker-compose:*)",
-      "Bash(dotnet clean:*)"
+      "Bash(dotnet clean:*)",
+      "Bash(claude-code --version)",
+      "Bash(where claude)",
+      "Bash(\"C:\\Program Files\\Claude\\claude.exe\" --version)",
+      "Bash(findstr:*)",
+      "Bash(taskkill:*)",
+      "Bash(netstat:*)",
+      "Bash(dotnet build:*)",
+      "Bash(python:*)",
+      "Bash(dotnet test:*)",
+      "Read(//c/Projects/football-prediciton-game/**)",
+      "Bash(git commit:*)",
+      "Bash(dotnet add:*)",
+      "Bash(del \"C:\\Projects\\football-prediction-pwa\\backend\\tests\\FootballPrediction.IntegrationTests\\Controllers\\TournamentsControllerTests.cs\")",
+      "Bash(docker ps --filter \"name=football\" --format \"table {{.Names}}\\t{{.Status}}\")"
     ],
     "deny": [],
     "ask": []

@@ -8,6 +8,8 @@ public interface IMatchRepository
     Task<Match?> GetByIdAsync(Guid id);
     Task<IEnumerable<Match>> GetUpcomingAsync();
     Task<IEnumerable<Match>> GetFinishedAsync();
+    Task<IEnumerable<Guid>> GetFinishedMatchIdsByTournamentAsync(Guid tournamentId);
+    Task<IEnumerable<Guid>> GetFinishedMatchIdsByGameWeekAsync(Guid gameWeekId);
     Task AddAsync(Match match);
     Task UpdateAsync(Match match);
     Task DeleteAsync(Match match);
