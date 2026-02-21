@@ -1,19 +1,16 @@
 namespace FootballPrediction.Domain.Entities;
 
-public class Prediction
+public class UserCompetitionStats
 {
     public Guid Id { get; set; }
     public Guid UserId { get; set; }
-    public Guid MatchId { get; set; }
-    public int HomeScore { get; set; }
-    public int AwayScore { get; set; }
-    public int? PointsEarned { get; set; }
-    public string Status { get; set; } = "PENDING";
     public string CompetitionCode { get; set; } = string.Empty;
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public int TotalPoints { get; set; }
+    public int TotalPredictions { get; set; }
+    public decimal Accuracy { get; set; }
+    public int? Rank { get; set; }
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
     public User User { get; set; } = null!;
-    public Match Match { get; set; } = null!;
     public Competition Competition { get; set; } = null!;
 }

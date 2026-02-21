@@ -16,6 +16,15 @@ public class PredictionConfiguration : IEntityTypeConfiguration<Prediction>
         builder.Property(p => p.AwayScore)
             .IsRequired();
 
+        builder.Property(p => p.Status)
+            .IsRequired()
+            .HasMaxLength(20)
+            .HasDefaultValue("PENDING");
+
+        builder.Property(p => p.CompetitionCode)
+            .IsRequired()
+            .HasMaxLength(10);
+
         builder.Property(p => p.CreatedAt)
             .IsRequired();
 
@@ -32,8 +41,15 @@ public class PredictionConfiguration : IEntityTypeConfiguration<Prediction>
             .HasForeignKey(p => p.MatchId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        builder.HasOne(p => p.Competition)
+            .WithMany()
+            .HasForeignKey(p => p.CompetitionCode)
+            .OnDelete(DeleteBehavior.Restrict);
+
         builder.HasIndex(p => p.UserId);
         builder.HasIndex(p => p.MatchId);
+        builder.HasIndex(p => p.CompetitionCode);
+        builder.HasIndex(p => p.Status);
         builder.HasIndex(p => new { p.UserId, p.MatchId })
             .IsUnique();
     }

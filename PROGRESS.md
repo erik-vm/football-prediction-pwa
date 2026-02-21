@@ -1041,4 +1041,104 @@ Frontend Production Build:
 
 ---
 
-**Last Updated:** 2026-02-21 (Phase 13 v3 Complete - All Critical Blockers Fixed!)
+### Phase 14: Automatic Result Processing ✅
+**Status:** Completed
+**Date:** 2026-02-21
+**Duration:** ~3 hours
+**Analysis:** `.analysis/2026-02-21-phase-14-implementation.md`
+
+#### Tasks
+- [x] Create UserCompetitionStats entity for tracking user stats per competition
+- [x] Update Prediction entity with Status and CompetitionCode properties
+- [x] Create PointsCalculator static service for calculating prediction points
+- [x] Create IUserCompetitionStatsRepository interface
+- [x] Implement UserCompetitionStatsRepository with GetOrCreate, Update, Leaderboard, Ranking
+- [x] Create ResultProcessingBackgroundJob (runs every 5 minutes)
+- [x] Update PredictionConfiguration with new properties and FK to Competition
+- [x] Create UserCompetitionStatsConfiguration for EF Core
+- [x] Update ApplicationDbContext with UserCompetitionStats DbSet
+- [x] Update PredictionsController to set CompetitionCode from Match
+- [x] Create migration AddResultProcessing
+- [x] Build and validate backend
+
+#### Deliverables
+- ✅ UserCompetitionStats entity with TotalPoints, TotalPredictions, Accuracy, Rank
+- ✅ Prediction entity updated with Status ("PENDING"/"SCORED") and CompetitionCode
+- ✅ PointsCalculator service: Calculate (5 exact, 3 winner, 2 diff, 0 none), CalculateAccuracy
+- ✅ UserCompetitionStatsRepository with 5 methods (GetOrCreate, Update, Leaderboard, Ranks, Save)
+- ✅ ResultProcessingBackgroundJob: Processes finished matches every 5 minutes
+- ✅ PredictionConfiguration: Status column (varchar(20)), CompetitionCode (FK to Competitions)
+- ✅ UserCompetitionStatsConfiguration: Composite unique index (UserId + CompetitionCode)
+- ✅ ApplicationDbContext updated with UserCompetitionStats DbSet
+- ✅ PredictionsController sets CompetitionCode from Match.CompetitionCode
+- ✅ Migration 20260221131618_AddResultProcessing created
+- ✅ Backend build: SUCCESS (0 warnings, 0 errors)
+
+#### Implementation Details
+
+**Points Calculation Logic:**
+- Exact score (both home and away): 5 points
+- Correct goal difference: 2 points
+- Correct winner (home/away/draw): 3 points
+- No match: 0 points
+- Accuracy: (TotalPoints / (TotalPredictions * 5)) * 100
+
+**Background Job Processing:**
+1. Runs every 5 minutes via PeriodicTimer
+2. Queries finished matches with scores
+3. Finds unprocessed predictions (Status = "PENDING")
+4. Calculates points using PointsCalculator
+5. Updates prediction: PointsEarned, Status = "SCORED", UpdatedAt
+6. Updates UserCompetitionStats: TotalPoints, TotalPredictions, Accuracy
+7. Recalculates rankings per competition (by TotalPoints, then Accuracy)
+8. Saves all changes in transactions
+
+**Database Schema Changes:**
+- **Predictions table:** +Status (varchar(20), default "PENDING"), +CompetitionCode (varchar(10))
+- **New table:** UserCompetitionStats (Id, UserId, CompetitionCode, TotalPoints, TotalPredictions, Accuracy, Rank, UpdatedAt)
+- **Indexes:** IX_Predictions_Status, IX_Predictions_CompetitionCode, IX_UserCompetitionStats_UserId_CompetitionCode (unique)
+- **Foreign Keys:** Predictions → Competitions (Restrict), UserCompetitionStats → Users (Cascade), UserCompetitionStats → Competitions (Restrict)
+
+**Files Created (10):**
+1. UserCompetitionStats.cs (Domain entity)
+2. IUserCompetitionStatsRepository.cs (Application interface)
+3. PointsCalculator.cs (Application service)
+4. UserCompetitionStatsConfiguration.cs (Infrastructure config)
+5. UserCompetitionStatsRepository.cs (Infrastructure repository)
+6. ResultProcessingBackgroundJob.cs (Infrastructure job)
+7. 20260221131618_AddResultProcessing.cs (Migration)
+8. 20260221131618_AddResultProcessing.Designer.cs (Migration metadata)
+
+**Files Modified (5):**
+1. Prediction.cs (added Status, CompetitionCode, Competition)
+2. PredictionConfiguration.cs (added columns, FK, indexes)
+3. ApplicationDbContext.cs (added UserCompetitionStats DbSet)
+4. ApplicationDbContextModelSnapshot.cs (EF Core snapshot)
+5. PredictionsController.cs (set CompetitionCode from Match)
+6. Program.cs (registered repository and background job)
+
+**Migration Details:**
+- Migration ID: 20260221131618_AddResultProcessing
+- Up: Add Status/CompetitionCode to Predictions, create UserCompetitionStats table, create indexes, add FKs
+- Down: Drop FKs, drop indexes, drop UserCompetitionStats table, drop Status/CompetitionCode columns
+- Status: Ready to apply (not yet applied to database)
+
+**Known Limitations:**
+- N+1 query problem in GetOrCreateAsync (performance optimization needed)
+- No tie handling in rankings (sequential ranks for same points)
+- No distributed lock (required for multi-instance deployments)
+- No unit/integration tests (testing deferred to Phase 15)
+
+**Next Steps:**
+- Apply migration to database
+- Test background job execution
+- Implement batch loading optimization (fix N+1 queries)
+- Add comprehensive unit and integration tests
+- Implement distributed lock for production
+- Add monitoring and health checks
+
+**See Analysis:** `.analysis/2026-02-21-phase-14-implementation.md` for comprehensive 1,100+ line technical review
+
+---
+
+**Last Updated:** 2026-02-21 (Phase 14 Complete - Automatic Result Processing Implemented!)

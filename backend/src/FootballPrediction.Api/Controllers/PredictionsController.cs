@@ -74,6 +74,7 @@ public class PredictionsController : ControllerBase
             MatchId = dto.MatchId,
             HomeScore = dto.HomeScore,
             AwayScore = dto.AwayScore,
+            CompetitionCode = match.CompetitionCode,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };

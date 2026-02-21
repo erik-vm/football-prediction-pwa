@@ -31,6 +31,7 @@ builder.Services.AddScoped<IGameWeekRepository, FootballPrediction.Infrastructur
 builder.Services.AddScoped<IMatchRepository, FootballPrediction.Infrastructure.Repositories.MatchRepository>();
 builder.Services.AddScoped<IPredictionRepository, FootballPrediction.Infrastructure.Repositories.PredictionRepository>();
 builder.Services.AddScoped<IWeeklyBonusRepository, FootballPrediction.Infrastructure.Repositories.WeeklyBonusRepository>();
+builder.Services.AddScoped<IUserCompetitionStatsRepository, FootballPrediction.Infrastructure.Repositories.UserCompetitionStatsRepository>();
 
 // Register application services
 builder.Services.AddScoped<ITokenService, TokenService>();
@@ -43,6 +44,7 @@ builder.Services.AddHttpClient<FootballDataService>();
 
 // Register background services
 builder.Services.AddHostedService<MatchSyncBackgroundJob>();
+builder.Services.AddHostedService<ResultProcessingBackgroundJob>();
 
 // Register validators
 builder.Services.AddValidatorsFromAssemblyContaining<RegisterRequestValidator>();
