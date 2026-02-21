@@ -32,6 +32,33 @@ public class MatchesController : ControllerBase
         _enterResultValidator = enterResultValidator;
     }
 
+    [HttpGet]
+    [AllowAnonymous]
+    public async Task<ActionResult<IEnumerable<MatchDto>>> GetMatches(
+        [FromQuery] string? competitionCode = null,
+        [FromQuery] bool? isFinished = null,
+        [FromQuery] int? matchday = null)
+    {
+        var matches = await _matchRepository.GetFilteredAsync(competitionCode, isFinished, matchday);
+        var matchDtos = matches.Select(m => new MatchDto
+        {
+            Id = m.Id,
+            GameWeekId = m.GameWeekId,
+            HomeTeam = m.HomeTeam,
+            AwayTeam = m.AwayTeam,
+            KickoffTime = m.KickoffTime,
+            Stage = m.Stage,
+            HomeScore = m.HomeScore,
+            AwayScore = m.AwayScore,
+            IsFinished = m.IsFinished,
+            StageMultiplier = m.StageMultiplier,
+            CompetitionCode = m.CompetitionCode,
+            Matchday = m.Matchday
+        });
+
+        return Ok(matchDtos);
+    }
+
     [HttpGet("gameweek/{gameWeekId}")]
     [AllowAnonymous]
     public async Task<ActionResult<IEnumerable<MatchDto>>> GetByGameWeekId(Guid gameWeekId)
@@ -48,7 +75,9 @@ public class MatchesController : ControllerBase
             HomeScore = m.HomeScore,
             AwayScore = m.AwayScore,
             IsFinished = m.IsFinished,
-            StageMultiplier = m.StageMultiplier
+            StageMultiplier = m.StageMultiplier,
+            CompetitionCode = m.CompetitionCode,
+            Matchday = m.Matchday
         });
 
         return Ok(matchDtos);
@@ -75,7 +104,9 @@ public class MatchesController : ControllerBase
             HomeScore = match.HomeScore,
             AwayScore = match.AwayScore,
             IsFinished = match.IsFinished,
-            StageMultiplier = match.StageMultiplier
+            StageMultiplier = match.StageMultiplier,
+            CompetitionCode = match.CompetitionCode,
+            Matchday = match.Matchday
         };
 
         return Ok(matchDto);
@@ -97,7 +128,9 @@ public class MatchesController : ControllerBase
             HomeScore = m.HomeScore,
             AwayScore = m.AwayScore,
             IsFinished = m.IsFinished,
-            StageMultiplier = m.StageMultiplier
+            StageMultiplier = m.StageMultiplier,
+            CompetitionCode = m.CompetitionCode,
+            Matchday = m.Matchday
         });
 
         return Ok(matchDtos);
@@ -119,7 +152,9 @@ public class MatchesController : ControllerBase
             HomeScore = m.HomeScore,
             AwayScore = m.AwayScore,
             IsFinished = m.IsFinished,
-            StageMultiplier = m.StageMultiplier
+            StageMultiplier = m.StageMultiplier,
+            CompetitionCode = m.CompetitionCode,
+            Matchday = m.Matchday
         });
 
         return Ok(matchDtos);

@@ -10,6 +10,8 @@ export interface Match {
   homeScore?: number;
   awayScore?: number;
   isFinished: boolean;
+  matchday?: number;
+  competitionCode?: string;
 }
 
 export enum TournamentStage {

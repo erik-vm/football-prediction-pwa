@@ -1,0 +1,7 @@
+:host {
+  display: block;
+}
+
+select {
+  min-width: 150px;
+}

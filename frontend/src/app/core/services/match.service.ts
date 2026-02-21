@@ -35,4 +35,29 @@ export class MatchService {
   getMatch(matchId: string): Observable<ApiResponse<Match>> {
     return this.http.get<ApiResponse<Match>>(`${this.apiUrl}/matches/${matchId}`);
   }
+
+  getMatches(filters?: {
+    competitionCode?: string;
+    isFinished?: boolean;
+    matchday?: number;
+  }): Observable<ApiResponse<Match[]>> {
+    let url = `${this.apiUrl}/matches`;
+    const params: string[] = [];
+
+    if (filters?.competitionCode) {
+      params.push(`competitionCode=${filters.competitionCode}`);
+    }
+    if (filters?.isFinished !== undefined) {
+      params.push(`isFinished=${filters.isFinished}`);
+    }
+    if (filters?.matchday !== undefined) {
+      params.push(`matchday=${filters.matchday}`);
+    }
+
+    if (params.length > 0) {
+      url += '?' + params.join('&');
+    }
+
+    return this.http.get<ApiResponse<Match[]>>(url);
+  }
 }

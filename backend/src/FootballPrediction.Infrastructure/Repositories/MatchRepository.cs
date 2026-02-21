@@ -45,6 +45,30 @@ public class MatchRepository : IMatchRepository
             .ToListAsync();
     }
 
+    public async Task<IEnumerable<Match>> GetFilteredAsync(string? competitionCode = null, bool? isFinished = null, int? matchday = null)
+    {
+        var query = _context.Matches.AsQueryable();
+
+        if (!string.IsNullOrEmpty(competitionCode))
+        {
+            query = query.Where(m => m.CompetitionCode == competitionCode);
+        }
+
+        if (isFinished.HasValue)
+        {
+            query = query.Where(m => m.IsFinished == isFinished.Value);
+        }
+
+        if (matchday.HasValue)
+        {
+            query = query.Where(m => m.Matchday == matchday.Value);
+        }
+
+        return await query
+            .OrderBy(m => m.KickoffTime)
+            .ToListAsync();
+    }
+
     public async Task<IEnumerable<Guid>> GetFinishedMatchIdsByTournamentAsync(Guid tournamentId)
     {
         return await _context.Matches

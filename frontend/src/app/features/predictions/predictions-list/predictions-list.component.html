@@ -1,0 +1,80 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">Match Predictions</h1>
+    <p class="text-gray-600">Submit your predictions before matches start to earn points</p>
+  </div>
+
+  @if (isLoading()) {
+    <div class="text-center py-12">
+      <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+      <p class="mt-4 text-gray-600">Loading matches...</p>
+    </div>
+  } @else if (error()) {
+    <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+      <p class="text-red-800">{{ error() }}</p>
+    </div>
+  } @else {
+    @if (activeTournament()) {
+      <div class="mb-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <div class="mb-4">
+          <h2 class="text-lg font-semibold text-gray-900">
+            {{ activeTournament()!.name }} {{ activeTournament()!.year }}
+          </h2>
+          <p class="text-sm text-gray-600 mt-1">
+            {{ totalMatches() }} matches · {{ userPredictionsCount() }} predictions made
+          </p>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+          <app-match-status-tabs
+            [tabs]="statusTabs()"
+            [activeTab]="activeStatusTab()"
+            (tabSelected)="onStatusTabChange($event)"
+          />
+
+          @if (availableMatchdays().length > 0) {
+            <app-matchday-filter
+              [matchdays]="availableMatchdays()"
+              [selectedMatchday]="selectedMatchday()"
+              (matchdaySelected)="onMatchdayChange($event)"
+            />
+          }
+        </div>
+      </div>
+
+      @if (filteredGroupedMatches().length === 0) {
+        <div class="text-center py-12 bg-white rounded-lg border border-gray-200">
+          <p class="text-gray-600">No matches found for the selected filter</p>
+        </div>
+      } @else {
+        <div class="space-y-8">
+          @for (group of filteredGroupedMatches(); track group.gameWeek.id) {
+            <div>
+              <div class="mb-4 pb-2 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900">
+                  Game Week {{ group.gameWeek.weekNumber }}
+                </h3>
+                <p class="text-sm text-gray-600">
+                  {{ formatDate(group.gameWeek.startDate) }} - {{ formatDate(group.gameWeek.endDate) }}
+                </p>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                @for (match of group.matches; track match.id) {
+                  <app-match-card
+                    [matchData]="match"
+                    [predictionData]="match.prediction"
+                  />
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+    } @else {
+      <div class="text-center py-12 bg-white rounded-lg border border-gray-200">
+        <p class="text-gray-600">No active tournament found</p>
+      </div>
+    }
+  }
+</div>

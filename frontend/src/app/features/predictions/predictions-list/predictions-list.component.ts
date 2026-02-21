@@ -5,8 +5,8 @@ import { PredictionService } from '../../../core/services/prediction.service';
 import { Match, Tournament, GameWeek } from '../../../core/models/match.model';
 import { PredictionWithMatch } from '../../../core/models/prediction.model';
 import { MatchCardComponent } from '../match-card/match-card.component';
-
-type FilterType = 'all' | 'upcoming' | 'finished';
+import { MatchStatusTabsComponent, MatchStatus, MatchStatusTab } from '../../../shared/components/match-status-tabs/match-status-tabs.component';
+import { MatchdayFilterComponent } from '../../../shared/components/matchday-filter/matchday-filter.component';
 
 interface MatchWithPrediction extends Match {
   prediction?: PredictionWithMatch['prediction'];
@@ -20,107 +20,8 @@ interface GroupedMatches {
 @Component({
   selector: 'app-predictions-list',
   standalone: true,
-  imports: [CommonModule, MatchCardComponent],
-  template: `
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900 mb-2">Match Predictions</h1>
-        <p class="text-gray-600">Submit your predictions before matches start to earn points</p>
-      </div>
-
-      @if (isLoading()) {
-        <div class="text-center py-12">
-          <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
-          <p class="mt-4 text-gray-600">Loading matches...</p>
-        </div>
-      } @else if (error()) {
-        <div class="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p class="text-red-800">{{ error() }}</p>
-        </div>
-      } @else {
-        @if (activeTournament()) {
-          <div class="mb-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-            <div class="flex items-center justify-between">
-              <div>
-                <h2 class="text-lg font-semibold text-gray-900">
-                  {{ activeTournament()!.name }} {{ activeTournament()!.year }}
-                </h2>
-                <p class="text-sm text-gray-600 mt-1">
-                  {{ totalMatches() }} matches · {{ userPredictionsCount() }} predictions made
-                </p>
-              </div>
-              <div class="flex gap-2">
-                <button
-                  (click)="setFilter('all')"
-                  [class.bg-primary-600]="activeFilter() === 'all'"
-                  [class.text-white]="activeFilter() === 'all'"
-                  [class.bg-gray-100]="activeFilter() !== 'all'"
-                  [class.text-gray-700]="activeFilter() !== 'all'"
-                  class="px-4 py-2 text-sm font-medium rounded-lg transition-colors"
-                >
-                  All
-                </button>
-                <button
-                  (click)="setFilter('upcoming')"
-                  [class.bg-primary-600]="activeFilter() === 'upcoming'"
-                  [class.text-white]="activeFilter() === 'upcoming'"
-                  [class.bg-gray-100]="activeFilter() !== 'upcoming'"
-                  [class.text-gray-700]="activeFilter() !== 'upcoming'"
-                  class="px-4 py-2 text-sm font-medium rounded-lg transition-colors"
-                >
-                  Upcoming
-                </button>
-                <button
-                  (click)="setFilter('finished')"
-                  [class.bg-primary-600]="activeFilter() === 'finished'"
-                  [class.text-white]="activeFilter() === 'finished'"
-                  [class.bg-gray-100]="activeFilter() !== 'finished'"
-                  [class.text-gray-700]="activeFilter() !== 'finished'"
-                  class="px-4 py-2 text-sm font-medium rounded-lg transition-colors"
-                >
-                  Finished
-                </button>
-              </div>
-            </div>
-          </div>
-
-          @if (filteredGroupedMatches().length === 0) {
-            <div class="text-center py-12 bg-white rounded-lg border border-gray-200">
-              <p class="text-gray-600">No matches found for the selected filter</p>
-            </div>
-          } @else {
-            <div class="space-y-8">
-              @for (group of filteredGroupedMatches(); track group.gameWeek.id) {
-                <div>
-                  <div class="mb-4 pb-2 border-b border-gray-200">
-                    <h3 class="text-lg font-semibold text-gray-900">
-                      Game Week {{ group.gameWeek.weekNumber }}
-                    </h3>
-                    <p class="text-sm text-gray-600">
-                      {{ formatDate(group.gameWeek.startDate) }} - {{ formatDate(group.gameWeek.endDate) }}
-                    </p>
-                  </div>
-
-                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    @for (match of group.matches; track match.id) {
-                      <app-match-card
-                        [matchData]="match"
-                        [predictionData]="match.prediction"
-                      />
-                    }
-                  </div>
-                </div>
-              }
-            </div>
-          }
-        } @else {
-          <div class="text-center py-12 bg-white rounded-lg border border-gray-200">
-            <p class="text-gray-600">No active tournament found</p>
-          </div>
-        }
-      }
-    </div>
-  `,
+  imports: [CommonModule, MatchCardComponent, MatchStatusTabsComponent, MatchdayFilterComponent],
+  templateUrl: './predictions-list.component.html',
   styles: []
 })
 export class PredictionsListComponent implements OnInit {
@@ -133,24 +34,65 @@ export class PredictionsListComponent implements OnInit {
   private predictionsSignal = signal<PredictionWithMatch[]>([]);
   private isLoadingSignal = signal<boolean>(true);
   private errorSignal = signal<string | null>(null);
-  private activeFilterSignal = signal<FilterType>('all');
+  private activeStatusTabSignal = signal<MatchStatus>('upcoming');
+  private selectedMatchdaySignal = signal<number | null>(null);
 
   activeTournament = this.activeTournamentSignal.asReadonly();
   isLoading = this.isLoadingSignal.asReadonly();
   error = this.errorSignal.asReadonly();
-  activeFilter = this.activeFilterSignal.asReadonly();
+  activeStatusTab = this.activeStatusTabSignal.asReadonly();
+  selectedMatchday = this.selectedMatchdaySignal.asReadonly();
 
   totalMatches = computed(() => this.matchesSignal().length);
   userPredictionsCount = computed(() => this.predictionsSignal().length);
 
-  filteredMatches = computed(() => {
-    const filter = this.activeFilterSignal();
+  availableMatchdays = computed(() => {
     const matches = this.matchesSignal();
+    const matchdays = new Set<number>();
+    matches.forEach(m => {
+      if (m.matchday !== undefined && m.matchday !== null) {
+        matchdays.add(m.matchday);
+      }
+    });
+    return Array.from(matchdays).sort((a, b) => a - b);
+  });
 
-    if (filter === 'all') return matches;
-    if (filter === 'upcoming') return matches.filter(m => !m.isFinished);
-    if (filter === 'finished') return matches.filter(m => m.isFinished);
-    return matches;
+  statusTabs = computed(() => {
+    const matches = this.matchesSignal();
+    const now = new Date();
+
+    const upcoming = matches.filter(m => !m.isFinished && new Date(m.kickoffTime) > now).length;
+    const live = matches.filter(m => !m.isFinished && new Date(m.kickoffTime) <= now).length;
+    const completed = matches.filter(m => m.isFinished).length;
+
+    return [
+      { status: 'upcoming' as MatchStatus, label: 'Upcoming', count: upcoming },
+      { status: 'live' as MatchStatus, label: 'Live', count: live },
+      { status: 'completed' as MatchStatus, label: 'Completed', count: completed }
+    ];
+  });
+
+  filteredMatches = computed(() => {
+    const statusTab = this.activeStatusTabSignal();
+    const matchday = this.selectedMatchdaySignal();
+    const matches = this.matchesSignal();
+    const now = new Date();
+
+    let filtered = matches;
+
+    if (statusTab === 'upcoming') {
+      filtered = filtered.filter(m => !m.isFinished && new Date(m.kickoffTime) > now);
+    } else if (statusTab === 'live') {
+      filtered = filtered.filter(m => !m.isFinished && new Date(m.kickoffTime) <= now);
+    } else if (statusTab === 'completed') {
+      filtered = filtered.filter(m => m.isFinished);
+    }
+
+    if (matchday !== null) {
+      filtered = filtered.filter(m => m.matchday === matchday);
+    }
+
+    return filtered;
   });
 
   filteredGroupedMatches = computed(() => {
@@ -267,8 +209,12 @@ export class PredictionsListComponent implements OnInit {
     }
   }
 
-  setFilter(filter: FilterType): void {
-    this.activeFilterSignal.set(filter);
+  onStatusTabChange(status: MatchStatus): void {
+    this.activeStatusTabSignal.set(status);
+  }
+
+  onMatchdayChange(matchday: number | null): void {
+    this.selectedMatchdaySignal.set(matchday);
   }
 
   formatDate(date: Date): string {
