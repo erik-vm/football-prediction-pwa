@@ -64,6 +64,6 @@ public class MatchConfiguration : IEntityTypeConfiguration<Match>
         builder.HasIndex(m => m.Matchday);
         builder.HasIndex(m => m.ExternalMatchId)
             .IsUnique()
-            .HasFilter("[ExternalMatchId] IS NOT NULL");
+            .HasFilter("\"ExternalMatchId\" IS NOT NULL");
     }
 }

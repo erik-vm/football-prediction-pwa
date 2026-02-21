@@ -30,7 +30,7 @@ namespace FootballPrediction.Infrastructure.Migrations
                 table: "Matches",
                 column: "ExternalMatchId",
                 unique: true,
-                filter: "[ExternalMatchId] IS NOT NULL");
+                filter: "\"ExternalMatchId\" IS NOT NULL");
         }
 
         /// <inheritdoc />

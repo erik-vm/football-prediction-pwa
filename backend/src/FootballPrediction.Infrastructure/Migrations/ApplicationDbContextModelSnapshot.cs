@@ -133,7 +133,7 @@ namespace FootballPrediction.Infrastructure.Migrations
 
                     b.HasIndex("ExternalMatchId")
                         .IsUnique()
-                        .HasFilter("[ExternalMatchId] IS NOT NULL");
+                        .HasFilter("\"ExternalMatchId\" IS NOT NULL");
 
                     b.HasIndex("GameWeekId");
 

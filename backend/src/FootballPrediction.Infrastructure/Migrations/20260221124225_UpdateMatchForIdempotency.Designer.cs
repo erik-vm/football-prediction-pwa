@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FootballPrediction.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260221100818_UpdateMatchForIdempotency")]
+    [Migration("20260221124225_UpdateMatchForIdempotency")]
     partial class UpdateMatchForIdempotency
     {
         /// <inheritdoc />
@@ -136,7 +136,7 @@ namespace FootballPrediction.Infrastructure.Migrations
 
                     b.HasIndex("ExternalMatchId")
                         .IsUnique()
-                        .HasFilter("[ExternalMatchId] IS NOT NULL");
+                        .HasFilter("\"ExternalMatchId\" IS NOT NULL");
 
                     b.HasIndex("GameWeekId");
 
