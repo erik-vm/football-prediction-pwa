@@ -1,7 +1,7 @@
 using System.Text;
 using FluentValidation;
 using FootballPrediction.Application.Interfaces;
-using FootballPrediction.Application.Jobs;
+using FootballPrediction.Infrastructure.Jobs;
 using FootballPrediction.Application.Services;
 using FootballPrediction.Application.Validators;
 using FootballPrediction.Infrastructure.Data;

@@ -13,8 +13,8 @@ public class CreateMatchValidator : AbstractValidator<CreateMatchDto>
         _gameWeekRepository = gameWeekRepository;
 
         RuleFor(x => x.GameWeekId)
-            .NotEmpty().WithMessage("Game week ID is required")
-            .MustAsync(GameWeekExists).WithMessage("Game week does not exist");
+            .MustAsync(GameWeekExists).WithMessage("Game week does not exist")
+            .When(x => x.GameWeekId.HasValue);
 
         RuleFor(x => x.HomeTeam)
             .NotEmpty().WithMessage("Home team is required")
@@ -32,8 +32,11 @@ public class CreateMatchValidator : AbstractValidator<CreateMatchDto>
             .IsInEnum().WithMessage("Invalid tournament stage");
     }
 
-    private async Task<bool> GameWeekExists(Guid gameWeekId, CancellationToken cancellationToken)
+    private async Task<bool> GameWeekExists(Guid? gameWeekId, CancellationToken cancellationToken)
     {
-        return await _gameWeekRepository.ExistsAsync(gameWeekId);
+        if (!gameWeekId.HasValue)
+            return true;
+
+        return await _gameWeekRepository.ExistsAsync(gameWeekId.Value);
     }
 }

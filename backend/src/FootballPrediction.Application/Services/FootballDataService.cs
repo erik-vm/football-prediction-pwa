@@ -1,6 +1,7 @@
 using FootballPrediction.Application.DTOs.FootballData;
 using FootballPrediction.Domain.Entities;
 using FootballPrediction.Domain.Enums;
+using Microsoft.Extensions.Configuration;
 using System.Net.Http.Json;
 using System.Text.Json;
 
@@ -9,14 +10,19 @@ namespace FootballPrediction.Application.Services;
 public class FootballDataService
 {
     private readonly HttpClient _httpClient;
-    private const string BaseUrl = "https://api.football-data.org/v4";
-    private const string ApiKey = "2c778464a60e4b51b2407fcc62539791";
+    private readonly string _apiKey;
 
-    public FootballDataService(HttpClient httpClient)
+    public FootballDataService(HttpClient httpClient, IConfiguration configuration)
     {
         _httpClient = httpClient;
-        _httpClient.BaseAddress = new Uri(BaseUrl);
-        _httpClient.DefaultRequestHeaders.Add("X-Auth-Token", ApiKey);
+
+        var baseUrl = configuration["FootballDataApi:BaseUrl"]
+            ?? throw new InvalidOperationException("FootballDataApi:BaseUrl not configured");
+        _apiKey = configuration["FootballDataApi:ApiKey"]
+            ?? throw new InvalidOperationException("FootballDataApi:ApiKey not configured. Use 'dotnet user-secrets set \"FootballDataApi:ApiKey\" \"YOUR_KEY\"' for development or set environment variable for production.");
+
+        _httpClient.BaseAddress = new Uri(baseUrl);
+        _httpClient.DefaultRequestHeaders.Add("X-Auth-Token", _apiKey);
     }
 
     public async Task<List<Match>> GetMatchesAsync(string competitionCode, DateTime dateFrom, DateTime dateTo)
@@ -33,7 +39,8 @@ public class FootballDataService
         return response.Matches.Select(m => new Match
         {
             Id = Guid.NewGuid(),
-            GameWeekId = Guid.Empty,
+            GameWeekId = null,
+            ExternalMatchId = m.Id,
             HomeTeam = m.HomeTeam.Name,
             AwayTeam = m.AwayTeam.Name,
             KickoffTime = m.UtcDate,

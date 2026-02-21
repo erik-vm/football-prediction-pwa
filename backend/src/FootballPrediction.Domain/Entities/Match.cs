@@ -5,7 +5,8 @@ namespace FootballPrediction.Domain.Entities;
 public class Match
 {
     public Guid Id { get; set; }
-    public Guid GameWeekId { get; set; }
+    public Guid? GameWeekId { get; set; }
+    public int? ExternalMatchId { get; set; }
     public required string HomeTeam { get; set; }
     public required string AwayTeam { get; set; }
     public DateTime KickoffTime { get; set; }
@@ -19,7 +20,7 @@ public class Match
 
     public int StageMultiplier => Stage.GetMultiplier();
 
-    public GameWeek GameWeek { get; set; } = null!;
+    public GameWeek? GameWeek { get; set; }
     public Competition Competition { get; set; } = null!;
     public ICollection<Prediction> Predictions { get; set; } = new List<Prediction>();
 }
