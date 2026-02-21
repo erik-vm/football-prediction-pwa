@@ -55,7 +55,7 @@
                 Must be at least 3 characters
               }
               @if (username?.errors?.['maxlength']) {
-                Must be at most 50 characters
+                Must be at most 20 characters
               }
               @if (username?.errors?.['pattern']) {
                 Only letters, numbers, underscores, and hyphens allowed
@@ -110,10 +110,10 @@
                 Password is required
               }
               @if (password?.errors?.['minlength']) {
-                Must be at least 6 characters
+                Must be at least 8 characters
               }
               @if (password?.errors?.['maxlength']) {
-                Must be at most 100 characters
+                Must be at most 64 characters
               }
             </p>
           }

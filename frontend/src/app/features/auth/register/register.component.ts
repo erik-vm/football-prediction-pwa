@@ -27,7 +27,7 @@ export class RegisterComponent implements OnInit {
       username: ['', [
         Validators.required,
         Validators.minLength(3),
-        Validators.maxLength(50),
+        Validators.maxLength(20),
         Validators.pattern(/^[a-zA-Z0-9_-]+$/)
       ]],
       email: ['', [
@@ -36,8 +36,8 @@ export class RegisterComponent implements OnInit {
       ]],
       password: ['', [
         Validators.required,
-        Validators.minLength(6),
-        Validators.maxLength(100)
+        Validators.minLength(8),
+        Validators.maxLength(64)
       ]],
       confirmPassword: ['', [Validators.required]]
     }, {
