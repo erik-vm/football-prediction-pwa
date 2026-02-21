@@ -548,21 +548,70 @@ Lazy chunks:
 ### Phase 10: Frontend Leaderboards ✅
 **Status:** Completed
 **Date:** 2026-02-21
-**Duration:** ~2 hours
+**Duration:** ~1 hour 45 minutes
 
 #### Tasks
 - [x] Create overall leaderboard component
 - [x] Create weekly leaderboard component
 - [x] Create user statistics component
 - [x] Implement leaderboard service
-- [x] Add sorting and filtering
-- [x] Create leaderboard navigation tabs
-- [x] Implement responsive table design
+- [x] Add filtering (tournament, game week)
+- [x] Add leaderboard routing with tabs
+- [x] Update navigation
 - [ ] Write component tests (deferred)
 - [x] Build and test application
 
 **Deliverables:**
-- ✅ LeaderboardService with overall and weekly endpoints
+- ✅ LeaderboardService with Signal-based state management
+- ✅ OverallLeaderboardComponent with tournament filtering
+- ✅ WeeklyLeaderboardComponent with tournament + game week filtering
+- ✅ UserStatsComponent with visual analytics
+- ✅ LeaderboardComponent with tab navigation
+- ✅ Public leaderboard access (no authGuard)
+- ✅ Current user highlighting (blue background)
+- ✅ Top 3 badges (🥇🥈🥉)
+- ✅ Tied rank indicators
+- ✅ Load more functionality
+- ✅ Responsive table design
+- ✅ Weekly performance bar chart (no external library)
+- ✅ Lazy loading (4 chunks: 23.62 kB total)
+- ✅ Build successful (0 warnings, 0 errors)
+
+**Implementation Details:**
+- **Models**: LeaderboardEntry, WeeklyLeaderboardEntry, UserStats, WeeklyPerformance
+- **Service**: Signal-based reactive state (follows AuthService pattern)
+- **Components**: 4 standalone components (1 parent + 3 tabs)
+- **Routing**: /leaderboard, /leaderboard/weekly, /leaderboard/stats
+- **Features**:
+  - Tournament selector (all components)
+  - Game week selector (weekly leaderboard)
+  - Current user highlighting
+  - Badge system for top 3 places
+  - Tied rank indicators with yellow background
+  - Load more pagination (start with 10, +10 increments)
+  - Accuracy rate calculation
+  - Points breakdown with progress bars
+  - Weekly performance chart (CSS flexbox bars)
+- **Navigation**: Leaderboard link added to main nav (visible to all users)
+- **Lazy Loading**: 4 separate chunks (23.62 kB raw, 7.30 kB gzipped)
+
+**Bundle Analysis:**
+```
+Lazy chunks:
+- user-stats-component:         7.64 kB (2.42 kB gzipped)
+- weekly-leaderboard-component: 7.46 kB (2.19 kB gzipped)
+- overall-leaderboard-component: 7.00 kB (2.17 kB gzipped)
+- leaderboard-component:        1.52 kB (547 bytes gzipped)
+Total leaderboard: 23.62 kB (7.30 kB gzipped)
+```
+
+**Notes:**
+- Followed Phase 8-9 patterns (Signals, inject(), @if/@for)
+- No external chart library (built with CSS)
+- Tournament/GameWeek dropdowns reuse MatchService
+- Responsive design with Tailwind (hidden sm:table-cell)
+- Public access encourages competition and engagement
+- See .analysis/2026-02-21-phase-10-leaderboard-ui-analysis.md
 - ✅ OverallLeaderboardComponent with sorting and ranking
 - ✅ WeeklyLeaderboardComponent with game week selection
 - ✅ UserStatsComponent with personal statistics

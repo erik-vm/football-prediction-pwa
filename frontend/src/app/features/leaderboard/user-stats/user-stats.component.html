@@ -1,0 +1,139 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="mb-6">
+    <h1 class="text-3xl font-bold text-gray-900">My Statistics</h1>
+    <p class="mt-2 text-sm text-gray-600">Track your performance and progress</p>
+  </div>
+
+  <div class="mb-6">
+    <label for="tournament" class="block text-sm font-medium text-gray-700 mb-2">
+      Select Tournament
+    </label>
+    <select
+      id="tournament"
+      [(ngModel)]="selectedTournamentId"
+      (change)="onTournamentChange()"
+      class="block w-full md:w-64 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+    >
+      @for (tournament of tournaments(); track tournament.id) {
+        <option [value]="tournament.id">{{ tournament.name }} {{ tournament.year }}</option>
+      }
+    </select>
+  </div>
+
+  @if (error()) {
+    <div class="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+      {{ error() }}
+    </div>
+  }
+
+  @if (isLoading()) {
+    <div class="flex justify-center items-center py-12">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+    </div>
+  } @else {
+    @if (!userStats()) {
+      <div class="text-center py-12">
+        <p class="text-gray-500">No statistics available yet. Start making predictions!</p>
+      </div>
+    } @else {
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div class="bg-white shadow-md rounded-lg p-6">
+          <h2 class="text-xl font-semibold text-gray-900 mb-4">Overview</h2>
+          <div class="space-y-4">
+            <div class="flex justify-between items-center">
+              <span class="text-gray-600">Current Rank</span>
+              <span class="text-2xl font-bold text-primary-600">
+                @if (userStats()?.currentRank) {
+                  #{{ userStats()?.currentRank }}
+                } @else {
+                  N/A
+                }
+              </span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-gray-600">Total Points</span>
+              <span class="text-2xl font-bold text-gray-900">{{ userStats()?.totalPoints }}</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-gray-600">Total Predictions</span>
+              <span class="text-xl font-semibold text-gray-900">{{ userStats()?.totalPredictions }}</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-gray-600">Accuracy Rate</span>
+              <span class="text-xl font-semibold text-green-600">{{ accuracyRate().toFixed(1) }}%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white shadow-md rounded-lg p-6">
+          <h2 class="text-xl font-semibold text-gray-900 mb-4">Prediction Breakdown</h2>
+          <div class="space-y-4">
+            <div>
+              <div class="flex justify-between items-center mb-2">
+                <span class="text-gray-600">Exact Scores</span>
+                <span class="text-xl font-bold text-green-600">{{ userStats()?.exactScores }}</span>
+              </div>
+              <div class="text-sm text-gray-500">Perfect match predictions</div>
+            </div>
+            <div>
+              <div class="flex justify-between items-center mb-2">
+                <span class="text-gray-600">Correct Winners</span>
+                <span class="text-xl font-bold text-blue-600">{{ userStats()?.correctWinners }}</span>
+              </div>
+              <div class="text-sm text-gray-500">Predicted the winning team</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white shadow-md rounded-lg p-6 mb-8">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">Points Breakdown</h2>
+        <div class="space-y-4">
+          <div>
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-gray-600">Prediction Points</span>
+              <span class="text-lg font-semibold text-gray-900">{{ userStats()?.predictionPoints }}</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-3">
+              <div
+                class="bg-blue-600 h-3 rounded-full transition-all duration-300"
+                [style.width.%]="predictionPointsPercentage()"
+              ></div>
+            </div>
+          </div>
+          <div>
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-gray-600">Bonus Points</span>
+              <span class="text-lg font-semibold text-gray-900">{{ userStats()?.bonusPoints }}</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-3">
+              <div
+                class="bg-green-600 h-3 rounded-full transition-all duration-300"
+                [style.width.%]="bonusPointsPercentage()"
+              ></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      @if (userStats()?.weeklyPerformance && userStats()!.weeklyPerformance!.length > 0) {
+        <div class="bg-white shadow-md rounded-lg p-6">
+          <h2 class="text-xl font-semibold text-gray-900 mb-4">Weekly Performance</h2>
+          <div class="flex items-end justify-between gap-2 h-48">
+            @for (week of userStats()?.weeklyPerformance; track week.gameWeekId) {
+              <div class="flex-1 flex flex-col items-center">
+                <div class="w-full bg-primary-600 rounded-t transition-all duration-300 hover:bg-primary-700 relative group"
+                  [style.height]="getWeeklyBarHeight(week.points)">
+                  <div class="absolute bottom-full mb-2 hidden group-hover:block bg-gray-900 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
+                    {{ week.points }} pts
+                  </div>
+                </div>
+                <div class="text-xs text-gray-600 mt-2">W{{ week.gameWeekNumber }}</div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    }
+  }
+</div>

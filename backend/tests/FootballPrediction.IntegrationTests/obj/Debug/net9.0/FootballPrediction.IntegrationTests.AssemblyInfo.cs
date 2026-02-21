@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("FootballPrediction.IntegrationTests")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+be364ef9e3ec4a0e548a91eaf1f4d7e63063e6ec")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+10768a839fedcdccdb62834773373d206a0f55cf")]
 [assembly: System.Reflection.AssemblyProductAttribute("FootballPrediction.IntegrationTests")]
 [assembly: System.Reflection.AssemblyTitleAttribute("FootballPrediction.IntegrationTests")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
