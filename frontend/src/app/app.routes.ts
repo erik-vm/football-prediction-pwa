@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { HomeComponent } from './features/home/home.component';
 import { authGuard } from './core/guards/auth.guard';
+import { adminGuard } from './core/guards/admin.guard';
 
 export const routes: Routes = [
   {
@@ -26,6 +27,62 @@ export const routes: Routes = [
       {
         path: ':matchId',
         loadComponent: () => import('./features/predictions/prediction-form/prediction-form.component').then(m => m.PredictionFormComponent)
+      }
+    ]
+  },
+  {
+    path: 'leaderboard',
+    loadComponent: () => import('./features/leaderboard/leaderboard.component').then(m => m.LeaderboardComponent),
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./features/leaderboard/overall/overall-leaderboard.component').then(m => m.OverallLeaderboardComponent)
+      },
+      {
+        path: 'weekly',
+        loadComponent: () => import('./features/leaderboard/weekly/weekly-leaderboard.component').then(m => m.WeeklyLeaderboardComponent)
+      },
+      {
+        path: 'stats',
+        loadComponent: () => import('./features/leaderboard/user-stats/user-stats.component').then(m => m.UserStatsComponent)
+      }
+    ]
+  },
+  {
+    path: 'admin',
+    canActivate: [adminGuard],
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./features/admin/dashboard/admin-dashboard.component').then(m => m.AdminDashboardComponent)
+      },
+      {
+        path: 'tournaments',
+        loadComponent: () => import('./features/admin/tournaments/tournament-list.component').then(m => m.TournamentListComponent)
+      },
+      {
+        path: 'tournaments/new',
+        loadComponent: () => import('./features/admin/tournaments/tournament-form.component').then(m => m.TournamentFormComponent)
+      },
+      {
+        path: 'tournaments/:id/edit',
+        loadComponent: () => import('./features/admin/tournaments/tournament-form.component').then(m => m.TournamentFormComponent)
+      },
+      {
+        path: 'matches',
+        loadComponent: () => import('./features/admin/matches/match-list.component').then(m => m.MatchListComponent)
+      },
+      {
+        path: 'matches/new',
+        loadComponent: () => import('./features/admin/matches/match-form.component').then(m => m.MatchFormComponent)
+      },
+      {
+        path: 'matches/:id/edit',
+        loadComponent: () => import('./features/admin/matches/match-form.component').then(m => m.MatchFormComponent)
+      },
+      {
+        path: 'results',
+        loadComponent: () => import('./features/admin/results/result-entry.component').then(m => m.ResultEntryComponent)
       }
     ]
   },
