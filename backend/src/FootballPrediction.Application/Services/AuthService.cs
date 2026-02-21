@@ -63,11 +63,16 @@ public class AuthService : IAuthService
 
     public async Task<TokenResponse> LoginAsync(LoginRequest request)
     {
-        var user = await _userRepository.GetByEmailAsync(request.Email);
+        var user = await _userRepository.GetByEmailAsync(request.UsernameOrEmail);
+
+        if (user == null)
+        {
+            user = await _userRepository.GetByUsernameAsync(request.UsernameOrEmail);
+        }
 
         if (user == null || !_passwordService.VerifyPassword(request.Password, user.PasswordHash))
         {
-            throw new UnauthorizedAccessException("Invalid email or password");
+            throw new UnauthorizedAccessException("Invalid credentials");
         }
 
         var refreshToken = _tokenService.GenerateRefreshToken();

@@ -1,4 +1,5 @@
 using FluentValidation;
+using FootballPrediction.Application.DTOs;
 using FootballPrediction.Application.DTOs.Auth;
 using FootballPrediction.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -24,7 +25,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("register")]
-    public async Task<ActionResult<TokenResponse>> Register([FromBody] RegisterRequest request)
+    public async Task<ActionResult<ApiResponse<TokenResponse>>> Register([FromBody] RegisterRequest request)
     {
         var validationResult = await _registerValidator.ValidateAsync(request);
         if (!validationResult.IsValid)
@@ -35,7 +36,7 @@ public class AuthController : ControllerBase
         try
         {
             var response = await _authService.RegisterAsync(request);
-            return Ok(response);
+            return Ok(ApiResponse<TokenResponse>.Success(response));
         }
         catch (InvalidOperationException ex)
         {
@@ -44,7 +45,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("login")]
-    public async Task<ActionResult<TokenResponse>> Login([FromBody] LoginRequest request)
+    public async Task<ActionResult<ApiResponse<TokenResponse>>> Login([FromBody] LoginRequest request)
     {
         var validationResult = await _loginValidator.ValidateAsync(request);
         if (!validationResult.IsValid)
@@ -55,7 +56,7 @@ public class AuthController : ControllerBase
         try
         {
             var response = await _authService.LoginAsync(request);
-            return Ok(response);
+            return Ok(ApiResponse<TokenResponse>.Success(response));
         }
         catch (UnauthorizedAccessException ex)
         {
@@ -64,12 +65,12 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("refresh")]
-    public async Task<ActionResult<TokenResponse>> RefreshToken([FromBody] RefreshTokenRequest request)
+    public async Task<ActionResult<ApiResponse<TokenResponse>>> RefreshToken([FromBody] RefreshTokenRequest request)
     {
         try
         {
             var response = await _authService.RefreshTokenAsync(request.RefreshToken);
-            return Ok(response);
+            return Ok(ApiResponse<TokenResponse>.Success(response));
         }
         catch (UnauthorizedAccessException ex)
         {
