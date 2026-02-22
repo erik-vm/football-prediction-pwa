@@ -1,21 +1,20 @@
 import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router, NavigationEnd } from '@angular/router';
+import { filter } from 'rxjs/operators';
 import { MatchService } from '../../../core/services/match.service';
 import { PredictionService } from '../../../core/services/prediction.service';
+import { CompetitionService } from '../../../core/services/competition.service';
 import { SignalRService } from '../../../core/services/signalr.service';
-import { Match, Tournament, GameWeek } from '../../../core/models/match.model';
-import { PredictionWithMatch } from '../../../core/models/prediction.model';
+import { Match } from '../../../core/models/match.model';
+import { Competition } from '../../../core/models/competition.model';
+import { Prediction } from '../../../core/models/prediction.model';
 import { MatchCardComponent } from '../match-card/match-card.component';
 import { MatchStatusTabsComponent, MatchStatus, MatchStatusTab } from '../../../shared/components/match-status-tabs/match-status-tabs.component';
 import { MatchdayFilterComponent } from '../../../shared/components/matchday-filter/matchday-filter.component';
 
 interface MatchWithPrediction extends Match {
-  prediction?: PredictionWithMatch['prediction'];
-}
-
-interface GroupedMatches {
-  gameWeek: GameWeek;
-  matches: MatchWithPrediction[];
+  prediction?: Prediction;
 }
 
 @Component({
@@ -28,25 +27,29 @@ interface GroupedMatches {
 export class PredictionsListComponent implements OnInit, OnDestroy {
   private matchService = inject(MatchService);
   private predictionService = inject(PredictionService);
+  private competitionService = inject(CompetitionService);
   private signalRService = inject(SignalRService);
+  private router = inject(Router);
 
-  private activeTournamentSignal = signal<Tournament | null>(null);
-  private gameWeeksSignal = signal<GameWeek[]>([]);
   private matchesSignal = signal<MatchWithPrediction[]>([]);
-  private predictionsSignal = signal<PredictionWithMatch[]>([]);
+  private predictionsSignal = signal<Prediction[]>([]);
   private isLoadingSignal = signal<boolean>(true);
   private errorSignal = signal<string | null>(null);
   private activeStatusTabSignal = signal<MatchStatus>('upcoming');
   private selectedMatchdaySignal = signal<number | null>(null);
+  private selectedCompetitionSignal = signal<string>(
+    typeof localStorage !== 'undefined' ? localStorage.getItem('selectedCompetition') || 'PL' : 'PL'
+  );
 
   private autoRefreshIntervalId: any = null;
   private matchUpdateCallback: ((matchId: string) => void) | null = null;
 
-  activeTournament = this.activeTournamentSignal.asReadonly();
   isLoading = this.isLoadingSignal.asReadonly();
   error = this.errorSignal.asReadonly();
   activeStatusTab = this.activeStatusTabSignal.asReadonly();
   selectedMatchday = this.selectedMatchdaySignal.asReadonly();
+  selectedCompetition = this.selectedCompetitionSignal.asReadonly();
+  activeCompetitions = this.competitionService.activeCompetitions;
 
   totalMatches = computed(() => this.matchesSignal().length);
   userPredictionsCount = computed(() => this.predictionsSignal().length);
@@ -100,30 +103,17 @@ export class PredictionsListComponent implements OnInit, OnDestroy {
     return filtered;
   });
 
-  filteredGroupedMatches = computed(() => {
-    const matches = this.filteredMatches();
-    const gameWeeks = this.gameWeeksSignal();
-
-    const grouped: GroupedMatches[] = [];
-
-    gameWeeks.forEach(gameWeek => {
-      const gameWeekMatches = matches.filter(m => m.gameWeekId === gameWeek.id);
-      if (gameWeekMatches.length > 0) {
-        grouped.push({
-          gameWeek,
-          matches: gameWeekMatches.sort((a, b) =>
-            new Date(a.kickoffTime).getTime() - new Date(b.kickoffTime).getTime()
-          )
-        });
-      }
-    });
-
-    return grouped.sort((a, b) => a.gameWeek.weekNumber - b.gameWeek.weekNumber);
-  });
+  getPredictionForMatch(matchId: string) {
+    const matches = this.matchesSignal();
+    const match = matches.find(m => m.id === matchId);
+    return match?.prediction || null;
+  }
 
   ngOnInit(): void {
+    this.competitionService.getCompetitions(true).subscribe();
     this.loadData();
     this.setupSignalRListeners();
+    this.setupRouterListener();
   }
 
   ngOnDestroy(): void {
@@ -140,10 +130,17 @@ export class PredictionsListComponent implements OnInit, OnDestroy {
     this.signalRService.onMatchUpdate(this.matchUpdateCallback);
   }
 
-  private refreshMatchData(matchId: string): void {
-    const tournament = this.activeTournamentSignal();
-    if (!tournament) return;
+  private setupRouterListener(): void {
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe((event: any) => {
+      if (event.url === '/predictions' || event.url.startsWith('/predictions?')) {
+        this.loadPredictions();
+      }
+    });
+  }
 
+  private refreshMatchData(matchId: string): void {
     this.matchService.getMatch(matchId).subscribe({
       next: (response) => {
         if (response.data) {
@@ -162,68 +159,44 @@ export class PredictionsListComponent implements OnInit, OnDestroy {
     });
   }
 
-  private loadData(): void {
+  loadData(): void {
     this.isLoadingSignal.set(true);
     this.errorSignal.set(null);
 
-    this.matchService.getActiveTournament().subscribe({
+    const competitionCode = this.selectedCompetitionSignal();
+    this.matchService.getMatches({ competitionCode }).subscribe({
       next: (response) => {
         if (response.data) {
-          this.activeTournamentSignal.set(response.data);
-          this.loadGameWeeks(response.data.id);
-          this.loadMatches(response.data.id);
-          this.loadPredictions(response.data.id);
+          this.matchesSignal.set(response.data);
+          this.loadPredictions();
         } else {
-          this.errorSignal.set('No active tournament found');
+          this.matchesSignal.set([]);
           this.isLoadingSignal.set(false);
         }
       },
       error: (error) => {
-        this.errorSignal.set(error.error?.message || 'Failed to load tournament');
+        console.error('Failed to load matches:', error);
+        this.errorSignal.set(error.message || 'Failed to load matches');
+        this.matchesSignal.set([]);
         this.isLoadingSignal.set(false);
       }
     });
   }
 
-  private loadGameWeeks(tournamentId: string): void {
-    this.matchService.getGameWeeks(tournamentId).subscribe({
-      next: (response) => {
-        if (response.data) {
-          this.gameWeeksSignal.set(response.data);
-        }
-      },
-      error: (error) => {
-        console.error('Failed to load game weeks:', error);
-      }
-    });
-  }
-
-  private loadMatches(tournamentId: string): void {
-    this.matchService.getUpcomingMatches(tournamentId).subscribe({
-      next: (response) => {
-        if (response.data) {
-          this.matchesSignal.set(response.data);
-          this.checkLoadingComplete();
-        }
-      },
-      error: (error) => {
-        this.errorSignal.set(error.error?.message || 'Failed to load matches');
-        this.isLoadingSignal.set(false);
-      }
-    });
-  }
-
-  private loadPredictions(tournamentId: string): void {
-    this.predictionService.getUserPredictions(tournamentId).subscribe({
+  private loadPredictions(): void {
+    this.predictionService.getUserPredictions().subscribe({
       next: (response) => {
         if (response.data) {
           this.predictionsSignal.set(response.data);
           this.mergePredictionsWithMatches();
+        } else {
+          this.predictionsSignal.set([]);
         }
         this.checkLoadingComplete();
       },
       error: (error) => {
         console.error('Failed to load predictions:', error);
+        this.predictionsSignal.set([]);
         this.checkLoadingComplete();
       }
     });
@@ -234,7 +207,7 @@ export class PredictionsListComponent implements OnInit, OnDestroy {
     const predictions = this.predictionsSignal();
 
     const predictionMap = new Map(
-      predictions.map(p => [p.match.id, p.prediction])
+      predictions.map(p => [p.matchId, p])
     );
 
     const matchesWithPredictions: MatchWithPrediction[] = matches.map(match => ({
@@ -278,9 +251,6 @@ export class PredictionsListComponent implements OnInit, OnDestroy {
   }
 
   private refreshLiveMatches(): void {
-    const tournament = this.activeTournamentSignal();
-    if (!tournament) return;
-
     const now = new Date();
     const liveMatches = this.matchesSignal().filter(m =>
       !m.isFinished && new Date(m.kickoffTime) <= now
@@ -295,10 +265,12 @@ export class PredictionsListComponent implements OnInit, OnDestroy {
     this.selectedMatchdaySignal.set(matchday);
   }
 
-  formatDate(date: Date): string {
-    return new Date(date).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric'
-    });
+  onCompetitionChange(competitionCode: string): void {
+    this.selectedCompetitionSignal.set(competitionCode);
+    this.selectedMatchdaySignal.set(null);
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('selectedCompetition', competitionCode);
+    }
+    this.loadData();
   }
 }

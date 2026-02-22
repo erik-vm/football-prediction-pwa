@@ -6,11 +6,14 @@ import { MatchService } from '../../../core/services/match.service';
 import { PredictionService } from '../../../core/services/prediction.service';
 import { Match } from '../../../core/models/match.model';
 import { Prediction } from '../../../core/models/prediction.model';
+import { ScoreInputComponent } from '../../../shared/components/score-input/score-input.component';
+import { CountdownTimerComponent } from '../../../shared/components/countdown-timer/countdown-timer.component';
+import { PointsInfoComponent } from '../../../shared/components/points-info/points-info.component';
 
 @Component({
   selector: 'app-prediction-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, ScoreInputComponent, CountdownTimerComponent, PointsInfoComponent],
   template: `
     <div class="max-w-2xl mx-auto px-4 py-8">
       @if (isLoading()) {
@@ -60,9 +63,19 @@ import { Prediction } from '../../../core/models/prediction.model';
               </div>
             </div>
 
-            <div class="text-center text-sm text-gray-600">
-              {{ formattedKickoffTime() }}
+            <div class="flex items-center justify-center gap-3 text-sm text-gray-600">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              <span>{{ formattedKickoffTime() }}</span>
             </div>
+
+            @if (!matchStarted()) {
+              <div class="mt-4 flex items-center justify-center gap-2">
+                <span class="text-sm font-medium text-gray-700">Deadline:</span>
+                <app-countdown-timer [match]="match()!" />
+              </div>
+            }
           </div>
 
           @if (matchStarted()) {
@@ -75,60 +88,26 @@ import { Prediction } from '../../../core/models/prediction.model';
               <div class="space-y-6">
                 <div>
                   <h3 class="text-lg font-semibold text-gray-900 mb-4">
-                    {{ existingPrediction() ? 'Update Your Prediction' : 'Make Your Prediction' }}
+                    {{ existingPrediction() ? 'Update Your Prediction' : 'Predict the Score' }}
                   </h3>
 
-                  <div class="grid grid-cols-2 gap-6">
-                    <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">
-                        {{ match()!.homeTeam }} Score
-                      </label>
-                      <input
-                        type="number"
-                        formControlName="homeScore"
-                        min="0"
-                        max="20"
-                        class="w-full px-4 py-3 text-center text-2xl font-bold border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                        [class.border-red-500]="homeScore?.invalid && homeScore?.touched"
-                      />
-                      @if (homeScore?.invalid && homeScore?.touched) {
-                        <p class="mt-1 text-sm text-red-600">
-                          @if (homeScore?.errors?.['required']) {
-                            Score is required
-                          } @else if (homeScore?.errors?.['min']) {
-                            Minimum score is 0
-                          } @else if (homeScore?.errors?.['max']) {
-                            Maximum score is 20
-                          }
-                        </p>
-                      }
-                    </div>
+                  <div class="flex items-center justify-center gap-8 mb-6">
+                    <app-score-input
+                      [teamName]="match()!.homeTeam"
+                      [score]="homeScore?.value"
+                      (scoreChange)="onHomeScoreChange($event)"
+                    />
 
-                    <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">
-                        {{ match()!.awayTeam }} Score
-                      </label>
-                      <input
-                        type="number"
-                        formControlName="awayScore"
-                        min="0"
-                        max="20"
-                        class="w-full px-4 py-3 text-center text-2xl font-bold border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                        [class.border-red-500]="awayScore?.invalid && awayScore?.touched"
-                      />
-                      @if (awayScore?.invalid && awayScore?.touched) {
-                        <p class="mt-1 text-sm text-red-600">
-                          @if (awayScore?.errors?.['required']) {
-                            Score is required
-                          } @else if (awayScore?.errors?.['min']) {
-                            Minimum score is 0
-                          } @else if (awayScore?.errors?.['max']) {
-                            Maximum score is 20
-                          }
-                        </p>
-                      }
-                    </div>
+                    <div class="text-3xl font-bold text-gray-400 px-4">VS</div>
+
+                    <app-score-input
+                      [teamName]="match()!.awayTeam"
+                      [score]="awayScore?.value"
+                      (scoreChange)="onAwayScoreChange($event)"
+                    />
                   </div>
+
+                  <app-points-info />
                 </div>
 
                 @if (predictionError()) {
@@ -230,8 +209,8 @@ export class PredictionFormComponent implements OnInit {
 
   ngOnInit(): void {
     this.predictionForm = this.fb.group({
-      homeScore: ['', [Validators.required, Validators.min(0), Validators.max(20)]],
-      awayScore: ['', [Validators.required, Validators.min(0), Validators.max(20)]]
+      homeScore: [0, [Validators.required, Validators.min(0), Validators.max(20)]],
+      awayScore: [0, [Validators.required, Validators.min(0), Validators.max(20)]]
     });
 
     const matchId = this.route.snapshot.paramMap.get('matchId');
@@ -271,8 +250,8 @@ export class PredictionFormComponent implements OnInit {
         if (response.data) {
           this.existingPredictionSignal.set(response.data);
           this.predictionForm.patchValue({
-            homeScore: response.data.predictedHomeScore,
-            awayScore: response.data.predictedAwayScore
+            homeScore: response.data.homeScore,
+            awayScore: response.data.awayScore
           });
         }
         this.isLoadingSignal.set(false);
@@ -298,8 +277,8 @@ export class PredictionFormComponent implements OnInit {
 
     const request = {
       matchId: match.id,
-      predictedHomeScore: this.predictionForm.value.homeScore,
-      predictedAwayScore: this.predictionForm.value.awayScore
+      homeScore: this.predictionForm.value.homeScore,
+      awayScore: this.predictionForm.value.awayScore
     };
 
     const existingPrediction = this.existingPredictionSignal();
@@ -324,6 +303,14 @@ export class PredictionFormComponent implements OnInit {
         this.isSubmittingSignal.set(false);
       }
     });
+  }
+
+  onHomeScoreChange(score: number): void {
+    this.predictionForm.patchValue({ homeScore: score });
+  }
+
+  onAwayScoreChange(score: number): void {
+    this.predictionForm.patchValue({ awayScore: score });
   }
 
   get homeScore() {

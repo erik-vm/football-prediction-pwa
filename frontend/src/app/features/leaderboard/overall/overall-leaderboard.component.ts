@@ -1,68 +1,75 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LeaderboardService } from '../../../core/services/leaderboard.service';
-import { MatchService } from '../../../core/services/match.service';
+import { CompetitionService } from '../../../core/services/competition.service';
 import { AuthService } from '../../../core/services/auth.service';
-import { Tournament } from '../../../core/models/match.model';
 import { LeaderboardEntry } from '../../../core/models/leaderboard.model';
+import { UserStatsCardComponent, UserStatsCardData } from '../../../shared/components/user-stats-card/user-stats-card.component';
 
 @Component({
   selector: 'app-overall-leaderboard',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, UserStatsCardComponent],
   templateUrl: './overall-leaderboard.component.html'
 })
 export class OverallLeaderboardComponent implements OnInit {
   private leaderboardService = inject(LeaderboardService);
-  private matchService = inject(MatchService);
+  private competitionService = inject(CompetitionService);
   private authService = inject(AuthService);
 
-  tournaments = signal<Tournament[]>([]);
-  selectedTournamentId = signal<string>('');
+  selectedCompetitionSignal = signal<string>(
+    typeof localStorage !== 'undefined' ? localStorage.getItem('selectedCompetitionLeaderboard') || 'PL' : 'PL'
+  );
   displayLimit = signal<number>(10);
   showLoadMore = signal<boolean>(false);
+  leaderboardDataSignal = signal<any[]>([]);
 
-  leaderboard = this.leaderboardService.overallLeaderboard;
+  activeCompetitions = this.competitionService.activeCompetitions;
   isLoading = this.leaderboardService.isLoading;
   error = this.leaderboardService.error;
   currentUser = this.authService.currentUser;
+  selectedCompetition = this.selectedCompetitionSignal.asReadonly();
+
+  userStatsData = computed<UserStatsCardData | null>(() => {
+    const userId = this.currentUser()?.id;
+    if (!userId) return null;
+
+    const userEntry = this.leaderboardDataSignal().find((entry: any) => entry.userId === userId);
+    if (!userEntry) return null;
+
+    return {
+      rank: userEntry.rank,
+      points: userEntry.totalPoints,
+      predictions: userEntry.totalPredictions,
+      accuracy: userEntry.accuracy
+    };
+  });
 
   ngOnInit(): void {
-    this.loadTournaments();
-  }
-
-  private loadTournaments(): void {
-    this.matchService.getTournaments().subscribe({
-      next: (response) => {
-        if (response.data) {
-          this.tournaments.set(response.data);
-          const activeTournament = response.data.find(t => t.isActive);
-          if (activeTournament) {
-            this.selectedTournamentId.set(activeTournament.id);
-            this.loadLeaderboard();
-          }
-        }
-      },
-      error: (err) => console.error('Failed to load tournaments', err)
-    });
+    this.competitionService.getCompetitions(true).subscribe();
+    this.loadLeaderboard();
   }
 
   loadLeaderboard(): void {
-    const tournamentId = this.selectedTournamentId();
-    if (!tournamentId) return;
+    const competitionCode = this.selectedCompetitionSignal();
+    if (!competitionCode) return;
 
-    this.leaderboardService.getOverallLeaderboard(tournamentId, this.displayLimit()).subscribe({
-      next: (response) => {
-        if (response.data) {
-          this.showLoadMore.set(response.data.length >= this.displayLimit());
-        }
-      }
+    this.leaderboardService.getCompetitionLeaderboard(competitionCode, this.displayLimit()).subscribe({
+      next: (data) => {
+        this.leaderboardDataSignal.set(data);
+        this.showLoadMore.set(data.length >= this.displayLimit());
+      },
+      error: (err) => console.error('Failed to load leaderboard', err)
     });
   }
 
-  onTournamentChange(): void {
+  onCompetitionChange(competitionCode: string): void {
+    this.selectedCompetitionSignal.set(competitionCode);
     this.displayLimit.set(10);
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('selectedCompetitionLeaderboard', competitionCode);
+    }
     this.loadLeaderboard();
   }
 
@@ -71,12 +78,11 @@ export class OverallLeaderboardComponent implements OnInit {
     this.loadLeaderboard();
   }
 
-  isCurrentUser(entry: LeaderboardEntry): boolean {
+  isCurrentUser(entry: any): boolean {
     return entry.userId === this.currentUser()?.id;
   }
 
-  getAccuracyRate(entry: LeaderboardEntry): number {
-    if (entry.totalPredictions === 0) return 0;
-    return ((entry.exactScores + entry.correctWinners) / entry.totalPredictions) * 100;
+  getAccuracyRate(entry: any): number {
+    return entry.accuracy || 0;
   }
 }

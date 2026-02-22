@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using FluentValidation;
+using FootballPrediction.Application.DTOs;
 using FootballPrediction.Application.DTOs.Prediction;
 using FootballPrediction.Application.Interfaces;
 using FootballPrediction.Domain.Entities;
@@ -9,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace FootballPrediction.Api.Controllers;
 
 [ApiController]
-[Route("api/v1/[controller]")]
+[Route("api/[controller]")]
 [Authorize]
 public class PredictionsController : ControllerBase
 {
@@ -31,7 +32,7 @@ public class PredictionsController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<PredictionDto>> CreatePrediction([FromBody] CreatePredictionDto dto)
+    public async Task<ActionResult<ApiResponse<PredictionDto>>> CreatePrediction([FromBody] CreatePredictionDto dto)
     {
         var validationResult = await _createValidator.ValidateAsync(dto);
         if (!validationResult.IsValid)
@@ -83,11 +84,11 @@ public class PredictionsController : ControllerBase
         await _predictionRepository.SaveChangesAsync();
 
         var createdPrediction = await _predictionRepository.GetByIdAsync(prediction.Id);
-        return CreatedAtAction(nameof(GetById), new { id = prediction.Id }, MapToPredictionDto(createdPrediction!));
+        return CreatedAtAction(nameof(GetById), new { id = prediction.Id }, ApiResponse<PredictionDto>.Success(MapToPredictionDto(createdPrediction!)));
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<PredictionDto>> GetById(Guid id)
+    public async Task<ActionResult<ApiResponse<PredictionDto>>> GetById(Guid id)
     {
         var prediction = await _predictionRepository.GetByIdAsync(id);
         if (prediction == null)
@@ -101,11 +102,11 @@ public class PredictionsController : ControllerBase
             return Forbid();
         }
 
-        return Ok(MapToPredictionDto(prediction));
+        return Ok(ApiResponse<PredictionDto>.Success(MapToPredictionDto(prediction)));
     }
 
     [HttpGet("my")]
-    public async Task<ActionResult<IEnumerable<PredictionDto>>> GetMyPredictions()
+    public async Task<ActionResult<ApiResponse<IEnumerable<PredictionDto>>>> GetMyPredictions()
     {
         var userId = GetUserId();
         if (userId == Guid.Empty)
@@ -114,13 +115,31 @@ public class PredictionsController : ControllerBase
         }
 
         var predictions = await _predictionRepository.GetByUserIdAsync(userId);
-        var predictionDtos = predictions.Select(MapToPredictionDto);
+        var predictionDtos = predictions.Select(MapToPredictionDto).ToList();
 
-        return Ok(predictionDtos);
+        return Ok(ApiResponse<IEnumerable<PredictionDto>>.Success(predictionDtos));
+    }
+
+    [HttpGet("match/{matchId}")]
+    public async Task<ActionResult<ApiResponse<PredictionDto>>> GetByMatch(Guid matchId)
+    {
+        var userId = GetUserId();
+        if (userId == Guid.Empty)
+        {
+            return Unauthorized("User ID not found in token");
+        }
+
+        var prediction = await _predictionRepository.GetByUserAndMatchAsync(userId, matchId);
+        if (prediction == null)
+        {
+            return NotFound("No prediction found for this match");
+        }
+
+        return Ok(ApiResponse<PredictionDto>.Success(MapToPredictionDto(prediction)));
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult<PredictionDto>> UpdatePrediction(Guid id, [FromBody] UpdatePredictionDto dto)
+    public async Task<ActionResult<ApiResponse<PredictionDto>>> UpdatePrediction(Guid id, [FromBody] UpdatePredictionDto dto)
     {
         var validationResult = await _updateValidator.ValidateAsync(dto);
         if (!validationResult.IsValid)
@@ -157,7 +176,7 @@ public class PredictionsController : ControllerBase
         await _predictionRepository.SaveChangesAsync();
 
         var updatedPrediction = await _predictionRepository.GetByIdAsync(id);
-        return Ok(MapToPredictionDto(updatedPrediction!));
+        return Ok(ApiResponse<PredictionDto>.Success(MapToPredictionDto(updatedPrediction!)));
     }
 
     [HttpDelete("{id}")]
