@@ -49,7 +49,7 @@ import { Prediction } from '../../../core/models/prediction.model';
           <div class="bg-blue-50 border border-blue-200 rounded px-3 py-2 text-center">
             <div class="text-xs text-blue-600 font-medium">Your Prediction</div>
             <div class="text-sm font-semibold text-blue-900">
-              {{ prediction()!.predictedHomeScore }} - {{ prediction()!.predictedAwayScore }}
+              {{ prediction()!.homeScore }} - {{ prediction()!.awayScore }}
               <span class="ml-2 text-blue-600">· {{ prediction()!.pointsEarned }} pts</span>
             </div>
           </div>
@@ -57,7 +57,7 @@ import { Prediction } from '../../../core/models/prediction.model';
           <div class="bg-gray-50 border border-gray-200 rounded px-3 py-2 text-center">
             <div class="text-xs text-gray-600 font-medium">Your Prediction</div>
             <div class="text-sm font-semibold text-gray-900">
-              {{ prediction()!.predictedHomeScore }} - {{ prediction()!.predictedAwayScore }}
+              {{ prediction()!.homeScore }} - {{ prediction()!.awayScore }}
             </div>
           </div>
         }

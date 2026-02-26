@@ -12,6 +12,7 @@ export interface Match {
   isFinished: boolean;
   matchday?: number;
   competitionCode?: string;
+  venue?: string;
 }
 
 export enum TournamentStage {

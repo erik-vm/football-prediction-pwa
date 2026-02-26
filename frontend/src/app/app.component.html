@@ -1,6 +1,7 @@
 <div class="min-h-screen bg-gray-50">
   <app-offline-indicator />
-  <nav class="bg-white shadow-sm">
+  <!-- Desktop Navigation - hidden on mobile when authenticated -->
+  <nav class="bg-white shadow-sm" [class.hidden]="isAuthenticated() && true" [class.md:block]="isAuthenticated()">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between h-16">
         <div class="flex">
@@ -9,7 +10,7 @@
               ⚽ Football Predictions
             </a>
           </div>
-          <div class="hidden sm:ml-8 sm:flex sm:space-x-8">
+          <div class="hidden md:ml-8 md:flex md:space-x-8">
             <a
               routerLink="/leaderboard"
               routerLinkActive="border-primary-500 text-gray-900"
@@ -71,7 +72,12 @@
     </div>
   </nav>
 
-  <main>
+  <main [class.pb-16]="isAuthenticated()">
     <router-outlet />
   </main>
+
+  <!-- Bottom Navigation - only for authenticated users on mobile -->
+  @if (isAuthenticated()) {
+    <app-bottom-navigation />
+  }
 </div>

@@ -4,11 +4,12 @@ import { CommonModule } from '@angular/common';
 import { AuthService } from './core/services/auth.service';
 import { SignalRService } from './core/services/signalr.service';
 import { OfflineIndicatorComponent } from './shared/components/offline-indicator/offline-indicator.component';
+import { BottomNavigationComponent } from './shared/components/bottom-navigation/bottom-navigation.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, OfflineIndicatorComponent],
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, OfflineIndicatorComponent, BottomNavigationComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })

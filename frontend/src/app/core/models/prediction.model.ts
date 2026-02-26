@@ -2,16 +2,22 @@ export interface Prediction {
   id: string;
   userId: string;
   matchId: string;
-  predictedHomeScore: number;
-  predictedAwayScore: number;
+  homeScore: number;
+  awayScore: number;
   pointsEarned?: number;
-  submittedAt: Date;
+  createdAt: Date;
+  updatedAt: Date;
+  matchDescription?: string;
+  kickoffTime?: Date;
+  isMatchFinished?: boolean;
+  actualHomeScore?: number;
+  actualAwayScore?: number;
 }
 
 export interface PredictionRequest {
   matchId: string;
-  predictedHomeScore: number;
-  predictedAwayScore: number;
+  homeScore: number;
+  awayScore: number;
 }
 
 export interface PredictionWithMatch {

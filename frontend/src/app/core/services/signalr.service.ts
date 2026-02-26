@@ -22,7 +22,7 @@ export class SignalRService {
   }
 
   private initializeConnection(): void {
-    const hubUrl = environment.apiUrl.replace('/api/v1', '') + '/predictionhub';
+    const hubUrl = environment.apiUrl.replace('/api', '') + '/predictionhub';
 
     this.hubConnection = new signalR.HubConnectionBuilder()
       .withUrl(hubUrl, {

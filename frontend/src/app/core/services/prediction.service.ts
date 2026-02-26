@@ -60,10 +60,11 @@ export class PredictionService {
           id: queueId,
           matchId: request.matchId,
           userId: '',
-          predictedHomeScore: request.predictedHomeScore,
-          predictedAwayScore: request.predictedAwayScore,
+          homeScore: request.homeScore,
+          awayScore: request.awayScore,
           pointsEarned: 0,
-          submittedAt: new Date()
+          createdAt: new Date(),
+          updatedAt: new Date()
         } as Prediction
       } as ApiResponse<Prediction>);
     }
@@ -96,10 +97,8 @@ export class PredictionService {
     );
   }
 
-  getUserPredictions(tournamentId?: string): Observable<ApiResponse<PredictionWithMatch[]>> {
-    const url = tournamentId
-      ? `${this.apiUrl}/user?tournamentId=${tournamentId}`
-      : `${this.apiUrl}/user`;
+  getUserPredictions(tournamentId?: string): Observable<ApiResponse<Prediction[]>> {
+    const url = `${this.apiUrl}/my`;
 
     if (!this.isOnlineSignal()) {
       return from(this.indexedDB.getPredictions(tournamentId)).pipe(
@@ -107,29 +106,26 @@ export class PredictionService {
           return of({
             success: true,
             message: 'Loaded from cache (offline)',
-            data: cachedPredictions
-          } as ApiResponse<PredictionWithMatch[]>);
+            data: cachedPredictions as any
+          } as ApiResponse<Prediction[]>);
         })
       );
     }
 
-    return this.http.get<ApiResponse<PredictionWithMatch[]>>(url).pipe(
+    return this.http.get<ApiResponse<Prediction[]>>(url).pipe(
       tap(response => {
-        if (response.data) {
-          this.indexedDB.cachePredictions(response.data);
-        }
+        // Skip IndexedDB caching for now since predictions don't have the right structure for the DB schema
+        // if (response.data) {
+        //   this.indexedDB.cachePredictions(response.data as any);
+        // }
       }),
       catchError(error => {
-        console.error('Error fetching predictions, trying cache:', error);
-        return from(this.indexedDB.getPredictions(tournamentId)).pipe(
-          switchMap(cachedPredictions => {
-            return of({
-              success: true,
-              message: 'Loaded from cache (fallback)',
-              data: cachedPredictions
-            } as ApiResponse<PredictionWithMatch[]>);
-          })
-        );
+        console.error('Error fetching predictions:', error);
+        return of({
+          success: false,
+          message: 'Failed to fetch predictions',
+          data: []
+        } as ApiResponse<Prediction[]>);
       })
     );
   }

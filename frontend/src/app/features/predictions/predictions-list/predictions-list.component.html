@@ -1,80 +1,91 @@
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-  <div class="mb-8">
-    <h1 class="text-3xl font-bold text-gray-900 mb-2">Match Predictions</h1>
-    <p class="text-gray-600">Submit your predictions before matches start to earn points</p>
+<div class="flex flex-col h-full">
+  <!-- Competition Dropdown Header -->
+  <div class="bg-primary-600 px-4 py-3">
+    <select
+      class="w-full px-4 py-2 bg-black bg-opacity-20 text-white border border-white border-opacity-30 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-400"
+      [value]="selectedCompetition()"
+      (change)="onCompetitionChange($any($event.target).value)"
+    >
+      @for (comp of activeCompetitions(); track comp.code) {
+        <option [value]="comp.code">{{ comp.name }}</option>
+      }
+    </select>
   </div>
 
-  @if (isLoading()) {
-    <div class="text-center py-12">
-      <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
-      <p class="mt-4 text-gray-600">Loading matches...</p>
-    </div>
-  } @else if (error()) {
-    <div class="bg-red-50 border border-red-200 rounded-lg p-4">
-      <p class="text-red-800">{{ error() }}</p>
-    </div>
-  } @else {
-    @if (activeTournament()) {
-      <div class="mb-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-        <div class="mb-4">
-          <h2 class="text-lg font-semibold text-gray-900">
-            {{ activeTournament()!.name }} {{ activeTournament()!.year }}
-          </h2>
-          <p class="text-sm text-gray-600 mt-1">
-            {{ totalMatches() }} matches · {{ userPredictionsCount() }} predictions made
-          </p>
+  <!-- Status Tabs -->
+  <div class="bg-primary-600">
+    <app-match-status-tabs
+      [tabs]="statusTabs()"
+      [activeTab]="activeStatusTab()"
+      (tabSelected)="onStatusTabChange($event)"
+    />
+  </div>
+
+  <!-- Main Content -->
+  <div class="flex-1 overflow-auto bg-gray-50">
+    @if (isLoading()) {
+      <div class="flex items-center justify-center h-full">
+        <div class="text-center py-12">
+          <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+          <p class="mt-4 text-gray-600">Loading matches...</p>
         </div>
-
-        <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-          <app-match-status-tabs
-            [tabs]="statusTabs()"
-            [activeTab]="activeStatusTab()"
-            (tabSelected)="onStatusTabChange($event)"
+      </div>
+    } @else if (error()) {
+      <div class="flex items-center justify-center h-full p-4">
+        <div class="text-center max-w-md">
+          <svg class="mx-auto h-16 w-16 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+          </svg>
+          <h3 class="mt-4 text-lg font-medium text-gray-900">Unable to load matches</h3>
+          <p class="mt-2 text-sm text-gray-600">{{ error() }}</p>
+          <button
+            (click)="loadData()"
+            class="mt-4 px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    } @else {
+      <!-- Matchday Dropdown (per tab) -->
+      @if (availableMatchdays().length > 0) {
+        <div class="bg-gray-100 px-4 py-2 border-b border-gray-200">
+          <app-matchday-filter
+            [matchdays]="availableMatchdays()"
+            [selectedMatchday]="selectedMatchday()"
+            (matchdaySelected)="onMatchdayChange($event)"
           />
+        </div>
+      }
 
-          @if (availableMatchdays().length > 0) {
-            <app-matchday-filter
-              [matchdays]="availableMatchdays()"
-              [selectedMatchday]="selectedMatchday()"
-              (matchdaySelected)="onMatchdayChange($event)"
+      <!-- Matches List -->
+      @if (filteredMatches().length === 0) {
+        <div class="flex items-center justify-center h-full">
+          <div class="text-center py-12">
+            <svg class="mx-auto h-16 w-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <p class="mt-4 text-gray-600">
+              @if (activeStatusTab() === 'upcoming') {
+                No upcoming matches
+              } @else if (activeStatusTab() === 'live') {
+                No live matches
+              } @else {
+                No finished matches
+              }
+            </p>
+          </div>
+        </div>
+      } @else {
+        <div class="py-2">
+          @for (match of filteredMatches(); track match.id) {
+            <app-match-card
+              [matchData]="match"
+              [predictionData]="getPredictionForMatch(match.id)"
             />
           }
         </div>
-      </div>
-
-      @if (filteredGroupedMatches().length === 0) {
-        <div class="text-center py-12 bg-white rounded-lg border border-gray-200">
-          <p class="text-gray-600">No matches found for the selected filter</p>
-        </div>
-      } @else {
-        <div class="space-y-8">
-          @for (group of filteredGroupedMatches(); track group.gameWeek.id) {
-            <div>
-              <div class="mb-4 pb-2 border-b border-gray-200">
-                <h3 class="text-lg font-semibold text-gray-900">
-                  Game Week {{ group.gameWeek.weekNumber }}
-                </h3>
-                <p class="text-sm text-gray-600">
-                  {{ formatDate(group.gameWeek.startDate) }} - {{ formatDate(group.gameWeek.endDate) }}
-                </p>
-              </div>
-
-              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                @for (match of group.matches; track match.id) {
-                  <app-match-card
-                    [matchData]="match"
-                    [predictionData]="match.prediction"
-                  />
-                }
-              </div>
-            </div>
-          }
-        </div>
       }
-    } @else {
-      <div class="text-center py-12 bg-white rounded-lg border border-gray-200">
-        <p class="text-gray-600">No active tournament found</p>
-      </div>
     }
-  }
+  </div>
 </div>
