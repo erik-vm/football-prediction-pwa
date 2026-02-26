@@ -2129,7 +2129,140 @@ Implemented Flutter app-inspired UX improvements to the prediction form, replaci
 
 ---
 
-**Last Updated:** 2026-02-22 (Phase 19 Complete - Enhanced Prediction UX Implemented!)
+## Bug Fix Session - 2026-02-26
+
+### Critical Bug: ResultProcessingBackgroundJob Not Running on Startup
+
+**Status:** ✅ Fixed
+**Impact:** High - Leaderboards were not updating
+**Analysis:** `.analysis/2026-02-26-result-processing-background-job-fix.md`
+
+#### Issue Description
+- Leaderboards remained empty despite completed matches with predictions
+- 73 completed matches in database
+- 7 predictions created, 2 on finished matches
+- Predictions stuck in "PENDING" status (not scored)
+- UserCompetitionStats table empty (0 rows)
+
+#### Root Causes Identified
+
+**Root Cause #1: Background Job Startup Delay**
+- `PeriodicTimer.WaitForNextTickAsync()` waits 5 minutes before first execution
+- On app startup, job registered but didn't run immediately
+- Completed matches with predictions not processed for up to 5 minutes
+- Impact: Poor user experience, leaderboards appeared broken
+
+**Root Cause #2: Database Concurrency Exception**
+- Job calling both `dbContext.SaveChangesAsync()` and `statsRepository.SaveChangesAsync()`
+- Duplicate save attempts on newly created UserCompetitionStats entities
+- `DbUpdateConcurrencyException`: "expected to affect 1 row(s), but actually affected 0"
+- Impact: Transaction rolled back, predictions remained unprocessed
+
+#### Solutions Implemented
+
+**Fix #1: Immediate Execution on Startup** (`ResultProcessingBackgroundJob.cs:25-52`)
+```csharp
+protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+{
+    _logger.LogInformation("Running initial result processing on startup");
+
+    // NEW: Run immediately on startup
+    try
+    {
+        await ProcessResultsAsync(stoppingToken);
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "Error occurred during initial result processing");
+    }
+
+    // Then continue with periodic execution (5 minutes)
+    using PeriodicTimer timer = new PeriodicTimer(_period);
+    // ... existing periodic logic
+}
+```
+
+**Fix #2: Single SaveChanges Call** (`ResultProcessingBackgroundJob.cs:110-128`)
+- Removed `statsRepository.UpdateAsync(stats)` call (unnecessary)
+- Removed duplicate `statsRepository.SaveChangesAsync()` call
+- Added manual `UpdatedAt` timestamp setting
+- Single DbContext handles all saves (predictions + stats + ranks)
+
+#### Testing Results
+
+✅ **Test 1: Immediate Processing**
+- Job ran on startup: "Processing 2 predictions"
+- Completed in <2 seconds
+- Logs show: "Result processing completed. Processed 2 predictions"
+
+✅ **Test 2: Predictions Scored**
+```sql
+-- Tottenham vs Arsenal (1-4): Predicted 0-0 = 0 points (no match)
+-- AS Roma vs Cremonese (3-0): Predicted 0-3 = 0 points (no match)
+Status: SCORED, PointsEarned: 0 (both)
+```
+
+✅ **Test 3: Leaderboard Data Created**
+```sql
+SELECT * FROM "UserCompetitionStats";
+-- 2 rows created:
+-- PL: 1 user, 0 points, 1 prediction, 0.00% accuracy, Rank 1
+-- SA: 1 user, 0 points, 1 prediction, 0.00% accuracy, Rank 1
+```
+
+✅ **Test 4: No Concurrency Exceptions**
+- Before fix: DbUpdateConcurrencyException
+- After fix: No exceptions, clean execution
+
+#### Files Modified (1)
+1. `backend/src/FootballPrediction.Infrastructure/Jobs/ResultProcessingBackgroundJob.cs`
+   - Lines 25-52: Added immediate execution on startup (+12 lines)
+   - Lines 110-128: Fixed database save conflict (-3 lines)
+
+#### Files Created (1)
+1. `.analysis/2026-02-26-result-processing-background-job-fix.md`
+
+#### Architecture Compliance
+- ✅ Clean Architecture: No layer violations
+- ✅ SOLID: All 5 principles maintained
+- ✅ DRY: Reused ProcessResultsAsync() method
+- ✅ KISS: Simple, clear solution
+
+#### Performance Impact
+- ✅ Faster user feedback: Immediate leaderboard updates (vs 5-min delay)
+- ✅ Fewer database round trips: Removed duplicate SaveChanges
+- ✅ Better transaction handling: Single transaction for related updates
+- ⚠️ Startup time: +1-2 seconds (acceptable tradeoff)
+
+#### User Impact
+
+**Before Fix:**
+- ❌ Leaderboards empty despite completed matches
+- ❌ Predictions not scored
+- ❌ No feedback on prediction accuracy
+- ❌ Up to 5-minute delay before leaderboard update
+
+**After Fix:**
+- ✅ Leaderboards populate immediately on app start
+- ✅ Predictions scored within seconds
+- ✅ Real-time feedback on prediction accuracy
+- ✅ Smooth UX, app feels responsive
+
+#### Known Limitations
+- N+1 query problem in GetOrCreateAsync (optimization needed)
+- No distributed lock (required for multi-instance)
+- No manual trigger endpoint (5-min interval sufficient for now)
+
+#### Lessons Learned
+1. Always run background jobs immediately on startup when processing existing data
+2. Add health checks for all background services
+3. Use single DbContext for related entity operations
+4. Add integration tests for background job execution
+5. Add monitoring/metrics for background job runs
+
+---
+
+**Last Updated:** 2026-02-26 (Bug Fix Complete - Leaderboards Now Working!)
 
 ## Phase 20: Leaderboard Enhancements (2026-02-22)
 

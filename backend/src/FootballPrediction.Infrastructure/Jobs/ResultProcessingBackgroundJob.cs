@@ -24,6 +24,17 @@ public class ResultProcessingBackgroundJob : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        _logger.LogInformation("Running initial result processing on startup");
+
+        try
+        {
+            await ProcessResultsAsync(stoppingToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred during initial result processing");
+        }
+
         using PeriodicTimer timer = new PeriodicTimer(_period);
 
         while (!stoppingToken.IsCancellationRequested &&
@@ -103,19 +114,18 @@ public class ResultProcessingBackgroundJob : BackgroundService
                 stats.TotalPoints += points;
                 stats.TotalPredictions += 1;
                 stats.Accuracy = PointsCalculator.CalculateAccuracy(stats.TotalPoints, stats.TotalPredictions);
-                await statsRepository.UpdateAsync(stats);
+                stats.UpdatedAt = DateTime.UtcNow;
             }
         }
 
         await dbContext.SaveChangesAsync(cancellationToken);
-        await statsRepository.SaveChangesAsync();
 
         foreach (var competitionCode in competitionCodes)
         {
             await statsRepository.RecalculateRanksAsync(competitionCode);
         }
 
-        await statsRepository.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(cancellationToken);
 
         _logger.LogInformation("Result processing completed. Processed {Count} predictions", unprocessedPredictions.Count);
     }
