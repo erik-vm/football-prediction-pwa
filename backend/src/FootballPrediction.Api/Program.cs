@@ -43,7 +43,7 @@ if (connectionString.StartsWith("postgres://") || connectionString.StartsWith("p
     Console.WriteLine("Converting PostgreSQL URL to Npgsql connection string format...");
     var uri = new Uri(connectionString);
     var host = uri.Host;
-    var port = uri.Port;
+    var port = uri.Port > 0 ? uri.Port : 5432; // Default PostgreSQL port
     var database = uri.AbsolutePath.TrimStart('/');
     var userInfo = uri.UserInfo.Split(':');
     var username = userInfo[0];
