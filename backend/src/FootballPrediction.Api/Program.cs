@@ -26,9 +26,13 @@ builder.Services.AddOpenApi();
 builder.Services.AddSignalR();
 
 // Configure PostgreSQL
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? builder.Configuration["DATABASE_URL"]
+    ?? throw new InvalidOperationException("No database connection string found. Set either ConnectionStrings:DefaultConnection or DATABASE_URL.");
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(
-        builder.Configuration.GetConnectionString("DefaultConnection"),
+        connectionString,
         b => b.MigrationsAssembly("FootballPrediction.Infrastructure"))
     .EnableSensitiveDataLogging()
     .EnableDetailedErrors());
