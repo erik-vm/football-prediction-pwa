@@ -27,8 +27,18 @@ builder.Services.AddSignalR();
 
 // Configure PostgreSQL
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? builder.Configuration["DATABASE_URL"]
-    ?? throw new InvalidOperationException("No database connection string found. Set either ConnectionStrings:DefaultConnection or DATABASE_URL.");
+    ?? builder.Configuration["DATABASE_URL"];
+
+if (string.IsNullOrWhiteSpace(connectionString))
+{
+    Console.WriteLine("ERROR: No database connection string found!");
+    Console.WriteLine($"ConnectionStrings:DefaultConnection = '{builder.Configuration.GetConnectionString("DefaultConnection")}'");
+    Console.WriteLine($"DATABASE_URL = '{builder.Configuration["DATABASE_URL"]}'");
+    throw new InvalidOperationException("No database connection string found. Set either ConnectionStrings:DefaultConnection or DATABASE_URL.");
+}
+
+Console.WriteLine($"Using connection string (first 50 chars): {connectionString.Substring(0, Math.Min(50, connectionString.Length))}...");
+Console.WriteLine($"Connection string length: {connectionString.Length}");
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(
