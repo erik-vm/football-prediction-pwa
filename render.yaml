@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: football-prediction-api
+    runtime: image
+    region: oregon
+    plan: free
+    branch: version_1_06_02_2026
+    dockerfilePath: ./Dockerfile
+    dockerContext: ./
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: Jwt__Issuer
+        value: FootballPredictionAPI
+      - key: Jwt__Audience
+        value: FootballPredictionClient
+      - key: Jwt__AccessTokenExpirationMinutes
+        value: "1440"
+      - key: FootballDataApi__BaseUrl
+        value: https://api.football-data.org/v4/
+      - key: BackgroundJobs__MatchSyncIntervalHours
+        value: "6"
+      - key: ASPNETCORE_FORWARDEDHEADERS_ENABLED
+        value: "true"
