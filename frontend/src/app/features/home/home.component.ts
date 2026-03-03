@@ -1,10 +1,12 @@
-import { Component } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
 import { InstallPromptComponent } from '../../shared/components/install-prompt/install-prompt.component';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [InstallPromptComponent],
+  imports: [InstallPromptComponent, RouterLink],
   template: `
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <app-install-prompt />
@@ -17,12 +19,12 @@ import { InstallPromptComponent } from '../../shared/components/install-prompt/i
           Predict match scores, earn points, and compete on the leaderboard!
         </p>
         <div class="space-x-4">
-          <button class="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors">
+          <a routerLink="/register" class="inline-block bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors">
             Get Started
-          </button>
-          <button class="bg-gray-200 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-300 transition-colors">
-            Learn More
-          </button>
+          </a>
+          <a routerLink="/login" class="inline-block bg-gray-200 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-300 transition-colors">
+            Login
+          </a>
         </div>
       </div>
 
@@ -43,4 +45,14 @@ import { InstallPromptComponent } from '../../shared/components/install-prompt/i
     </div>
   `
 })
-export class HomeComponent {}
+export class HomeComponent implements OnInit {
+  private authService = inject(AuthService);
+  private router = inject(Router);
+
+  ngOnInit(): void {
+    // If already logged in, redirect to predictions
+    if (this.authService.isAuthenticated()) {
+      this.router.navigate(['/predictions']);
+    }
+  }
+}
