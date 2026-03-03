@@ -1,5 +1,5 @@
 export const environment = {
   production: true,
-  apiUrl: '/api/v1',
+  apiUrl: 'https://football-prediction-api.onrender.com/api',
   apiTimeout: 30000,
 };

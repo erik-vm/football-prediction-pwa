@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json.Serialization;
 using FluentValidation;
 using FootballPrediction.Application.Interfaces;
 using FootballPrediction.Infrastructure.Jobs;
@@ -14,7 +15,11 @@ using Microsoft.IdentityModel.Tokens;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
 builder.Services.AddOpenApi();
 
 // Add SignalR
@@ -45,7 +50,18 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IScoringService, ScoringService>();
 builder.Services.AddScoped<IMatchResultService, MatchResultService>();
 builder.Services.AddScoped<ILeaderboardService, LeaderboardService>();
-builder.Services.AddHttpClient<FootballDataService>();
+
+// Register FootballDataService with HttpClient
+var footballDataBaseUrl = builder.Configuration["FootballDataApi:BaseUrl"]
+    ?? throw new InvalidOperationException("FootballDataApi:BaseUrl not configured");
+var footballDataApiKey = builder.Configuration["FootballDataApi:ApiKey"]
+    ?? throw new InvalidOperationException("FootballDataApi:ApiKey not configured. Use 'dotnet user-secrets set \"FootballDataApi:ApiKey\" \"YOUR_KEY\"' for development or set environment variable for production.");
+
+builder.Services.AddHttpClient<FootballDataService>(client =>
+{
+    client.BaseAddress = new Uri(footballDataBaseUrl);
+    client.DefaultRequestHeaders.Add("X-Auth-Token", footballDataApiKey);
+});
 
 // Register background services
 builder.Services.AddHostedService<MatchSyncBackgroundJob>();
@@ -89,7 +105,20 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:4200", "https://localhost:4200")
+        var allowedOrigins = new List<string>
+        {
+            "http://localhost:4200",
+            "https://localhost:4200"
+        };
+
+        // Add production origins if configured
+        var productionOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
+        if (productionOrigins != null)
+        {
+            allowedOrigins.AddRange(productionOrigins);
+        }
+
+        policy.WithOrigins(allowedOrigins.ToArray())
             .AllowAnyMethod()
             .AllowAnyHeader()
             .AllowCredentials();
