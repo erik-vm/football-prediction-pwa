@@ -2532,3 +2532,131 @@ Compared with `.specs/views/leaderboard_view.png`:
 ---
 
 **Last Updated:** 2026-02-22 (Bug Fixes Complete - Prediction System & Leaderboards Working\!)
+
+## Phase 25: User Settings/Preferences View (2026-03-03)
+
+### Overview
+Updated the Competition Preferences component with a modern, clean design matching the Flutter app. Added HeaderComponent integration, user profile section with gradient avatar, and redesigned the competition selection interface with cyan-themed checkboxes and card-based layout.
+
+### Tasks Completed
+- [x] Add HeaderComponent to preferences view
+- [x] Create user profile section with gradient avatar
+- [x] Display username and email
+- [x] Redesign competition selection with card-based layout
+- [x] Add cyan checkboxes and selection highlighting
+- [x] Display competition emblems
+- [x] Add Select All/Clear All buttons
+- [x] Verify backend API integration
+
+### Implementation Details
+
+**1. Component Updates** (`frontend/src/app/features/preferences/competition-preferences/`)
+- Added HeaderComponent import and integration
+- Added AuthService for current user display
+- Backend API integration already in place (preferences saved to database)
+- Reactive state management with Angular signals
+
+**2. User Profile Section**
+- Gradient cyan-to-blue avatar (bg-gradient-to-br from-cyan-500 to-blue-600)
+- Circle avatar (w-16 h-16 rounded-full)
+- First letter of username displayed in white (text-2xl font-bold)
+- Username displayed below avatar (text-xl font-bold)
+- Email displayed in gray (text-sm text-gray-500)
+
+**3. Competition Selection Interface**
+- Card-based layout with rounded borders (rounded-lg)
+- Cyan checkboxes (w-5 h-5 text-cyan-500 focus:ring-cyan-500)
+- Selected state styling:
+  - Cyan background (bg-cyan-50)
+  - Cyan border (border-cyan-500)
+  - Checkmark icon displayed (text-cyan-500)
+- Competition emblems (w-8 h-8)
+- Hover effects (hover:bg-gray-50)
+- Cursor pointer for clickable cards
+
+**4. Action Buttons**
+- "Select All" button (rounded-full bg-gray-100)
+- "Clear All" button (rounded-full bg-gray-100)
+- Disabled state handling
+- Small, compact styling (px-3 py-1 text-xs)
+
+**5. Loading & Error States**
+- Cyan spinner for loading (border-cyan-500)
+- Green success messages (bg-green-50 border-green-200)
+- Red error messages (bg-red-50 border-red-200)
+
+### Files Modified (2)
+1. `frontend/src/app/features/preferences/competition-preferences/competition-preferences.component.ts`
+   - Added HeaderComponent import
+   - Added AuthService injection
+   - Added currentUser signal
+2. `frontend/src/app/features/preferences/competition-preferences/competition-preferences.component.html`
+   - Complete template redesign
+   - Added HeaderComponent
+   - Added user profile section
+   - Redesigned competition cards
+   - Added cyan styling throughout
+
+### Build Results
+- Frontend: ✅ SUCCESS (competition-preferences chunk: 18.83 kB → 25.98 kB)
+- Hot Module Replacement: ✅ Working
+- No compilation errors
+- Bundle size increase: ~7 kB (includes HeaderComponent and new template)
+
+### UI/UX Improvements
+- ✅ Clean, modern design matching Flutter app
+- ✅ User profile prominently displayed
+- ✅ Cyan theme consistent with app design
+- ✅ Card-based layout easier to use
+- ✅ Visual feedback for selected competitions
+- ✅ Competition emblems enhance recognition
+- ✅ Responsive layout for mobile and desktop
+
+### Backend Integration
+- Route: `/preferences` (protected with authGuard)
+- API endpoint: `/api/users/me/preferences`
+- Methods: GET, POST (add), DELETE (remove)
+- Real-time updates via Angular signals
+- Preferences saved to database (better than localStorage)
+- Toggle functionality with immediate feedback
+
+### Testing Notes
+- Preferences view accessible via `/preferences` route
+- HeaderComponent renders with app title and user actions
+- User avatar displays first letter of username
+- Competitions load from backend API
+- Select All/Clear All buttons functional
+- Individual competition toggle working
+- Success messages display after save
+- Cyan theme consistent throughout
+
+### Integration with Previous Phases
+- **Phase 22:** Uses HeaderComponent created in match list polish
+- **Phase 15:** Uses CompetitionService for fetching competitions
+- **Phase 15:** Uses CompetitionPreferenceService for API calls
+- **Phase 26:** Accessible via bottom navigation Profile/User icon
+
+### Design Alignment with Flutter App
+- ✅ HeaderComponent with app title
+- ✅ User profile section with avatar
+- ✅ Competition checkboxes with emblems
+- ✅ Cyan accent color throughout
+- ✅ Card-based selection interface
+- ✅ Clean, minimalist design
+
+### Known Limitations
+- Avatar only shows first letter (no image upload)
+- No search/filter for competitions
+- No grouping by competition type
+- No reordering of selected competitions
+- Email not editable (read-only display)
+
+### Next Steps
+- Consider adding competition search/filter
+- Consider adding profile image upload
+- Consider adding email change functionality
+- Consider adding notification preferences
+
+---
+
+**Last Updated:** 2026-03-03 (Phase 25 Complete - User Settings/Preferences View Implemented!)

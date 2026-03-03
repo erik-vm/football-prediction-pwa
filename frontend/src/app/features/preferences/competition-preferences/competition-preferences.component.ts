@@ -2,18 +2,21 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CompetitionPreferenceService } from '../../../core/services/competition-preference.service';
 import { CompetitionService } from '../../../core/services/competition.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { Competition } from '../../../core/models/competition.model';
+import { HeaderComponent } from '../../../shared/components/header/header.component';
 
 @Component({
   selector: 'app-competition-preferences',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, HeaderComponent],
   templateUrl: './competition-preferences.component.html',
   styleUrl: './competition-preferences.component.css'
 })
 export class CompetitionPreferencesComponent implements OnInit {
   private preferenceService = inject(CompetitionPreferenceService);
   private competitionService = inject(CompetitionService);
+  private authService = inject(AuthService);
 
   competitions = signal<Competition[]>([]);
   selectedCodes = signal<Set<string>>(new Set());
@@ -23,6 +26,7 @@ export class CompetitionPreferencesComponent implements OnInit {
   isLoading = this.preferenceService.isLoading;
   error = this.preferenceService.error;
   preferences = this.preferenceService.preferences;
+  currentUser = this.authService.currentUser;
 
   ngOnInit(): void {
     this.loadCompetitions();
