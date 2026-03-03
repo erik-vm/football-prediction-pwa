@@ -9,13 +9,18 @@ import { Prediction } from '../../../core/models/prediction.model';
 import { ScoreInputComponent } from '../../../shared/components/score-input/score-input.component';
 import { CountdownTimerComponent } from '../../../shared/components/countdown-timer/countdown-timer.component';
 import { PointsInfoComponent } from '../../../shared/components/points-info/points-info.component';
+import { HeaderComponent } from '../../../shared/components/header/header.component';
 
 @Component({
   selector: 'app-prediction-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, ScoreInputComponent, CountdownTimerComponent, PointsInfoComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, ScoreInputComponent, CountdownTimerComponent, PointsInfoComponent, HeaderComponent],
   template: `
-    <div class="max-w-2xl mx-auto px-4 py-8">
+    <div class="flex flex-col h-full">
+      <app-header />
+
+      <div class="flex-1 overflow-auto bg-gray-50">
+        <div class="max-w-2xl mx-auto px-4 py-6">
       @if (isLoading()) {
         <div class="text-center py-12">
           <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
@@ -122,37 +127,30 @@ import { PointsInfoComponent } from '../../../shared/components/points-info/poin
                   </div>
                 }
 
-                <div class="flex gap-4">
-                  <button
-                    type="submit"
-                    [disabled]="predictionForm.invalid || isSubmitting()"
-                    class="flex-1 px-6 py-3 bg-primary-600 text-white font-medium rounded-lg hover:bg-primary-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-                  >
-                    @if (isSubmitting()) {
-                      <span class="flex items-center justify-center">
-                        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
-                          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Submitting...
-                      </span>
-                    } @else {
-                      {{ existingPrediction() ? 'Update Prediction' : 'Submit Prediction' }}
-                    }
-                  </button>
-
-                  <a
-                    routerLink="/predictions"
-                    class="px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
-                  >
-                    Cancel
-                  </a>
-                </div>
+                <button
+                  type="submit"
+                  [disabled]="predictionForm.invalid || isSubmitting()"
+                  class="w-full px-6 py-3 bg-cyan-500 text-white font-bold rounded-full hover:bg-cyan-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                >
+                  @if (isSubmitting()) {
+                    <span class="flex items-center justify-center">
+                      <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Submitting...
+                    </span>
+                  } @else {
+                    {{ existingPrediction() ? 'Update Prediction' : 'Save Prediction' }}
+                  }
+                </button>
               </div>
             </form>
           }
         </div>
       }
+        </div>
+      </div>
     </div>
   `,
   styles: []

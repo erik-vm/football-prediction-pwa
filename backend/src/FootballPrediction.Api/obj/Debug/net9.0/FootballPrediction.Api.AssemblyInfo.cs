@@ -10,10 +10,11 @@
 using System;
 using System.Reflection;
 
+[assembly: Microsoft.Extensions.Configuration.UserSecrets.UserSecretsIdAttribute("d0dd75c5-d648-4921-8387-b397654aa424")]
 [assembly: System.Reflection.AssemblyCompanyAttribute("FootballPrediction.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+10768a839fedcdccdb62834773373d206a0f55cf")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+872aa3ad989ef115fdf79239113df6a32ca8dba7")]
 [assembly: System.Reflection.AssemblyProductAttribute("FootballPrediction.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("FootballPrediction.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

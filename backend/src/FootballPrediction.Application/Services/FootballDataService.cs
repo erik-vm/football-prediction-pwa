@@ -1,7 +1,6 @@
 using FootballPrediction.Application.DTOs.FootballData;
 using FootballPrediction.Domain.Entities;
 using FootballPrediction.Domain.Enums;
-using Microsoft.Extensions.Configuration;
 using System.Net.Http.Json;
 using System.Text.Json;
 
@@ -10,26 +9,17 @@ namespace FootballPrediction.Application.Services;
 public class FootballDataService
 {
     private readonly HttpClient _httpClient;
-    private readonly string _apiKey;
 
-    public FootballDataService(HttpClient httpClient, IConfiguration configuration)
+    public FootballDataService(HttpClient httpClient)
     {
         _httpClient = httpClient;
-
-        var baseUrl = configuration["FootballDataApi:BaseUrl"]
-            ?? throw new InvalidOperationException("FootballDataApi:BaseUrl not configured");
-        _apiKey = configuration["FootballDataApi:ApiKey"]
-            ?? throw new InvalidOperationException("FootballDataApi:ApiKey not configured. Use 'dotnet user-secrets set \"FootballDataApi:ApiKey\" \"YOUR_KEY\"' for development or set environment variable for production.");
-
-        _httpClient.BaseAddress = new Uri(baseUrl);
-        _httpClient.DefaultRequestHeaders.Add("X-Auth-Token", _apiKey);
     }
 
     public async Task<List<Match>> GetMatchesAsync(string competitionCode, DateTime dateFrom, DateTime dateTo)
     {
         var dateFromStr = dateFrom.ToString("yyyy-MM-dd");
         var dateToStr = dateTo.ToString("yyyy-MM-dd");
-        var url = $"/competitions/{competitionCode}/matches?dateFrom={dateFromStr}&dateTo={dateToStr}";
+        var url = $"competitions/{competitionCode}/matches?dateFrom={dateFromStr}&dateTo={dateToStr}";
 
         var response = await _httpClient.GetFromJsonAsync<FootballDataMatchesResponse>(url);
 

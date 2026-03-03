@@ -112,3 +112,13 @@ C:\Projects\football-prediction-pwa\backend\tests\FootballPrediction.UnitTests\o
 C:\Projects\football-prediction-pwa\backend\tests\FootballPrediction.UnitTests\obj\Release\net9.0\FootballPrediction.UnitTests.pdb
 C:\Projects\football-prediction-pwa\backend\tests\FootballPrediction.UnitTests\obj\Release\net9.0\FootballPrediction.UnitTests.genruntimeconfig.cache
 C:\Projects\football-prediction-pwa\backend\tests\FootballPrediction.UnitTests\obj\Release\net9.0\ref\FootballPrediction.UnitTests.dll
+C:\Projects\football-prediction-pwa\backend\tests\FootballPrediction.UnitTests\bin\Release\net9.0\Castle.Core.dll
+C:\Projects\football-prediction-pwa\backend\tests\FootballPrediction.UnitTests\bin\Release\net9.0\Microsoft.EntityFrameworkCore.dll
+C:\Projects\football-prediction-pwa\backend\tests\FootballPrediction.UnitTests\bin\Release\net9.0\Microsoft.EntityFrameworkCore.Abstractions.dll
+C:\Projects\football-prediction-pwa\backend\tests\FootballPrediction.UnitTests\bin\Release\net9.0\Microsoft.EntityFrameworkCore.InMemory.dll
+C:\Projects\football-prediction-pwa\backend\tests\FootballPrediction.UnitTests\bin\Release\net9.0\Microsoft.EntityFrameworkCore.Relational.dll
+C:\Projects\football-prediction-pwa\backend\tests\FootballPrediction.UnitTests\bin\Release\net9.0\Moq.dll
+C:\Projects\football-prediction-pwa\backend\tests\FootballPrediction.UnitTests\bin\Release\net9.0\Npgsql.dll
+C:\Projects\football-prediction-pwa\backend\tests\FootballPrediction.UnitTests\bin\Release\net9.0\Npgsql.EntityFrameworkCore.PostgreSQL.dll
+C:\Projects\football-prediction-pwa\backend\tests\FootballPrediction.UnitTests\bin\Release\net9.0\FootballPrediction.Infrastructure.dll
+C:\Projects\football-prediction-pwa\backend\tests\FootballPrediction.UnitTests\bin\Release\net9.0\FootballPrediction.Infrastructure.pdb

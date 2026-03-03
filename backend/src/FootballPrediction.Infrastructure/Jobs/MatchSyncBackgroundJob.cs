@@ -23,6 +23,18 @@ public class MatchSyncBackgroundJob : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        // Run immediately on startup
+        try
+        {
+            _logger.LogInformation("Running initial match sync on startup");
+            await SyncMatchesAsync(stoppingToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred during initial match sync");
+        }
+
+        // Then run periodically every hour
         using PeriodicTimer timer = new PeriodicTimer(_period);
 
         while (!stoppingToken.IsCancellationRequested &&

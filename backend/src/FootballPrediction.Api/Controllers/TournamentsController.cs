@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace FootballPrediction.Api.Controllers;
 
 [ApiController]
-[Route("api/v1/[controller]")]
+[Route("api/[controller]")]
 [Authorize(Roles = "Admin")]
 public class TournamentsController : ControllerBase
 {
@@ -42,6 +42,31 @@ public class TournamentsController : ControllerBase
         });
 
         return Ok(tournamentDtos);
+    }
+
+    [HttpGet("active")]
+    [AllowAnonymous]
+    public async Task<ActionResult<TournamentDto>> GetActiveTournament()
+    {
+        var tournaments = await _tournamentRepository.GetAllAsync();
+        var activeTournament = tournaments.FirstOrDefault(t => t.IsActive);
+
+        if (activeTournament == null)
+        {
+            return NotFound(new { message = "No active tournament found" });
+        }
+
+        var tournamentDto = new TournamentDto
+        {
+            Id = activeTournament.Id,
+            Name = activeTournament.Name,
+            Season = activeTournament.Season,
+            StartDate = activeTournament.StartDate,
+            EndDate = activeTournament.EndDate,
+            IsActive = activeTournament.IsActive
+        };
+
+        return Ok(tournamentDto);
     }
 
     [HttpGet("{id}")]

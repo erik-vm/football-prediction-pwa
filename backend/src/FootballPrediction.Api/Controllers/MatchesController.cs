@@ -1,4 +1,5 @@
 using FluentValidation;
+using FootballPrediction.Application.DTOs;
 using FootballPrediction.Application.DTOs.Match;
 using FootballPrediction.Application.Interfaces;
 using FootballPrediction.Domain.Entities;
@@ -8,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace FootballPrediction.Api.Controllers;
 
 [ApiController]
-[Route("api/v1/[controller]")]
+[Route("api/[controller]")]
 [Authorize(Roles = "Admin")]
 public class MatchesController : ControllerBase
 {
@@ -34,7 +35,7 @@ public class MatchesController : ControllerBase
 
     [HttpGet]
     [AllowAnonymous]
-    public async Task<ActionResult<IEnumerable<MatchDto>>> GetMatches(
+    public async Task<ActionResult<ApiResponse<IEnumerable<MatchDto>>>> GetMatches(
         [FromQuery] string? competitionCode = null,
         [FromQuery] bool? isFinished = null,
         [FromQuery] int? matchday = null)
@@ -53,10 +54,11 @@ public class MatchesController : ControllerBase
             IsFinished = m.IsFinished,
             StageMultiplier = m.StageMultiplier,
             CompetitionCode = m.CompetitionCode,
-            Matchday = m.Matchday
-        });
+            Matchday = m.Matchday,
+            Venue = m.Venue
+        }).ToList();
 
-        return Ok(matchDtos);
+        return Ok(ApiResponse<IEnumerable<MatchDto>>.Success(matchDtos));
     }
 
     [HttpGet("gameweek/{gameWeekId}")]
@@ -77,7 +79,8 @@ public class MatchesController : ControllerBase
             IsFinished = m.IsFinished,
             StageMultiplier = m.StageMultiplier,
             CompetitionCode = m.CompetitionCode,
-            Matchday = m.Matchday
+            Matchday = m.Matchday,
+            Venue = m.Venue
         });
 
         return Ok(matchDtos);
@@ -85,7 +88,7 @@ public class MatchesController : ControllerBase
 
     [HttpGet("{id}")]
     [AllowAnonymous]
-    public async Task<ActionResult<MatchDto>> GetById(Guid id)
+    public async Task<ActionResult<ApiResponse<MatchDto>>> GetById(Guid id)
     {
         var match = await _matchRepository.GetByIdAsync(id);
         if (match == null)
@@ -106,10 +109,11 @@ public class MatchesController : ControllerBase
             IsFinished = match.IsFinished,
             StageMultiplier = match.StageMultiplier,
             CompetitionCode = match.CompetitionCode,
-            Matchday = match.Matchday
+            Matchday = match.Matchday,
+            Venue = match.Venue
         };
 
-        return Ok(matchDto);
+        return Ok(ApiResponse<MatchDto>.Success(matchDto));
     }
 
     [HttpGet("upcoming")]
@@ -130,7 +134,8 @@ public class MatchesController : ControllerBase
             IsFinished = m.IsFinished,
             StageMultiplier = m.StageMultiplier,
             CompetitionCode = m.CompetitionCode,
-            Matchday = m.Matchday
+            Matchday = m.Matchday,
+            Venue = m.Venue
         });
 
         return Ok(matchDtos);
@@ -154,7 +159,8 @@ public class MatchesController : ControllerBase
             IsFinished = m.IsFinished,
             StageMultiplier = m.StageMultiplier,
             CompetitionCode = m.CompetitionCode,
-            Matchday = m.Matchday
+            Matchday = m.Matchday,
+            Venue = m.Venue
         });
 
         return Ok(matchDtos);

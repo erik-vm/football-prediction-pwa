@@ -6,7 +6,7 @@ using System.Security.Claims;
 namespace FootballPrediction.Api.Controllers;
 
 [ApiController]
-[Route("api/v1/users")]
+[Route("api/users")]
 [Authorize]
 public class UserPreferencesController : ControllerBase
 {

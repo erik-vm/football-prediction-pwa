@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("FootballPrediction.Domain")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+93a1c7b9abc765ed1c5a57c0238edd61e3812cc8")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e20d724c3332473a690bcd5363c0950a37552ca1")]
 [assembly: System.Reflection.AssemblyProductAttribute("FootballPrediction.Domain")]
 [assembly: System.Reflection.AssemblyTitleAttribute("FootballPrediction.Domain")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

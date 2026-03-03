@@ -1,0 +1,17 @@
+<div class="flex border-b border-gray-200 bg-white">
+  @for (tab of tabs; track tab.value) {
+    <button
+      type="button"
+      (click)="selectTab(tab.value)"
+      class="flex-1 py-3 px-4 text-center font-medium transition-colors relative"
+      [class.text-cyan-500]="tab.value === activeTab()"
+      [class.text-gray-500]="tab.value !== activeTab()">
+      {{ tab.label }}
+
+      <!-- Active Tab Underline -->
+      @if (tab.value === activeTab()) {
+        <span class="absolute bottom-0 left-0 right-0 h-0.5 bg-cyan-500"></span>
+      }
+    </button>
+  }
+</div>

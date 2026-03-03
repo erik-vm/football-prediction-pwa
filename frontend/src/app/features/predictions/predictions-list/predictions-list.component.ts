@@ -5,13 +5,17 @@ import { filter } from 'rxjs/operators';
 import { MatchService } from '../../../core/services/match.service';
 import { PredictionService } from '../../../core/services/prediction.service';
 import { CompetitionService } from '../../../core/services/competition.service';
+import { CompetitionPreferenceService } from '../../../core/services/competition-preference.service';
 import { SignalRService } from '../../../core/services/signalr.service';
 import { Match } from '../../../core/models/match.model';
 import { Competition } from '../../../core/models/competition.model';
 import { Prediction } from '../../../core/models/prediction.model';
 import { MatchCardComponent } from '../match-card/match-card.component';
-import { MatchStatusTabsComponent, MatchStatus, MatchStatusTab } from '../../../shared/components/match-status-tabs/match-status-tabs.component';
+import { MatchStatus } from '../../../shared/components/match-status-tabs/match-status-tabs.component';
 import { MatchdayFilterComponent } from '../../../shared/components/matchday-filter/matchday-filter.component';
+import { HeaderComponent } from '../../../shared/components/header/header.component';
+import { CompetitionSelectorComponent } from '../../../shared/components/competition-selector/competition-selector.component';
+import { TabNavigationComponent, TabType } from '../../../shared/components/tab-navigation/tab-navigation.component';
 
 interface MatchWithPrediction extends Match {
   prediction?: Prediction;
@@ -20,7 +24,14 @@ interface MatchWithPrediction extends Match {
 @Component({
   selector: 'app-predictions-list',
   standalone: true,
-  imports: [CommonModule, MatchCardComponent, MatchStatusTabsComponent, MatchdayFilterComponent],
+  imports: [
+    CommonModule,
+    MatchCardComponent,
+    MatchdayFilterComponent,
+    HeaderComponent,
+    CompetitionSelectorComponent,
+    TabNavigationComponent
+  ],
   templateUrl: './predictions-list.component.html',
   styles: []
 })
@@ -28,6 +39,7 @@ export class PredictionsListComponent implements OnInit, OnDestroy {
   private matchService = inject(MatchService);
   private predictionService = inject(PredictionService);
   private competitionService = inject(CompetitionService);
+  private preferenceService = inject(CompetitionPreferenceService);
   private signalRService = inject(SignalRService);
   private router = inject(Router);
 
@@ -49,7 +61,21 @@ export class PredictionsListComponent implements OnInit, OnDestroy {
   activeStatusTab = this.activeStatusTabSignal.asReadonly();
   selectedMatchday = this.selectedMatchdaySignal.asReadonly();
   selectedCompetition = this.selectedCompetitionSignal.asReadonly();
-  activeCompetitions = this.competitionService.activeCompetitions;
+
+  // Filter active competitions by user preferences
+  activeCompetitions = computed(() => {
+    const allActive = this.competitionService.activeCompetitions();
+    const preferences = this.preferenceService.preferences();
+
+    // If user has preferences, only show preferred competitions
+    if (preferences.length > 0) {
+      const preferredCodes = new Set(preferences.map(p => p.competitionCode));
+      return allActive.filter(c => preferredCodes.has(c.code));
+    }
+
+    // Otherwise show all active competitions
+    return allActive;
+  });
 
   totalMatches = computed(() => this.matchesSignal().length);
   userPredictionsCount = computed(() => this.predictionsSignal().length);
@@ -111,6 +137,7 @@ export class PredictionsListComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.competitionService.getCompetitions(true).subscribe();
+    this.preferenceService.getUserPreferences().subscribe();
     this.loadData();
     this.setupSignalRListeners();
     this.setupRouterListener();
@@ -231,6 +258,24 @@ export class PredictionsListComponent implements OnInit, OnDestroy {
     if (status === 'live') {
       this.startAutoRefresh();
     }
+  }
+
+  onTabChange(tab: TabType): void {
+    const statusMapping: Record<TabType, MatchStatus> = {
+      'upcoming': 'upcoming',
+      'live': 'live',
+      'completed': 'completed'
+    };
+    this.onStatusTabChange(statusMapping[tab]);
+  }
+
+  mapStatusToTab(status: MatchStatus): TabType {
+    const tabMapping: Record<MatchStatus, TabType> = {
+      'upcoming': 'upcoming',
+      'live': 'live',
+      'completed': 'completed'
+    };
+    return tabMapping[status];
   }
 
   private startAutoRefresh(): void {

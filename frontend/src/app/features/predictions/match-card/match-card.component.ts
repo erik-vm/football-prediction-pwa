@@ -3,94 +3,79 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { Match } from '../../../core/models/match.model';
 import { Prediction } from '../../../core/models/prediction.model';
+import { StatusBadgeComponent, BadgeStatus } from '../../../shared/components/status-badge/status-badge.component';
 
 @Component({
   selector: 'app-match-card',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, StatusBadgeComponent],
   template: `
-    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow">
-      <div class="flex justify-between items-start mb-3">
-        <div class="text-xs font-medium text-gray-500 uppercase">
-          {{ stageName() }} · x{{ match().stageMultiplier }}
+    <div class="bg-white rounded-xl shadow-md p-4 mb-4 hover:shadow-lg transition-shadow">
+      <!-- Header: Date/Time and Status Badge -->
+      <div class="flex justify-between items-start mb-4">
+        <div class="text-sm text-gray-500">
+          {{ formattedKickoffTime() }}
         </div>
-        @if (hasPrediction()) {
-          <div class="flex items-center gap-1 text-green-600 text-xs font-medium">
-            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-            </svg>
-            Predicted
-          </div>
-        }
+        <app-status-badge [status]="badgeStatus()" />
       </div>
 
-      <div class="space-y-3">
-        <div class="flex items-center justify-between">
-          <div class="flex-1 text-right pr-4">
-            <div class="text-lg font-semibold text-gray-900">{{ match().homeTeam }}</div>
+      <!-- Team Names and Score/VS -->
+      <div class="flex items-center justify-between mb-4">
+        <!-- Home Team -->
+        <div class="flex-1 flex flex-col items-center">
+          <div class="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center mb-2">
+            <svg class="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10" fill="currentColor" opacity="0.2"/>
+              <circle cx="12" cy="12" r="2" fill="currentColor"/>
+            </svg>
           </div>
-
-          <div class="flex items-center gap-2 text-center min-w-[80px]">
-            @if (match().isFinished) {
-              <div class="text-2xl font-bold text-gray-900">
-                {{ match().homeScore }} - {{ match().awayScore }}
-              </div>
-            } @else {
-              <div class="text-xl font-medium text-gray-400">VS</div>
-            }
-          </div>
-
-          <div class="flex-1 pl-4">
-            <div class="text-lg font-semibold text-gray-900">{{ match().awayTeam }}</div>
-          </div>
+          <div class="text-sm font-medium text-gray-800 text-center">{{ match().homeTeam }}</div>
         </div>
 
-        @if (prediction() && match().isFinished && prediction()!.pointsEarned !== undefined) {
-          <div class="bg-blue-50 border border-blue-200 rounded px-3 py-2 text-center">
-            <div class="text-xs text-blue-600 font-medium">Your Prediction</div>
-            <div class="text-sm font-semibold text-blue-900">
-              {{ prediction()!.homeScore }} - {{ prediction()!.awayScore }}
-              <span class="ml-2 text-blue-600">· {{ prediction()!.pointsEarned }} pts</span>
-            </div>
-          </div>
-        } @else if (prediction()) {
-          <div class="bg-gray-50 border border-gray-200 rounded px-3 py-2 text-center">
-            <div class="text-xs text-gray-600 font-medium">Your Prediction</div>
-            <div class="text-sm font-semibold text-gray-900">
-              {{ prediction()!.homeScore }} - {{ prediction()!.awayScore }}
-            </div>
-          </div>
-        }
-
-        <div class="flex items-center justify-between text-sm pt-2 border-t border-gray-100">
-          <div class="text-gray-600">
-            {{ formattedKickoffTime() }}
-          </div>
-
+        <!-- Score or VS -->
+        <div class="px-4">
           @if (match().isFinished) {
-            <span class="px-2 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded">
-              Finished
-            </span>
-          } @else if (matchStarted()) {
-            <span class="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs font-medium rounded">
-              In Progress
-            </span>
+            <div class="text-3xl font-bold text-gray-900">
+              {{ match().homeScore }} - {{ match().awayScore }}
+            </div>
           } @else {
-            <span class="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded">
-              {{ countdown() }}
-            </span>
+            <div class="text-xl font-semibold text-gray-400">VS</div>
           }
         </div>
 
-        @if (!match().isFinished && !matchStarted()) {
-          <a
-            [routerLink]="['/predictions', match().id]"
-            class="block w-full text-center px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded hover:bg-primary-700 transition-colors"
-          >
-            {{ hasPrediction() ? 'Edit Prediction' : 'Make Prediction' }}
-          </a>
-        }
+        <!-- Away Team -->
+        <div class="flex-1 flex flex-col items-center">
+          <div class="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center mb-2">
+            <svg class="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10" fill="currentColor" opacity="0.2"/>
+              <circle cx="12" cy="12" r="2" fill="currentColor"/>
+            </svg>
+          </div>
+          <div class="text-sm font-medium text-gray-800 text-center">{{ match().awayTeam }}</div>
+        </div>
       </div>
+
+      <!-- User Prediction Display -->
+      @if (prediction() && match().isFinished && prediction()!.pointsEarned !== undefined) {
+        <div class="bg-blue-50 rounded-lg p-3 mb-3">
+          <div class="text-xs text-gray-600 mb-1">Your Prediction: {{ prediction()!.homeScore }}-{{ prediction()!.awayScore }}</div>
+          <div class="text-sm font-semibold text-green-600">{{ prediction()!.pointsEarned }} points earned</div>
+        </div>
+      } @else if (prediction()) {
+        <div class="bg-yellow-50 border-l-4 border-yellow-500 rounded p-3 mb-3">
+          <div class="text-sm font-semibold text-yellow-900">Your prediction: {{ prediction()!.homeScore }}-{{ prediction()!.awayScore }}</div>
+        </div>
+      }
+
+      <!-- Action Button -->
+      @if (!match().isFinished && !matchStarted()) {
+        <a
+          [routerLink]="['/predictions', match().id]"
+          class="block w-full text-center px-4 py-3 bg-cyan-500 text-white font-bold rounded-full hover:bg-cyan-600 transition-colors"
+        >
+          {{ hasPrediction() ? 'Edit Prediction' : 'Make Prediction' }}
+        </a>
+      }
     </div>
   `,
   styles: []
@@ -115,6 +100,13 @@ export class MatchCardComponent {
   matchStarted = computed(() => {
     const kickoff = new Date(this.matchSignal().kickoffTime).getTime();
     return this.currentTimeSignal() >= kickoff;
+  });
+
+  badgeStatus = computed((): BadgeStatus => {
+    const match = this.matchSignal();
+    if (match.isFinished) return 'finished';
+    if (this.matchStarted()) return 'live';
+    return 'upcoming';
   });
 
   stageName = computed(() => {

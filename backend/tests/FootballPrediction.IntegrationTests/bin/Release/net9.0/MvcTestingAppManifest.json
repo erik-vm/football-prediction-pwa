@@ -1,0 +1,6 @@
+{
+  "FootballPrediction.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "C:\\Projects\\football-prediction-pwa\\backend\\src\\FootballPrediction.Api",
+  "FootballPrediction.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "C:\\Projects\\football-prediction-pwa\\backend\\src\\FootballPrediction.Application",
+  "FootballPrediction.Domain, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "C:\\Projects\\football-prediction-pwa\\backend\\src\\FootballPrediction.Domain",
+  "FootballPrediction.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "C:\\Projects\\football-prediction-pwa\\backend\\src\\FootballPrediction.Infrastructure"
+}

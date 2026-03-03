@@ -16,4 +16,5 @@ public class MatchDto
     public int StageMultiplier { get; set; }
     public string CompetitionCode { get; set; } = string.Empty;
     public int? Matchday { get; set; }
+    public string? Venue { get; set; }
 }

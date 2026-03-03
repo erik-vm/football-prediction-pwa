@@ -1,0 +1,46 @@
+
+---
+
+### Phase 13 (v2): Football-Data.org API Integration ✅
+**Status:** Completed
+**Date:** 2026-02-21
+**Duration:** ~3 hours
+**Analysis:** `.analysis/2026-02-21-phase-13-analysis.md`
+
+#### Tasks
+- [x] Create Competition entity in Domain layer
+- [x] Create CompetitionConfiguration for EF Core
+- [x] Update Match entity with CompetitionCode, Venue, Matchday
+- [x] Update MatchConfiguration for new columns
+- [x] Update DbContext to include Competitions DbSet
+- [x] Implement FootballDataService with API integration
+- [x] Create MatchSyncBackgroundJob for hourly updates
+- [x] Create database migrations for schema changes
+- [x] Seed 12 competitions into database
+- [x] Create Competition DTOs and CompetitionsController
+- [x] Update frontend Competition model and service
+- [x] Build and test backend and frontend
+
+**Deliverables:**
+- ✅ Competition entity with Code (PK), Name, Emblem, IsActive
+- ✅ Match entity updated with CompetitionCode (FK), Venue, Matchday
+- ✅ FootballDataService with football-data.org API v4 integration
+- ✅ MatchSyncBackgroundJob (hourly execution via PeriodicTimer)
+- ✅ CompetitionSeeder for 12 competitions (PL, CL, BL1, SA, PD, FL1, DED, PPL, ELC, BSA, WC, EC)
+- ✅ CompetitionsController with GET endpoints
+- ✅ Frontend CompetitionService with reactive signals
+- ✅ Database migration: AddCompetitions
+- ✅ Backend build: 0 warnings, 0 errors
+- ✅ Frontend build: 326.14 kB (successful)
+
+**Critical Issues Identified (must fix before Phase 14):**
+- 🔴 Non-idempotent match creation (Guid.NewGuid creates duplicates)
+- 🔴 Invalid GameWeekId (Guid.Empty violates FK constraint)
+- 🔴 Hardcoded API key in source code (security risk)
+- ⚠️ MatchSyncBackgroundJob incomplete (fetches but doesn't save matches)
+
+**See Analysis:** `.analysis/2026-02-21-phase-13-analysis.md` for detailed technical review
+
+---
+
+**Last Updated:** 2026-02-21 (Phase 13 v2 Complete - football-data.org API Integration with Critical Issues Identified!)
