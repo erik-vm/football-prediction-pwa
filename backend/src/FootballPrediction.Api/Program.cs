@@ -37,6 +37,22 @@ if (string.IsNullOrWhiteSpace(connectionString))
     throw new InvalidOperationException("No database connection string found. Set either ConnectionStrings:DefaultConnection or DATABASE_URL.");
 }
 
+// Convert PostgreSQL URL format to Npgsql connection string format
+if (connectionString.StartsWith("postgres://") || connectionString.StartsWith("postgresql://"))
+{
+    Console.WriteLine("Converting PostgreSQL URL to Npgsql connection string format...");
+    var uri = new Uri(connectionString);
+    var host = uri.Host;
+    var port = uri.Port;
+    var database = uri.AbsolutePath.TrimStart('/');
+    var userInfo = uri.UserInfo.Split(':');
+    var username = userInfo[0];
+    var password = userInfo.Length > 1 ? userInfo[1] : "";
+
+    connectionString = $"Host={host};Port={port};Database={database};Username={username};Password={password};SSL Mode=Require;Trust Server Certificate=true";
+    Console.WriteLine($"Converted connection string (first 50 chars): {connectionString.Substring(0, Math.Min(50, connectionString.Length))}...");
+}
+
 Console.WriteLine($"Using connection string (first 50 chars): {connectionString.Substring(0, Math.Min(50, connectionString.Length))}...");
 Console.WriteLine($"Connection string length: {connectionString.Length}");
 
