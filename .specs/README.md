@@ -17,6 +17,7 @@ This folder contains **all** the specifications, requirements, rules, and guidel
 | **[PROJECT-STRUCTURE.md](PROJECT-STRUCTURE.md)** | Folder structure, naming conventions | **WHEN** creating new files or organizing code |
 | **[PHASE-COMPLETION-WORKFLOW.md](PHASE-COMPLETION-WORKFLOW.md)** ⚠️ | **Required workflow after EVERY phase** | **AFTER** completing each phase |
 | **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** 🔧 | Common issues and solutions | **WHEN** encountering errors or unexpected behavior |
+| **[DEPLOYMENT.md](DEPLOYMENT.md)** 🚀 | Production deployment guide | **WHEN** deploying to production or troubleshooting deployment issues |
 
 ### Agent Guidelines
 
@@ -295,8 +296,15 @@ refactor/description
 
 ### Hosting
 
+**Production (LIVE)**:
+- Backend: Render.com (Free Tier) - https://football-prediction-pwa.onrender.com/api
+- Frontend: Vercel (Free Tier) - https://football-prediction-pwa-erik-vms-projects.vercel.app/
+- Database: Render PostgreSQL (Free Tier)
+- **Total Cost**: $0/month
+
+**Alternative Options**:
 - Backend: Azure App Service / Railway
-- Frontend: Vercel / Netlify
+- Frontend: Netlify / GitHub Pages
 - Database: Azure PostgreSQL / Supabase
 
 ---
@@ -364,11 +372,13 @@ For questions or clarifications:
 
 ---
 
-**Version**: 1.1
+**Version**: 1.2
 **Created**: 2025-01-27
-**Updated**: 2026-02-08 (Added troubleshooting and analysis documentation)
-**Status**: Complete Specification Package
-**Ready For**: Project Scaffolding and Development
+**Updated**: 2026-03-04 (Added production deployment documentation)
+**Status**: Complete Specification Package - PRODUCTION READY
+**Production URLs**:
+- Frontend: https://football-prediction-pwa-erik-vms-projects.vercel.app/
+- Backend: https://football-prediction-pwa.onrender.com/api
 
 ---
 
