@@ -4,12 +4,8 @@
   "installCommand": "echo 'Skipping root install'",
   "routes": [
     {
-      "src": "/assets/(.*)",
-      "dest": "/assets/$1"
-    },
-    {
-      "src": "/(.*\\.(js|css|ico|json|svg|png|jpg|jpeg|webp|woff|woff2|ttf|eot|webmanifest))",
-      "dest": "/$1"
+      "src": "/manifest.webmanifest",
+      "dest": "/manifest.webmanifest"
     },
     {
       "src": "/ngsw-worker.js",
@@ -18,6 +14,18 @@
     {
       "src": "/ngsw.json",
       "dest": "/ngsw.json"
+    },
+    {
+      "src": "/assets/(.*)",
+      "dest": "/assets/$1"
+    },
+    {
+      "src": "/icons/(.*)",
+      "dest": "/icons/$1"
+    },
+    {
+      "src": "/(.*\\.(js|css|ico|svg|png|jpg|jpeg|webp|woff|woff2|ttf|eot))",
+      "dest": "/$1"
     },
     {
       "src": "/(.*)",
