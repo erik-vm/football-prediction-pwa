@@ -1,6 +1,0 @@
-{
-  "FootballPrediction.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "~",
-  "FootballPrediction.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "~",
-  "FootballPrediction.Domain, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "~",
-  "FootballPrediction.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "~"
-}
