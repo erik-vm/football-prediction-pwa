@@ -1,0 +1,50 @@
+# OS Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.settings/
+.classpath
+
+# Build artifacts
+*.log
+*.tmp
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Node modules (will be in frontend/)
+node_modules/
+
+# .NET build output (will be in backend/)
+bin/
+obj/
+*.user
+*.suo
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Temporary files
+tmp/
+temp/
+
+# Session analyses (keep these in repo)
+!.analysis/
+
+# Specification system (keep these in repo)
+!.spec_v_2/
+
+# Claude configuration (keep in repo)
+!.claude/

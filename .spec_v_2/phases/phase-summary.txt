@@ -1,0 +1,16 @@
+PHASE-04-TOURNAMENT-MANAGEMENT.md - 3 hours - Tournament, GameWeek, Match repositories and controllers
+PHASE-05-PREDICTION-SUBMISSION.md - 1.5 hours - Prediction CRUD with deadline enforcement
+PHASE-06-LEADERBOARD-SYSTEM.md - 2 hours - Overall and weekly leaderboards with bonuses
+PHASE-07-FRONTEND-FOUNDATION.md - 1.5 hours - Angular 19 setup with PWA
+PHASE-08-AUTHENTICATION-UI.md - 1 hour - Login/Register components
+PHASE-09-MATCH-LISTS.md - 1.5 hours - Match display with prediction forms
+PHASE-10-PREDICTION-FORM.md - 1 hour - Renamed from MATCH-LISTS, prediction forms
+PHASE-11-LEADERBOARD-UI.md - 1.75 hours - Leaderboard display components
+PHASE-12-PWA-FEATURES.md - 0.75 hours - Service worker and offline support
+PHASE-13-API-INTEGRATION.md - 3 hours - football-data.org API integration
+PHASE-14-RESULT-PROCESSING.md - 3 hours - Automatic result processing background job
+PHASE-15-COMPETITION-FEATURES.md - 3 hours - Competition preferences and leaderboards
+PHASE-16-MATCH-ORGANIZATION.md - 2.5 hours - Match filtering and organization
+PHASE-17-REALTIME-UPDATES.md - 2 hours - SignalR for real-time updates
+PHASE-18-OFFLINE-SUPPORT.md - 1 hour - Enhanced PWA offline capabilities
+PHASE-19-DEPLOYMENT.md - Production deployment guide
