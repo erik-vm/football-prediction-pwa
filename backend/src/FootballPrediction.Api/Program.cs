@@ -8,6 +8,8 @@ using FootballPrediction.Infrastructure.Data;
 using FootballPrediction.Application.Services.Auth;
 using FootballPrediction.Infrastructure.Services.Auth;
 using FootballPrediction.Application.Validators;
+using FootballPrediction.Application.Interfaces;
+using FootballPrediction.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,6 +43,8 @@ builder.Services.AddAuthorization();
 
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ITournamentRepository, TournamentRepository>();
+builder.Services.AddScoped<IMatchRepository, MatchRepository>();
 
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<RegisterRequestValidator>();
