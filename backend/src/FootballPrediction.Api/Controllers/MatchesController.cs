@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using FootballPrediction.Application.Interfaces;
+using FootballPrediction.Application.Services;
 using FootballPrediction.Domain.Entities;
 
 namespace FootballPrediction.Api.Controllers;
@@ -9,10 +10,12 @@ namespace FootballPrediction.Api.Controllers;
 public class MatchesController : ControllerBase
 {
     private readonly IMatchRepository _repository;
+    private readonly IMatchResultService _matchResultService;
 
-    public MatchesController(IMatchRepository repository)
+    public MatchesController(IMatchRepository repository, IMatchResultService matchResultService)
     {
         _repository = repository;
+        _matchResultService = matchResultService;
     }
 
     [HttpGet]
@@ -70,4 +73,17 @@ public class MatchesController : ControllerBase
         await _repository.DeleteAsync(id);
         return NoContent();
     }
+
+    [HttpPost("{id}/result")]
+    public async Task<IActionResult> SubmitResult(Guid id, [FromBody] MatchResultDto result)
+    {
+        await _matchResultService.ProcessMatchResultAsync(id, result.HomeScore, result.AwayScore);
+        return Ok(new { message = "Result processed and predictions scored" });
+    }
+}
+
+public class MatchResultDto
+{
+    public int HomeScore { get; set; }
+    public int AwayScore { get; set; }
 }
