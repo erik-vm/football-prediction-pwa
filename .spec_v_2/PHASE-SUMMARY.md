@@ -246,7 +246,8 @@ Create Angular 19 PWA project with standalone components, routing, and core serv
 
 ### Implementation Steps
 1. Create Angular project: `ng new frontend --routing --style=css --standalone`
-2. Install Tailwind CSS: `npm install -D tailwindcss postcss autoprefixer`
+2. Install Tailwind CSS v3: `npm install -D tailwindcss@3.4.17 postcss autoprefixer`
+   **IMPORTANT**: Use Tailwind v3, NOT v4. Tailwind v4 has PostCSS compatibility issues with Angular 19.
 3. Configure Tailwind (tailwind.config.js)
 4. Create folder structure (core/, features/, shared/)
 5. Create AuthService with login/register/logout methods

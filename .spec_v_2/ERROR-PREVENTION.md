@@ -19,12 +19,13 @@ This document contains **EVERY KNOWN ERROR** encountered during the previous bui
 
 ---
 
-## 📊 ERROR STATISTICS (Previous Build)
+## 📊 ERROR STATISTICS (Previous Build + Current Session)
 
-- **Total Blockers**: 12 major + 8 minor = 20 errors
-- **Time Lost**: ~6 hours (15% of total development time)
+- **Total Blockers**: 13 major + 8 minor = 21 errors
+- **Time Lost**: ~6.2 hours (15% of total development time)
 - **Most Costly**: EF migration mystery (45 min), dotnet-ef version (30 min)
-- **Most Frequent**: Package version mismatches (4 occurrences)
+- **Most Frequent**: Package version mismatches (5 occurrences)
+- **Latest**: Tailwind CSS v4 incompatibility (10 min, Phase 8)
 
 **This guide can save you 6+ hours.**
 
@@ -346,7 +347,64 @@ docker ps
 
 ---
 
-### ❌ ERROR 6: Angular 19 New Output Directory Structure
+### ❌ ERROR 6: Tailwind CSS v4 PostCSS Incompatibility with Angular 19
+**Phase**: 7/8 (Frontend Foundation)
+**Time Lost**: 10 minutes
+**Severity**: MEDIUM
+
+#### Exact Error
+```
+Error: It looks like you're trying to use `tailwindcss` directly as a PostCSS plugin.
+The PostCSS plugin has moved to a separate package, so to continue using Tailwind CSS
+with PostCSS you'll need to install `@tailwindcss/postcss` and update your PostCSS configuration.
+```
+
+#### Root Cause
+- Tailwind CSS v4 changed architecture
+- v4 requires `@tailwindcss/postcss` package instead of direct `tailwindcss`
+- Angular 19 build system (esbuild + Angular CLI) not compatible with this new structure
+- Even installing `@tailwindcss/postcss` doesn't fully resolve compatibility
+
+#### Failed Attempts
+1. ❌ Tried `npm install -D @tailwindcss/postcss@4.0.0 tailwindcss@4.0.0` - still incompatible
+2. ❌ Attempted to configure PostCSS separately - Angular 19 uses esbuild internally
+
+#### ✅ WORKING SOLUTION
+Use Tailwind CSS v3.4.17 (stable, fully compatible):
+```bash
+# Uninstall v4
+npm uninstall tailwindcss @tailwindcss/postcss
+
+# Install v3
+npm install -D tailwindcss@3.4.17 postcss autoprefixer
+
+# Create tailwind.config.js
+module.exports = {
+  content: ["./src/**/*.{html,ts}"],
+  theme: { extend: {} },
+  plugins: [],
+}
+
+# Update src/styles.css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+```
+
+#### 🛡️ PREVENTION
+**ALWAYS use Tailwind v3 with Angular 19:**
+```bash
+npm install -D tailwindcss@3.4.17 postcss autoprefixer
+```
+
+**DO NOT install Tailwind v4 or @tailwindcss/postcss**
+
+#### Time Saved
+**10 minutes** by using v3 from the start
+
+---
+
+### ❌ ERROR 7: Angular 19 New Output Directory Structure
 **Phase**: 19 (Deployment)
 **Time Lost**: 10 minutes
 **Severity**: MEDIUM
