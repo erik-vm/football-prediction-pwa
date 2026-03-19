@@ -39,6 +39,14 @@ public class PredictionRepository : IPredictionRepository
             .ToListAsync();
     }
 
+    public async Task<IEnumerable<Prediction>> GetByMatchIdAsync(Guid matchId)
+    {
+        return await _context.Predictions
+            .Where(p => p.MatchId == matchId)
+            .Include(p => p.User)
+            .ToListAsync();
+    }
+
     public async Task<Prediction?> GetByUserAndMatchAsync(Guid userId, Guid matchId)
     {
         return await _context.Predictions

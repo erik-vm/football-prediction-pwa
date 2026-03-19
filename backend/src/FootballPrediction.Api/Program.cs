@@ -12,6 +12,7 @@ using FootballPrediction.Application.Interfaces;
 using FootballPrediction.Infrastructure.Repositories;
 using FootballPrediction.Application.Services;
 using FootballPrediction.Infrastructure.Services;
+using FootballPrediction.Api.BackgroundJobs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -48,12 +49,15 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IScoringService, ScoringService>();
 builder.Services.AddScoped<ILeaderboardService, LeaderboardService>();
 builder.Services.AddScoped<IMatchResultService, MatchResultService>();
+builder.Services.AddScoped<IResultProcessingService, ResultProcessingService>();
 builder.Services.AddScoped<ITournamentRepository, TournamentRepository>();
 builder.Services.AddScoped<IMatchRepository, MatchRepository>();
 builder.Services.AddScoped<IPredictionRepository, PredictionRepository>();
 
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<RegisterRequestValidator>();
+
+builder.Services.AddHostedService<ResultProcessingBackgroundJob>();
 
 builder.Services.AddHealthChecks();
 builder.Services.AddControllers();
