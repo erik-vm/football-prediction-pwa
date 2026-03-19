@@ -65,6 +65,7 @@ builder.Services.AddScoped<IScoringService, ScoringService>();
 builder.Services.AddScoped<ILeaderboardService, LeaderboardService>();
 builder.Services.AddScoped<IMatchResultService, MatchResultService>();
 builder.Services.AddScoped<IResultProcessingService, ResultProcessingService>();
+builder.Services.AddScoped<IFootballDataService, FootballDataService>();
 builder.Services.AddScoped<ITournamentRepository, TournamentRepository>();
 builder.Services.AddScoped<IMatchRepository, MatchRepository>();
 builder.Services.AddScoped<IPredictionRepository, PredictionRepository>();
@@ -72,7 +73,10 @@ builder.Services.AddScoped<IPredictionRepository, PredictionRepository>();
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<RegisterRequestValidator>();
 
+builder.Services.AddHttpClient();
+
 builder.Services.AddHostedService<ResultProcessingBackgroundJob>();
+builder.Services.AddHostedService<FootballDataSyncJob>();
 
 builder.Services.AddSignalR();
 builder.Services.AddCors(options =>
