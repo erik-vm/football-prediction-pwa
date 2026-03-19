@@ -21,11 +21,11 @@ This document contains **EVERY KNOWN ERROR** encountered during the previous bui
 
 ## 📊 ERROR STATISTICS (Previous Build + Current Session)
 
-- **Total Blockers**: 13 major + 8 minor = 21 errors
-- **Time Lost**: ~6.2 hours (15% of total development time)
+- **Total Blockers**: 13 major + 9 minor = 22 errors
+- **Time Lost**: ~6.3 hours (15% of total development time)
 - **Most Costly**: EF migration mystery (45 min), dotnet-ef version (30 min)
 - **Most Frequent**: Package version mismatches (5 occurrences)
-- **Latest**: Tailwind CSS v4 incompatibility (10 min, Phase 8)
+- **Latest**: AuthService method signature mismatch (5 min, Phase 9)
 
 **This guide can save you 6+ hours.**
 
@@ -401,6 +401,69 @@ npm install -D tailwindcss@3.4.17 postcss autoprefixer
 
 #### Time Saved
 **10 minutes** by using v3 from the start
+
+---
+
+### ❌ ERROR 6.5: AuthService Method Signature Mismatch
+**Phase**: 9 (Authentication UI)
+**Time Lost**: 5 minutes
+**Severity**: LOW
+
+#### Exact Error
+```
+TS2554: Expected 1 arguments, but got 2.
+  src/app/features/auth/login.component.ts:131:34:
+    131 │     this.authService.login(email, password).subscribe({
+                                          ~~~~~~~~
+
+TS2554: Expected 1 arguments, but got 3.
+  src/app/features/auth/register.component.ts:212:40:
+    212 │     this.authService.register(username, email, password).subscribe({
+                                                ~~~~~~~~~~~~~~~
+```
+
+#### Root Cause
+- AuthService methods expect request objects (DTOs), not individual parameters
+- AuthService.login() expects `LoginRequest` object: `{ email, password }`
+- AuthService.register() expects `RegisterRequest` object: `{ username, email, password }`
+- Components initially called methods with individual parameters
+
+#### Failed Approach
+```typescript
+// ❌ Wrong - passing individual parameters
+this.authService.login(email, password).subscribe(...)
+this.authService.register(username, email, password).subscribe(...)
+```
+
+#### ✅ WORKING SOLUTION
+```typescript
+// LoginComponent
+const request = this.loginForm.getRawValue(); // Returns { email, password }
+this.authService.login(request).subscribe(...)
+
+// RegisterComponent
+const { username, email, password } = this.registerForm.getRawValue();
+const request = { username, email, password };
+this.authService.register(request).subscribe(...)
+```
+
+#### 🛡️ PREVENTION
+**Check AuthService method signatures BEFORE implementing components:**
+```typescript
+// Always check the service interface first
+login(request: LoginRequest): Observable<AuthResponse>
+register(request: RegisterRequest): Observable<AuthResponse>
+```
+
+**Use form.getRawValue() directly when structure matches DTO:**
+```typescript
+// If form structure matches DTO exactly, use directly
+const request = this.loginForm.getRawValue();
+this.authService.login(request).subscribe(...)
+```
+
+#### Time Saved
+**5 minutes** by checking service signatures first
 
 ---
 
