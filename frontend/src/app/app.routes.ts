@@ -11,7 +11,11 @@ export const routes: Routes = [
     path: 'register',
     loadComponent: () => import('./features/auth/register.component').then(m => m.RegisterComponent)
   },
-  { path: 'matches', canActivate: [authGuard], children: [] },
+  {
+    path: 'matches',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/matches/match-list.component').then(m => m.MatchListComponent)
+  },
   { path: 'predictions', canActivate: [authGuard], children: [] },
   { path: 'leaderboard', children: [] }
 ];
