@@ -18,10 +18,10 @@
 
 ## 📊 PROGRESS SUMMARY
 
-**Phases Complete**: 11 / 20 (55%)
+**Phases Complete**: 12 / 20 (60%)
 **Backend Phases Complete**: 7 / 7 (100%)
-**Frontend Phases Complete**: 4 / 6 (67%)
-**Estimated Time Remaining**: 41-51 hours
+**Frontend Phases Complete**: 5 / 6 (83%)
+**Estimated Time Remaining**: 40-50 hours
 **Blockers**: None
 
 ### Phase Status Legend
@@ -557,8 +557,61 @@
 
 ---
 
-### Phase 12: Leaderboard UI 📅
-**Status:** Not Started
+### Phase 12: Leaderboard UI ✅
+**Status:** Complete
+**Started:** 2026-03-19
+**Completed:** 2026-03-19
+**Duration:** 0.3h
+
+#### Tasks
+- [x] Create leaderboard feature directory structure
+- [x] Create LeaderboardService with API methods
+- [x] Create LeaderboardComponent with rankings table
+- [x] Display rank, username, total points, predictions, avg points
+- [x] Add medal emojis for top 3 (🥇🥈🥉)
+- [x] Highlight current user row (blue background)
+- [x] Add "You" badge for current user
+- [x] Add loading and error states
+- [x] Add empty state with friendly message
+- [x] Responsive table design
+- [x] Configure lazy-loaded route
+- [x] Build: 0 warnings, 0 errors
+
+**Deliverables:**
+- LeaderboardService (features/leaderboard/services/leaderboard.service.ts)
+  - getOverall(): Get overall leaderboard
+  - getByTournament(tournamentId): Get tournament-specific leaderboard
+
+- LeaderboardComponent (features/leaderboard/leaderboard.component.ts)
+  - Rankings table with 5 columns (Rank, Username, Total Points, Predictions, Avg Points)
+  - Medal emojis for top 3 positions (🥇🥈🥉)
+  - Current user highlighting (blue background)
+  - "You" badge for authenticated user
+  - Loading spinner
+  - Error message display
+  - Empty state with message
+  - Responsive table (overflow-x-auto for mobile)
+  - Hover effects on rows
+
+- Updated app.routes.ts with /leaderboard route
+- Build: 0 warnings, 0 errors (304.38 kB initial, 84.97 kB gzipped)
+
+**Notes:**
+- Simplified single-view leaderboard (no tabs - can add later)
+- Uses averagePoints instead of accuracy % (based on LeaderboardEntry model)
+- Medal emojis (text, not images) for better performance
+- Current user detection via AuthService signals
+- Table is horizontally scrollable on mobile devices
+- Hover effect improves UX on desktop
+
+**Blockers:**
+- None
+
+**Time Breakdown:**
+- Service creation: 0.05h
+- Component creation: 0.2h
+- Build fixes: 0.05h
+- Total: 0.3h
 
 ---
 

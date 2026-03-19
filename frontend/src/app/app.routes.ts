@@ -30,5 +30,8 @@ export const routes: Routes = [
       }
     ]
   },
-  { path: 'leaderboard', children: [] }
+  {
+    path: 'leaderboard',
+    loadComponent: () => import('./features/leaderboard/leaderboard.component').then(m => m.LeaderboardComponent)
+  }
 ];
