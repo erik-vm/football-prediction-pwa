@@ -26,5 +26,32 @@
         ]
       }
     }
+  ],
+  "dataGroups": [
+    {
+      "name": "api-fresh",
+      "urls": [
+        "/api/v1/matches/**",
+        "/api/v1/predictions/**"
+      ],
+      "cacheConfig": {
+        "strategy": "freshness",
+        "maxSize": 100,
+        "maxAge": "1h",
+        "timeout": "5s"
+      }
+    },
+    {
+      "name": "api-performance",
+      "urls": [
+        "/api/v1/leaderboard/**",
+        "/api/v1/auth/refresh"
+      ],
+      "cacheConfig": {
+        "strategy": "performance",
+        "maxSize": 50,
+        "maxAge": "12h"
+      }
+    }
   ]
 }
