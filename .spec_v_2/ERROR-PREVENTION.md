@@ -21,11 +21,11 @@ This document contains **EVERY KNOWN ERROR** encountered during the previous bui
 
 ## 📊 ERROR STATISTICS (Previous Build + Current Session)
 
-- **Total Blockers**: 13 major + 9 minor = 22 errors
-- **Time Lost**: ~6.3 hours (15% of total development time)
+- **Total Blockers**: 13 major + 11 minor = 24 errors
+- **Time Lost**: ~6.5 hours (15% of total development time)
 - **Most Costly**: EF migration mystery (45 min), dotnet-ef version (30 min)
-- **Most Frequent**: Package version mismatches (5 occurrences)
-- **Latest**: AuthService method signature mismatch (5 min, Phase 9)
+- **Most Frequent**: Package version mismatches (6 occurrences)
+- **Latest**: IHttpClientFactory missing namespace (5 min, Phase 14)
 
 **This guide can save you 6+ hours.**
 
@@ -753,6 +753,67 @@ If you follow all prevention checks:
 - **Minor issues**: 30 minutes saved
 
 **TOTAL: ~3.5 hours saved** = 10% of total development time
+
+---
+
+---
+
+## 🆕 NEW ERRORS (Session 2026-03-19)
+
+### ❌ ERROR 7.1: IHttpClientFactory Missing Namespace
+**Phase**: 14 (football-data.org Integration)
+**Time Lost**: 5 minutes
+**Severity**: MINOR
+
+#### Exact Error
+```
+error CS0246: The type or namespace name 'IHttpClientFactory' could not be found
+```
+
+#### Root Cause
+- Used `IHttpClientFactory` in Infrastructure project
+- Package `Microsoft.Extensions.Http` not referenced
+- Namespace `Microsoft.Extensions.Http` doesn't exist in base project
+
+#### ✅ SOLUTION
+```bash
+cd backend/src/FootballPrediction.Infrastructure
+dotnet add package Microsoft.Extensions.Http
+```
+
+Then add using statements:
+```csharp
+using Microsoft.Extensions.Http;
+using System.Net.Http;
+```
+
+#### 🛡️ PREVENTION
+**Always add Microsoft.Extensions.Http package** when using IHttpClientFactory in Infrastructure layer.
+
+#### Time Saved
+**5 minutes** of troubleshooting
+
+---
+
+### ❌ ERROR 7.2: SignalR Package Version Confusion
+**Phase**: 17 (Real-time Updates)
+**Time Lost**: 2 minutes
+**Severity**: MINOR
+
+#### Issue
+- Multiple SignalR packages available
+- Version confusion (1.1.0 vs latest)
+
+#### ✅ SOLUTION
+For .NET 9 with ASP.NET Core:
+```bash
+dotnet add package Microsoft.AspNetCore.SignalR --version 1.1.0
+```
+
+SignalR is included in ASP.NET Core framework, but adding package explicitly helps with IntelliSense and ensures compatibility.
+
+#### 🛡️ PREVENTION
+**Use version 1.1.0** for .NET 9 projects to match framework version.
 
 ---
 
