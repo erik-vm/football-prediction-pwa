@@ -18,11 +18,11 @@
 
 ## 📊 PROGRESS SUMMARY
 
-**Phases Complete**: 16 / 20 (80%)
+**Phases Complete**: 17 / 20 (85%)
 **Backend Phases Complete**: 8 / 8 (100%)
-**Frontend Phases Complete**: 7 / 7 (100%)
+**Frontend Phases Complete**: 8 / 8 (100%)
 **Deployment**: ✅ Configured (ready for manual deployment)
-**Remaining**: Phases 14, 16-17 (optional advanced features)
+**Remaining**: Phases 14, 17 (optional advanced features)
 **Blockers**: None
 
 ### Phase Status Legend
@@ -781,8 +781,91 @@ See `MVP-COMPLETE.md` for detailed report.
 
 ---
 
-### Phase 16: Competition Features 📅
-**Status:** Not Started
+### Phase 16: Competition/Tournament Features ✅
+**Status:** Complete
+**Started:** 2026-03-19
+**Completed:** 2026-03-19
+**Duration:** 0.5h
+
+#### Tasks
+- [x] Create TournamentService for API calls
+- [x] Create TournamentListComponent with tournament cards
+- [x] Add tournament route and navigation
+- [x] Update default route to /tournaments
+- [x] Add tournament filtering to MatchListComponent
+- [x] Add tournament filtering to LeaderboardComponent
+- [x] Implement query parameter-based filtering
+- [x] Build: 0 warnings, 0 errors
+
+**Deliverables:**
+- TournamentService
+  - getAll() - fetch all tournaments
+  - getById() - fetch single tournament
+  - getActive() - fetch active tournaments only
+  - API integration with tournaments endpoint
+
+- TournamentListComponent
+  - Grid layout with tournament cards
+  - Display tournament name, season, description
+  - Active/Inactive status badges (green/gray)
+  - Action buttons: "View Matches" and "Leaderboard"
+  - Query parameter passing for filtering
+  - Loading and error states
+  - Empty state for no tournaments
+
+- Enhanced MatchListComponent
+  - Tournament filtering via ?tournamentId query param
+  - Filters both upcoming and finished matches
+  - Reactive query parameter subscription
+  - Maintains existing tab functionality
+
+- Enhanced LeaderboardComponent
+  - Tournament-specific leaderboards via ?tournamentId
+  - Dynamic API endpoint selection
+  - Falls back to overall leaderboard when no tournament
+  - Reactive query parameter subscription
+
+- Updated App Routes
+  - New /tournaments route (now default landing page)
+  - Tournament list as entry point after login
+  - Lazy-loaded tournament component
+  - Auth guard protected
+
+**Technical Details:**
+- Query parameter-based filtering (not route params)
+- Signal-based reactive state management
+- ActivatedRoute queryParams subscription
+- Router navigation with queryParams
+- Conditional API endpoint selection
+- Existing tournament API already available
+
+**User Experience:**
+- Tournament-centric navigation flow
+- Clear visual hierarchy with cards
+- Direct links to filtered views
+  - Click "View Matches" → filtered match list
+  - Click "Leaderboard" → tournament-specific leaderboard
+- Status badges for quick tournament identification
+- Responsive grid layout (mobile-friendly)
+
+**Notes:**
+- Backend tournament endpoints already existed
+- LeaderboardService.getByTournament() already implemented
+- No backend changes required
+- Tournament model already defined in match.model.ts
+- Changed default route from /matches to /tournaments
+- Better user flow: select tournament → view matches/leaderboard
+
+**Blockers:**
+- None
+
+**Time Breakdown:**
+- TournamentService: 0.05h
+- TournamentListComponent: 0.2h
+- Match/Leaderboard filtering: 0.15h
+- Routes and integration: 0.05h
+- Testing: 0.05h
+- Total: 0.5h
 
 ---
 

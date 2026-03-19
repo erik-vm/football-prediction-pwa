@@ -1,5 +1,6 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ActivatedRoute } from '@angular/router';
 import { LeaderboardService } from './services/leaderboard.service';
 import { AuthService } from '../../core/services/auth.service';
 import { LeaderboardEntry } from '../../shared/models/leaderboard.model';
@@ -117,21 +118,31 @@ import { LeaderboardEntry } from '../../shared/models/leaderboard.model';
 export class LeaderboardComponent implements OnInit {
   private leaderboardService = inject(LeaderboardService);
   private authService = inject(AuthService);
+  private route = inject(ActivatedRoute);
 
   entries = signal<LeaderboardEntry[]>([]);
   isLoading = signal<boolean>(false);
   errorMessage = signal<string>('');
+  tournamentId = signal<string | null>(null);
   currentUserId = computed(() => this.authService.currentUser()?.userId);
 
   ngOnInit(): void {
-    this.loadLeaderboard();
+    this.route.queryParams.subscribe(params => {
+      this.tournamentId.set(params['tournamentId'] || null);
+      this.loadLeaderboard();
+    });
   }
 
   loadLeaderboard(): void {
     this.isLoading.set(true);
     this.errorMessage.set('');
 
-    this.leaderboardService.getOverall().subscribe({
+    const tournamentId = this.tournamentId();
+    const request = tournamentId
+      ? this.leaderboardService.getByTournament(tournamentId)
+      : this.leaderboardService.getOverall();
+
+    request.subscribe({
       next: (entries) => {
         this.entries.set(entries);
         this.isLoading.set(false);

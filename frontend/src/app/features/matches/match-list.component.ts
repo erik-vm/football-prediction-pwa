@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { MatchService } from './services/match.service';
 import { MatchCardComponent } from './match-card.component';
 import { Match } from '../../shared/models/match.model';
@@ -95,15 +95,20 @@ type TabType = 'upcoming' | 'finished';
 export class MatchListComponent implements OnInit {
   private matchService = inject(MatchService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   activeTab = signal<TabType>('upcoming');
   upcomingMatches = signal<Match[]>([]);
   finishedMatches = signal<Match[]>([]);
   isLoading = signal<boolean>(false);
   errorMessage = signal<string>('');
+  tournamentId = signal<string | null>(null);
 
   ngOnInit(): void {
-    this.loadMatches();
+    this.route.queryParams.subscribe(params => {
+      this.tournamentId.set(params['tournamentId'] || null);
+      this.loadMatches();
+    });
   }
 
   selectTab(tab: TabType): void {
@@ -154,7 +159,13 @@ export class MatchListComponent implements OnInit {
   }
 
   getCurrentMatches(): Match[] {
-    return this.activeTab() === 'upcoming' ? this.upcomingMatches() : this.finishedMatches();
+    const matches = this.activeTab() === 'upcoming' ? this.upcomingMatches() : this.finishedMatches();
+
+    if (this.tournamentId()) {
+      return matches.filter(match => match.tournamentId === this.tournamentId());
+    }
+
+    return matches;
   }
 
   getTabClass(tab: TabType): string {
