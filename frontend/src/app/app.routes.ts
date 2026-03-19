@@ -16,6 +16,19 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import('./features/matches/match-list.component').then(m => m.MatchListComponent)
   },
-  { path: 'predictions', canActivate: [authGuard], children: [] },
+  {
+    path: 'predictions',
+    canActivate: [authGuard],
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./features/predictions/my-predictions.component').then(m => m.MyPredictionsComponent)
+      },
+      {
+        path: 'new',
+        loadComponent: () => import('./features/predictions/prediction-form.component').then(m => m.PredictionFormComponent)
+      }
+    ]
+  },
   { path: 'leaderboard', children: [] }
 ];
