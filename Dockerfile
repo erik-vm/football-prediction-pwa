@@ -10,16 +10,13 @@ COPY backend/src/FootballPrediction.Api/*.csproj ./src/FootballPrediction.Api/
 COPY backend/src/FootballPrediction.Application/*.csproj ./src/FootballPrediction.Application/
 COPY backend/src/FootballPrediction.Domain/*.csproj ./src/FootballPrediction.Domain/
 COPY backend/src/FootballPrediction.Infrastructure/*.csproj ./src/FootballPrediction.Infrastructure/
-COPY backend/tests/FootballPrediction.UnitTests/*.csproj ./tests/FootballPrediction.UnitTests/
-COPY backend/tests/FootballPrediction.IntegrationTests/*.csproj ./tests/FootballPrediction.IntegrationTests/
 
-# Restore dependencies
-RUN dotnet restore
+# Restore dependencies (API project only, tests excluded via .dockerignore)
+RUN dotnet restore src/FootballPrediction.Api/FootballPrediction.Api.csproj
 
-# Copy everything else and build
-COPY backend/ ./
-WORKDIR /src/src/FootballPrediction.Api
-RUN dotnet publish -c Release -o /app/publish --no-restore
+# Copy source projects and build
+COPY backend/src/ ./src/
+RUN dotnet publish src/FootballPrediction.Api/FootballPrediction.Api.csproj -c Release -o /app/publish --no-restore
 
 # Stage 2: Runtime
 FROM mcr.microsoft.com/dotnet/aspnet:9.0
