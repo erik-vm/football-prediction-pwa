@@ -10,6 +10,8 @@ COPY backend/src/FootballPrediction.Api/*.csproj ./src/FootballPrediction.Api/
 COPY backend/src/FootballPrediction.Application/*.csproj ./src/FootballPrediction.Application/
 COPY backend/src/FootballPrediction.Domain/*.csproj ./src/FootballPrediction.Domain/
 COPY backend/src/FootballPrediction.Infrastructure/*.csproj ./src/FootballPrediction.Infrastructure/
+COPY backend/tests/FootballPrediction.UnitTests/*.csproj ./tests/FootballPrediction.UnitTests/
+COPY backend/tests/FootballPrediction.IntegrationTests/*.csproj ./tests/FootballPrediction.IntegrationTests/
 
 # Restore dependencies
 RUN dotnet restore

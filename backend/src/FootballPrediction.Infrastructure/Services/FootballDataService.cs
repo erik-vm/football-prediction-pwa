@@ -14,7 +14,7 @@ public class FootballDataService : IFootballDataService
     private readonly IMatchRepository _matchRepository;
     private readonly ILogger<FootballDataService> _logger;
     private readonly string? _apiKey;
-    private readonly string _baseUrl = "https://api.football-data.org/v4";
+    private const string BaseUrl = "https://api.football-data.org/v4";
 
     public FootballDataService(
         IHttpClientFactory httpClientFactory,
