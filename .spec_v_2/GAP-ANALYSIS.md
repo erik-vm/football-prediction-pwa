@@ -170,26 +170,26 @@
 ## PRIORITY ORDER FOR REBUILD
 
 ### P0 — Must Have (Core UX)
-1. Navigation system (header + bottom nav)
-2. Competition selector + matchday filter
-3. Match status tabs (Upcoming/Live/Completed)
-4. Score input component (visual +/- buttons)
-5. Status badges
-6. Points info display
+1. ~~Navigation system (header + bottom nav)~~ **DONE 2026-03-22**
+2. ~~Competition selector + matchday filter~~ **DONE 2026-03-22**
+3. ~~Match status tabs (Upcoming/Live/Completed)~~ **DONE 2026-03-22**
+4. ~~Score input component (visual +/- buttons)~~ **DONE 2026-03-22**
+5. ~~Status badges~~ **DONE 2026-03-22**
+6. ~~Points info display~~ **DONE 2026-03-22**
 
 ### P1 — Must Have (Core Features)
-7. Competition entity + endpoints
-8. Match filtering by competition/matchday
+7. Competition entity + endpoints — **PARTIAL** (match filtering by code works, no standalone Competition CRUD)
+8. ~~Match filtering by competition/matchday~~ **DONE 2026-03-22**
 9. Admin guard + admin routes
 10. Admin dashboard + CRUD UI
 11. Result entry UI
-12. User preferences (competition selection)
+12. ~~User preferences (competition selection)~~ **DONE 2026-03-22**
 
 ### P2 — Important
 13. Weekly leaderboard
-14. Competition-specific leaderboard
-15. User stats view
-16. Countdown timer
+14. ~~Competition-specific leaderboard~~ **DONE 2026-03-22**
+15. ~~User stats view~~ **DONE 2026-03-22** (integrated in leaderboard)
+16. ~~Countdown timer~~ **DONE 2026-03-22**
 17. Home/landing page
 
 ### P3 — Enhancement
@@ -198,6 +198,13 @@
 20. IndexedDB offline caching
 21. SignalR client integration
 22. Install prompt component
+
+### Added Beyond Original Gap (2026-03-22)
+23. ~~Football-data.org real match sync~~ **DONE** (full season, 12 competitions)
+24. ~~Auto-score predictions on match finish~~ **DONE** (triggered during sync)
+25. ~~Dark/light theme toggle~~ **DONE** (header toggle, Tailwind dark mode)
+26. ~~Smart matchday auto-selection~~ **DONE** (nearest future/past matchday per tab)
+27. ~~Prediction display on match cards~~ **DONE** ("Your prediction: X-Y" + points earned)
 
 ---
 

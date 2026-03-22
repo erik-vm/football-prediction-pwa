@@ -944,10 +944,129 @@ Provide:
 
 ---
 
-**Version**: 2.0
-**Created**: 2026-03-05
-**Based on**: Real errors from 40+ hours of development
-**Time Savings**: ~3.5 hours if followed
+---
+
+## 🆕 NEW ERRORS (Session 2026-03-22 — P0/P1 Rebuild)
+
+### ❌ ERROR 11: Navigation Property Required by Model Binder (400 Bad Request)
+**Phase**: P0 (Predictions, Match CRUD)
+**Time Lost**: 30 minutes (across Match and Prediction entities)
+**Severity**: HIGH
+
+#### Exact Error
+```
+{"errors":{"Tournament":["The Tournament field is required."]}}
+{"errors":{"User":["The User field is required."],"Match":["The Match field is required."]}}
+```
+
+#### Root Cause
+- EF Core entities had non-nullable navigation properties: `public Tournament Tournament { get; set; } = null!;`
+- ASP.NET model binder treats these as required fields on POST/PUT
+- API rejects requests that don't include full nested objects
+
+#### ✅ SOLUTION
+Make navigation properties nullable:
+```csharp
+// BEFORE (breaks API)
+public Tournament Tournament { get; set; } = null!;
+public User User { get; set; } = null!;
+public Match Match { get; set; } = null!;
+
+// AFTER (works)
+public Tournament? Tournament { get; set; }
+public User? User { get; set; }
+public Match? Match { get; set; }
+```
+
+#### 🛡️ PREVENTION
+**ALL navigation properties on domain entities MUST be nullable** when the entity is used directly as a controller parameter.
+
+---
+
+### ❌ ERROR 12: CORS Blocking Vercel Preview URLs
+**Phase**: Deployment
+**Time Lost**: 10 minutes
+**Severity**: MEDIUM
+
+#### Root Cause
+Hardcoded CORS origins don't match Vercel preview deployment URLs (which include commit hashes).
+
+#### ✅ SOLUTION
+Use `SetIsOriginAllowed` with pattern matching instead of `WithOrigins`:
+```csharp
+policy.SetIsOriginAllowed(origin =>
+    origin.Contains("localhost") ||
+    origin.Contains("vercel.app") ||
+    origin.Contains("football-prediction"))
+```
+
+---
+
+### ❌ ERROR 13: Prediction FK Constraint — userId Not in DB
+**Phase**: P0 (Predictions)
+**Time Lost**: 15 minutes
+**Severity**: HIGH
+
+#### Exact Error
+```
+ConstraintName: FK_Predictions_Users_UserId
+```
+
+#### Root Cause
+- Frontend sent userId from localStorage
+- User was registered in a different session, userId didn't exist in current DB
+- Backend trusted client-provided userId instead of extracting from JWT
+
+#### ✅ SOLUTION
+1. Add `[Authorize]` to PredictionsController
+2. Extract userId from JWT claims via `User.FindFirst("sub")`
+3. Never trust client-provided userId
+
+---
+
+### ❌ ERROR 14: Fake Seed Data Mixed with Real API Data
+**Phase**: P0 (Football Data Sync)
+**Time Lost**: 45 minutes
+**Severity**: HIGH
+
+#### Root Cause
+- Database had fake hardcoded matches (Arsenal vs Chelsea, etc.) with obvious GUIDs
+- Football-data.org sync added real matches alongside fakes
+- Users saw wrong fixtures and couldn't distinguish
+
+#### ✅ SOLUTION
+1. Delete all matches belonging to fake tournament IDs
+2. Delete fake tournaments
+3. Re-sync from football-data.org with `?season=YYYY` (full season, not date range)
+
+#### 🛡️ PREVENTION
+- NEVER seed fake match data into production DB
+- Use football-data.org sync from day one
+- Use `?season=YYYY` parameter to get full season data (not `dateFrom/dateTo`)
+
+---
+
+### ❌ ERROR 15: Duplicate Matches from Multiple Syncs
+**Phase**: P0 (Football Data Sync)
+**Time Lost**: 20 minutes
+**Severity**: MEDIUM
+
+#### Root Cause
+- Each sync run created new matches instead of updating existing ones
+- Dedup logic matched on `CompetitionCode + HomeTeam + AwayTeam + Matchday + Season`
+- But when tournaments were deleted and recreated, matches got new tournament IDs
+
+#### ✅ SOLUTION
+- Match lookup should NOT include Season (it may differ slightly)
+- Use `CompetitionCode + HomeTeam + AwayTeam + Matchday` as unique key
+- Added `CleanupDuplicatesAsync()` method as safety net
+
+---
+
+**Version**: 3.0
+**Updated**: 2026-03-22
+**Based on**: Real errors from 50+ hours of development
+**Time Savings**: ~5 hours if followed
 **Status**: Production-validated error prevention guide
 
 **Remember**: Every minute spent on prevention saves 5-10 minutes of debugging.
