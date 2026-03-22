@@ -21,4 +21,11 @@ public class LeaderboardController : ControllerBase
         var leaderboard = await _leaderboardService.GetOverallLeaderboardAsync(tournamentId);
         return Ok(leaderboard);
     }
+
+    [HttpGet("competition/{competitionCode}")]
+    public async Task<ActionResult<IEnumerable<LeaderboardEntryDto>>> GetByCompetition(string competitionCode)
+    {
+        var leaderboard = await _leaderboardService.GetByCompetitionAsync(competitionCode);
+        return Ok(leaderboard);
+    }
 }

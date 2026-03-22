@@ -39,4 +39,28 @@ public class LeaderboardService : ILeaderboardService
 
         return leaderboard;
     }
+
+    public async Task<IEnumerable<LeaderboardEntryDto>> GetByCompetitionAsync(string competitionCode)
+    {
+        var leaderboard = await _context.Predictions
+            .Where(p => p.CompetitionCode == competitionCode && p.PointsEarned != null)
+            .GroupBy(p => new { p.UserId, p.User!.Username })
+            .Select(g => new LeaderboardEntryDto
+            {
+                UserId = g.Key.UserId,
+                Username = g.Key.Username ?? "Anonymous",
+                TotalPoints = g.Sum(p => p.PointsEarned!.Value),
+                TotalPredictions = g.Count(),
+                AveragePoints = Math.Round(g.Average(p => p.PointsEarned!.Value), 2)
+            })
+            .OrderByDescending(e => e.TotalPoints)
+            .ThenByDescending(e => e.TotalPredictions)
+            .ToListAsync();
+
+        int rank = 1;
+        foreach (var entry in leaderboard)
+            entry.Rank = rank++;
+
+        return leaderboard;
+    }
 }

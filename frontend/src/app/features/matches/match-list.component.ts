@@ -134,9 +134,13 @@ export class MatchListComponent implements OnInit {
     this.loadPredictions();
     this.matchService.getCompetitions().subscribe({
       next: (codes) => {
-        this.competitions.set(codes);
+        const selectedComps = this.storage.getObject<string[]>('selected_competitions');
+        const filtered = selectedComps && selectedComps.length > 0
+          ? codes.filter(c => selectedComps.includes(c))
+          : codes;
+        this.competitions.set(filtered);
         const saved = this.storage.getItem(this.COMP_KEY);
-        const defaultComp = saved && codes.includes(saved) ? saved : codes[0] || '';
+        const defaultComp = saved && filtered.includes(saved) ? saved : filtered[0] || '';
         if (defaultComp) {
           this.selectedCompetition.set(defaultComp);
           this.storage.setItem(this.COMP_KEY, defaultComp);

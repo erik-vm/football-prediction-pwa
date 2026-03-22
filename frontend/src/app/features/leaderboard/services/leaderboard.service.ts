@@ -16,4 +16,8 @@ export class LeaderboardService {
   getByTournament(tournamentId: string): Observable<LeaderboardEntry[]> {
     return this.api.get<LeaderboardEntry[]>(`leaderboard/tournament/${tournamentId}`);
   }
+
+  getByCompetition(competitionCode: string): Observable<LeaderboardEntry[]> {
+    return this.api.get<LeaderboardEntry[]>(`leaderboard/competition/${competitionCode}`);
+  }
 }

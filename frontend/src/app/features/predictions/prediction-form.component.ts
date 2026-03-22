@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PredictionService } from './services/prediction.service';
 import { MatchService } from '../matches/services/match.service';
@@ -47,7 +47,7 @@ import { Prediction } from '../../shared/models/prediction.model';
                       d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
               </svg>
               <div>
-                <div class="font-bold text-cyan-700">Deadline</div>
+                <div class="font-bold text-cyan-700">{{ countdown() }}</div>
                 <div class="text-sm text-cyan-600">{{ formatKickoffTime(match()!.kickoffTime) }}</div>
               </div>
             </div>
@@ -118,7 +118,7 @@ import { Prediction } from '../../shared/models/prediction.model';
     </div>
   `
 })
-export class PredictionFormComponent implements OnInit {
+export class PredictionFormComponent implements OnInit, OnDestroy {
   private predictionService = inject(PredictionService);
   private matchService = inject(MatchService);
   private authService = inject(AuthService);
@@ -134,6 +134,8 @@ export class PredictionFormComponent implements OnInit {
   isEditing = signal(false);
   homeScore = signal(0);
   awayScore = signal(0);
+  countdown = signal('Deadline');
+  private countdownInterval?: ReturnType<typeof setInterval>;
 
   ngOnInit(): void {
     const matchId = this.route.snapshot.queryParamMap.get('matchId');
@@ -144,12 +146,38 @@ export class PredictionFormComponent implements OnInit {
     }
   }
 
+  ngOnDestroy(): void {
+    if (this.countdownInterval) clearInterval(this.countdownInterval);
+  }
+
+  private startCountdown(): void {
+    const update = () => {
+      const kickoff = this.match()?.kickoffTime;
+      if (!kickoff) return;
+      const diff = new Date(kickoff).getTime() - Date.now();
+      if (diff <= 0) {
+        this.countdown.set('Deadline passed');
+        if (this.countdownInterval) clearInterval(this.countdownInterval);
+        return;
+      }
+      const days = Math.floor(diff / 86400000);
+      const hours = Math.floor((diff % 86400000) / 3600000);
+      const mins = Math.floor((diff % 3600000) / 60000);
+      if (days > 0) this.countdown.set(`Deadline in ${days}d ${hours}h`);
+      else if (hours > 0) this.countdown.set(`Deadline in ${hours}h ${mins}m`);
+      else this.countdown.set(`Deadline in ${mins}m`);
+    };
+    update();
+    this.countdownInterval = setInterval(update, 30000);
+  }
+
   loadMatch(matchId: string): void {
     this.isLoadingMatch.set(true);
     this.matchService.getById(matchId).subscribe({
       next: (match) => {
         this.match.set(match);
         this.isLoadingMatch.set(false);
+        this.startCountdown();
         this.loadExistingPrediction(matchId);
       },
       error: () => {

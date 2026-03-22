@@ -1,4 +1,5 @@
 using FootballPrediction.Application.Interfaces;
+using FootballPrediction.Application.Services;
 using FootballPrediction.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -15,6 +16,7 @@ public class FootballDataService : IFootballDataService
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IMatchRepository _matchRepository;
     private readonly ITournamentRepository _tournamentRepository;
+    private readonly IScoringService _scoringService;
     private readonly ApplicationDbContext _context;
     private readonly ILogger<FootballDataService> _logger;
     private readonly string? _apiKey;
@@ -26,6 +28,7 @@ public class FootballDataService : IFootballDataService
         IHttpClientFactory httpClientFactory,
         IMatchRepository matchRepository,
         ITournamentRepository tournamentRepository,
+        IScoringService scoringService,
         ApplicationDbContext context,
         IConfiguration configuration,
         ILogger<FootballDataService> logger)
@@ -33,6 +36,7 @@ public class FootballDataService : IFootballDataService
         _httpClientFactory = httpClientFactory;
         _matchRepository = matchRepository;
         _tournamentRepository = tournamentRepository;
+        _scoringService = scoringService;
         _context = context;
         _logger = logger;
         _apiKey = configuration["FootballData:ApiKey"];
@@ -163,6 +167,40 @@ public class FootballDataService : IFootballDataService
 
         await _context.SaveChangesAsync();
         _logger.LogInformation("Synced {Code}: {New} new, {Total} total matches", competitionCode, synced, json.Matches.Count);
+
+        await ScorePendingPredictionsAsync(competitionCode);
+    }
+
+    private async Task ScorePendingPredictionsAsync(string competitionCode)
+    {
+        var finishedMatches = await _context.Matches
+            .Where(m => m.CompetitionCode == competitionCode && m.IsFinished
+                && m.HomeScore.HasValue && m.AwayScore.HasValue)
+            .ToListAsync();
+
+        var scored = 0;
+        foreach (var match in finishedMatches)
+        {
+            var pendingPredictions = await _context.Predictions
+                .Where(p => p.MatchId == match.Id && p.Status == "PENDING")
+                .ToListAsync();
+
+            foreach (var prediction in pendingPredictions)
+            {
+                prediction.PointsEarned = _scoringService.CalculatePoints(
+                    prediction.HomeScore, prediction.AwayScore,
+                    match.HomeScore!.Value, match.AwayScore!.Value);
+                prediction.Status = "SCORED";
+                prediction.CompetitionCode = competitionCode;
+                scored++;
+            }
+        }
+
+        if (scored > 0)
+        {
+            await _context.SaveChangesAsync();
+            _logger.LogInformation("Auto-scored {Count} predictions for {Code}", scored, competitionCode);
+        }
     }
 
     public async Task UpdateMatchScoresAsync()
