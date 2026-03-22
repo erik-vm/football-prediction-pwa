@@ -1,7 +1,9 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, of, throwError } from 'rxjs';
+import { Observable, of, throwError, EMPTY } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { HttpErrorResponse } from '@angular/common/http';
 import { ApiService } from '../../../core/services/api.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { OfflineService } from '../../../core/services/offline.service';
 import { OfflineQueueService } from '../../../core/services/offline-queue.service';
 import { Prediction, PredictionRequest } from '../../../shared/models/prediction.model';
@@ -11,6 +13,7 @@ import { Prediction, PredictionRequest } from '../../../shared/models/prediction
 })
 export class PredictionService {
   private api = inject(ApiService);
+  private authService = inject(AuthService);
   private offlineService = inject(OfflineService);
   private offlineQueue = inject(OfflineQueueService);
 
@@ -18,8 +21,13 @@ export class PredictionService {
     return this.api.get<Prediction[]>('predictions/my');
   }
 
-  getByMatchId(matchId: string): Observable<Prediction> {
-    return this.api.get<Prediction>(`predictions/match/${matchId}`);
+  getByMatchId(matchId: string): Observable<Prediction | null> {
+    return this.api.get<Prediction>(`predictions/match/${matchId}`).pipe(
+      catchError((err: HttpErrorResponse) => {
+        if (err.status === 404) return of(null);
+        return throwError(() => err);
+      })
+    );
   }
 
   create(request: PredictionRequest): Observable<Prediction> {

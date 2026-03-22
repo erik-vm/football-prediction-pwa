@@ -53,6 +53,83 @@ public class MatchRepository : IMatchRepository
             .ToListAsync();
     }
 
+    public async Task<IEnumerable<Match>> GetFilteredAsync(string? competitionCode, int? matchday)
+    {
+        var query = _context.Matches.Include(m => m.Tournament).AsQueryable();
+
+        if (!string.IsNullOrEmpty(competitionCode))
+            query = query.Where(m => m.CompetitionCode == competitionCode);
+
+        if (matchday.HasValue)
+            query = query.Where(m => m.Matchday == matchday.Value);
+
+        return await query.OrderBy(m => m.KickoffTime).ToListAsync();
+    }
+
+    public async Task<IEnumerable<string>> GetDistinctCompetitionCodesAsync()
+    {
+        return await _context.Matches
+            .Where(m => !string.IsNullOrEmpty(m.CompetitionCode))
+            .Select(m => m.CompetitionCode)
+            .Distinct()
+            .OrderBy(c => c)
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<int>> GetDistinctMatchdaysAsync(string? competitionCode)
+    {
+        var query = _context.Matches.AsQueryable();
+
+        if (!string.IsNullOrEmpty(competitionCode))
+            query = query.Where(m => m.CompetitionCode == competitionCode);
+
+        return await query
+            .Where(m => m.Matchday.HasValue)
+            .Select(m => m.Matchday!.Value)
+            .Distinct()
+            .OrderBy(d => d)
+            .ToListAsync();
+    }
+
+    public async Task<int?> GetNearestMatchdayAsync(string competitionCode, string tab)
+    {
+        var now = DateTime.UtcNow;
+        var query = _context.Matches
+            .Where(m => m.CompetitionCode == competitionCode && m.Matchday.HasValue);
+
+        Match? nearest;
+        switch (tab)
+        {
+            case "upcoming":
+                nearest = await query
+                    .Where(m => !m.IsFinished && m.KickoffTime > now)
+                    .OrderBy(m => m.KickoffTime)
+                    .FirstOrDefaultAsync();
+                break;
+            case "completed":
+                nearest = await query
+                    .Where(m => m.IsFinished)
+                    .OrderByDescending(m => m.KickoffTime)
+                    .FirstOrDefaultAsync();
+                break;
+            case "live":
+                nearest = await query
+                    .Where(m => m.Status == "IN_PLAY")
+                    .FirstOrDefaultAsync();
+                if (nearest == null)
+                {
+                    nearest = await query
+                        .Where(m => !m.IsFinished && m.KickoffTime > now)
+                        .OrderBy(m => m.KickoffTime)
+                        .FirstOrDefaultAsync();
+                }
+                break;
+            default:
+                return null;
+        }
+        return nearest?.Matchday;
+    }
+
     public async Task<Match> AddAsync(Match match)
     {
         _context.Matches.Add(match);

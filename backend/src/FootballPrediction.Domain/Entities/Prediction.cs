@@ -13,6 +13,6 @@ public class Prediction
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 
-    public User User { get; set; } = null!;
-    public Match Match { get; set; } = null!;
+    public User? User { get; set; }
+    public Match? Match { get; set; }
 }

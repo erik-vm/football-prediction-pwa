@@ -18,6 +18,7 @@ export interface CreatePredictionRequest {
 }
 
 export interface PredictionRequest {
+  userId?: string;
   matchId: string;
   homeScore: number;
   awayScore: number;

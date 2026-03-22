@@ -2,7 +2,7 @@ import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
-  { path: '', redirectTo: '/tournaments', pathMatch: 'full' },
+  { path: '', redirectTo: '/matches', pathMatch: 'full' },
   {
     path: 'login',
     loadComponent: () => import('./features/auth/login.component').then(m => m.LoginComponent)
@@ -34,6 +34,11 @@ export const routes: Routes = [
         loadComponent: () => import('./features/predictions/prediction-form.component').then(m => m.PredictionFormComponent)
       }
     ]
+  },
+  {
+    path: 'preferences',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/preferences/preferences.component').then(m => m.PreferencesComponent)
   },
   {
     path: 'leaderboard',

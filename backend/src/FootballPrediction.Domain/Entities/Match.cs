@@ -18,7 +18,7 @@ public class Match
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 
-    public Tournament Tournament { get; set; } = null!;
+    public Tournament? Tournament { get; set; }
     public GameWeek? GameWeek { get; set; }
     public ICollection<Prediction> Predictions { get; set; } = new List<Prediction>();
 }

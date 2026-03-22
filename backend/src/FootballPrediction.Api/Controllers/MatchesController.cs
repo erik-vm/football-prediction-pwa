@@ -11,11 +11,13 @@ public class MatchesController : ControllerBase
 {
     private readonly IMatchRepository _repository;
     private readonly IMatchResultService _matchResultService;
+    private readonly IFootballDataService _footballDataService;
 
-    public MatchesController(IMatchRepository repository, IMatchResultService matchResultService)
+    public MatchesController(IMatchRepository repository, IMatchResultService matchResultService, IFootballDataService footballDataService)
     {
         _repository = repository;
         _matchResultService = matchResultService;
+        _footballDataService = footballDataService;
     }
 
     [HttpGet]
@@ -49,6 +51,37 @@ public class MatchesController : ControllerBase
         return Ok(matches);
     }
 
+    [HttpGet("filtered")]
+    public async Task<ActionResult<IEnumerable<Match>>> GetFiltered(
+        [FromQuery] string? competitionCode,
+        [FromQuery] int? matchday)
+    {
+        var matches = await _repository.GetFilteredAsync(competitionCode, matchday);
+        return Ok(matches);
+    }
+
+    [HttpGet("competitions")]
+    public async Task<ActionResult<IEnumerable<string>>> GetCompetitions()
+    {
+        var codes = await _repository.GetDistinctCompetitionCodesAsync();
+        return Ok(codes);
+    }
+
+    [HttpGet("matchdays")]
+    public async Task<ActionResult<IEnumerable<int>>> GetMatchdays([FromQuery] string? competitionCode)
+    {
+        var matchdays = await _repository.GetDistinctMatchdaysAsync(competitionCode);
+        return Ok(matchdays);
+    }
+
+    [HttpGet("nearest-matchday")]
+    public async Task<ActionResult<int?>> GetNearestMatchday(
+        [FromQuery] string competitionCode, [FromQuery] string tab = "upcoming")
+    {
+        var matchday = await _repository.GetNearestMatchdayAsync(competitionCode, tab);
+        return Ok(matchday);
+    }
+
     [HttpPost]
     public async Task<ActionResult<Match>> Create(Match match)
     {
@@ -72,6 +105,20 @@ public class MatchesController : ControllerBase
     {
         await _repository.DeleteAsync(id);
         return NoContent();
+    }
+
+    [HttpPost("sync")]
+    public async Task<IActionResult> SyncMatches()
+    {
+        await _footballDataService.SyncAllCompetitionsAsync();
+        return Ok(new { message = "Sync completed" });
+    }
+
+    [HttpPost("cleanup-duplicates")]
+    public async Task<IActionResult> CleanupDuplicates()
+    {
+        var removed = await _footballDataService.CleanupDuplicatesAsync();
+        return Ok(new { message = $"Removed {removed} duplicate matches" });
     }
 
     [HttpPost("{id}/result")]

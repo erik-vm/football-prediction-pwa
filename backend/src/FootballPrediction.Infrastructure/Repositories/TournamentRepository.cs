@@ -24,6 +24,12 @@ public class TournamentRepository : ITournamentRepository
         return await _context.Tournaments.FindAsync(id);
     }
 
+    public async Task<Tournament?> GetByCodeAndSeasonAsync(string code, string season)
+    {
+        return await _context.Tournaments
+            .FirstOrDefaultAsync(t => t.Code == code && t.Season == season);
+    }
+
     public async Task<Tournament> AddAsync(Tournament tournament)
     {
         _context.Tournaments.Add(tournament);

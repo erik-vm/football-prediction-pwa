@@ -9,6 +9,8 @@ export interface Match {
   awayScore: number | null;
   isFinished: boolean;
   status: string;
+  competitionCode: string;
+  matchday: number | null;
   createdAt: string;
   updatedAt: string;
 }
