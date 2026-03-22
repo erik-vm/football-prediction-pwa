@@ -373,6 +373,11 @@ Report back when complete or if blocked.
 - **Solution**: Negative lookahead rewrite: `/((?!.*\\.).*)`
 - **Prevention**: Configure rewrites before deployment
 
+❌ **Dockerfile dotnet restore fails - test projects excluded**
+- **Problem**: `.dockerignore` excludes `**/tests/` but `dotnet restore` targets full `.sln` which references test projects
+- **Solution**: Target API `.csproj` directly: `dotnet restore src/FootballPrediction.Api/FootballPrediction.Api.csproj`
+- **Prevention**: Always check `.dockerignore` exclusions match Dockerfile COPY/RESTORE targets
+
 **See**: `ERROR-PREVENTION.md` for complete list
 
 ---

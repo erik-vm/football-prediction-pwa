@@ -21,11 +21,11 @@ This document contains **EVERY KNOWN ERROR** encountered during the previous bui
 
 ## 📊 ERROR STATISTICS (Previous Build + Current Session)
 
-- **Total Blockers**: 13 major + 11 minor = 24 errors
-- **Time Lost**: ~6.5 hours (15% of total development time)
+- **Total Blockers**: 14 major + 11 minor = 25 errors
+- **Time Lost**: ~6.75 hours (15% of total development time)
 - **Most Costly**: EF migration mystery (45 min), dotnet-ef version (30 min)
 - **Most Frequent**: Package version mismatches (6 occurrences)
-- **Latest**: IHttpClientFactory missing namespace (5 min, Phase 14)
+- **Latest**: Dockerfile restore fails on excluded test projects (15 min, Phase 19)
 
 **This guide can save you 6+ hours.**
 
@@ -573,7 +573,7 @@ if (connectionString != null && (connectionString.StartsWith("postgres://") || c
     // Parse PostgreSQL URL to Npgsql format
     var uri = new Uri(connectionString);
     var host = uri.Host;
-    var port = uri.Port > 0 ? uri.Port : 5432;
+    var port = uri.Port > 0 ? uri.Port : 5432;  // CRITICAL: Render internal URLs omit port, uri.Port returns -1
     var database = uri.AbsolutePath.TrimStart('/');
     var userInfo = uri.UserInfo.Split(':');
     var username = userInfo[0];
@@ -586,11 +586,16 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(connectionString));
 ```
 
+#### ⚠️ CRITICAL DETAILS (from v2 deployment 2026-03-22)
+1. **Must handle BOTH `postgres://` AND `postgresql://`** — Render's `fromDatabase` `connectionString` property uses `postgresql://`
+2. **Must default port to 5432** when `uri.Port` returns `-1` — Render internal connection strings omit the port
+3. **Never use ternary `:` directly inside interpolated strings** — C# treats `:` as format specifier. Extract to variable first.
+
 #### 🛡️ PREVENTION
 **Include this parser in Program.cs from Phase 1** (even for local development - it's harmless).
 
 #### Time Saved
-**20 minutes** and ensures production deployment works first time
+**35 minutes** (20 min original + 15 min from port/-1 issue in v2 deployment)
 
 ---
 
@@ -738,9 +743,27 @@ grep "postgresql://" backend/src/FootballPrediction.Api/Program.cs
 
 # ✅ CHECK 5: Vercel Deployment Protection OFF
 # Manual check in Vercel dashboard
+
+# ✅ CHECK 6: Dockerfile restores API project only (not full .sln)
+grep "dotnet restore" Dockerfile
+# Should target: src/FootballPrediction.Api/FootballPrediction.Api.csproj
+# Should NOT be: dotnet restore (bare, targets .sln which includes excluded test projects)
+
+# ✅ CHECK 7: Dockerfile COPY matches .dockerignore exclusions
+grep "COPY backend" Dockerfile
+# Should copy backend/src/ not backend/ (tests excluded via .dockerignore)
+
+# ✅ CHECK 8: Connection string parser handles both URI schemes AND missing port
+grep "postgres://" backend/src/FootballPrediction.Api/Program.cs
+# Must check for BOTH postgres:// and postgresql://
+# Must default port to 5432 when uri.Port returns -1
+
+# ✅ CHECK 9: Production API URL matches actual Render service URL
+cat frontend/src/environments/environment.prod.ts
+# Must match the actual Render URL (e.g. football-prediction-api-316o, not generic name)
 ```
 
-**Time saved: 60 minutes**
+**Time saved: 90 minutes**
 
 ---
 
@@ -749,10 +772,10 @@ grep "postgresql://" backend/src/FootballPrediction.Api/Program.cs
 If you follow all prevention checks:
 - **Phase 1**: 90 minutes saved
 - **Phase 2**: 20 minutes saved
-- **Phase 19**: 60 minutes saved
+- **Phase 19**: 90 minutes saved (Dockerfile, connection string, port, API URL)
 - **Minor issues**: 30 minutes saved
 
-**TOTAL: ~3.5 hours saved** = 10% of total development time
+**TOTAL: ~4 hours saved** = 10% of total development time
 
 ---
 
@@ -814,6 +837,48 @@ SignalR is included in ASP.NET Core framework, but adding package explicitly hel
 
 #### 🛡️ PREVENTION
 **Use version 1.1.0** for .NET 9 projects to match framework version.
+
+---
+
+### ❌ ERROR 7.3: Dockerfile dotnet restore Fails - Test Projects Not Found
+**Phase**: 19 (Deployment)
+**Time Lost**: 15 minutes (2 failed Render builds)
+**Severity**: HIGH
+
+#### Exact Error
+```
+error MSB3202: The project file "/src/tests/FootballPrediction.UnitTests/FootballPrediction.UnitTests.csproj" was not found.
+```
+
+#### Root Cause
+- `.dockerignore` excludes `**/tests/` directories
+- Dockerfile runs `dotnet restore` on the full `.sln` file
+- Solution file references test projects that are excluded from Docker context
+- Restore fails because test `.csproj` files don't exist in the container
+
+#### ✅ SOLUTION
+Restore only the API project instead of the full solution:
+```dockerfile
+# DON'T: RUN dotnet restore
+# DO: Target API project directly (pulls in src dependencies via project refs)
+RUN dotnet restore src/FootballPrediction.Api/FootballPrediction.Api.csproj
+```
+
+Also copy only `backend/src/` (not `backend/`) for the build step:
+```dockerfile
+# DON'T: COPY backend/ ./
+# DO: Copy only source projects
+COPY backend/src/ ./src/
+RUN dotnet publish src/FootballPrediction.Api/FootballPrediction.Api.csproj -c Release -o /app/publish --no-restore
+```
+
+#### 🛡️ PREVENTION
+- **Always check `.dockerignore`** before writing COPY/RESTORE commands in Dockerfile
+- **Never use `dotnet restore` on full solution** when test projects are excluded
+- **Target the API .csproj directly** for restore and publish
+
+#### Time Saved
+**15 minutes** (2 failed Render builds at ~5-8 min each)
 
 ---
 
