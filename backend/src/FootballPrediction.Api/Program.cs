@@ -93,7 +93,10 @@ builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.WithOrigins("http://localhost:4200", "https://localhost:4200", "https://football-prediction-pwa-pi.vercel.app")
+        policy.SetIsOriginAllowed(origin =>
+                  origin.Contains("localhost") ||
+                  origin.Contains("vercel.app") ||
+                  origin.Contains("football-prediction"))
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
