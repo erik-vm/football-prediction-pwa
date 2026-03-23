@@ -1,0 +1,26 @@
+<div class="pb-20 px-4 pt-4">
+  <h2 class="text-lg font-bold text-gray-800 mb-4">Tournaments</h2>
+
+  @if (loading()) {
+    <div class="text-center py-8 text-gray-500">Loading tournaments...</div>
+  } @else if (tournaments().length === 0) {
+    <div class="text-center py-8 text-gray-400">No tournaments available</div>
+  } @else {
+    @for (t of tournaments(); track t.id) {
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-3 flex items-center gap-4">
+        @if (t.logoUrl) {
+          <img [src]="t.logoUrl" [alt]="t.name" class="w-10 h-10 object-contain" />
+        } @else {
+          <div class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-gray-500 text-xs">
+            {{ t.code }}
+          </div>
+        }
+        <div class="flex-1">
+          <p class="font-semibold text-gray-800 text-sm">{{ t.name }}</p>
+          <p class="text-xs text-gray-500">{{ t.season }} &middot; {{ t.country }}</p>
+          <p class="text-xs text-gray-400">{{ t.startDate | date:'MMM d, yyyy' }} - {{ t.endDate | date:'MMM d, yyyy' }}</p>
+        </div>
+      </div>
+    }
+  }
+</div>

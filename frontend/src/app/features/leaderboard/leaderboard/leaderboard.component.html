@@ -1,0 +1,58 @@
+<div class="pb-20">
+  <div class="px-4 pt-4">
+    <select
+      [(ngModel)]="selectedCompetition"
+      (ngModelChange)="loadLeaderboard()"
+      class="w-full px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-400"
+    >
+      @for (comp of competitions(); track comp.code) {
+        <option [value]="comp.code">{{ comp.name }}</option>
+      }
+    </select>
+  </div>
+
+  @if (myStats(); as stats) {
+    <div class="mx-4 mt-4 bg-gradient-to-r from-cyan-500 to-cyan-600 rounded-xl p-5 text-white">
+      <h3 class="text-sm font-medium opacity-90 mb-3">Your Stats</h3>
+      <div class="grid grid-cols-4 gap-2 text-center">
+        <div>
+          <p class="text-xl font-bold">{{ stats.rank }}</p>
+          <p class="text-xs opacity-80">Rank</p>
+        </div>
+        <div>
+          <p class="text-xl font-bold">{{ stats.totalPoints }}</p>
+          <p class="text-xs opacity-80">Points</p>
+        </div>
+        <div>
+          <p class="text-xl font-bold">{{ stats.totalPredictions }}</p>
+          <p class="text-xs opacity-80">Predictions</p>
+        </div>
+        <div>
+          <p class="text-xl font-bold">{{ stats.accuracy | number:'1.0-0' }}%</p>
+          <p class="text-xs opacity-80">Accuracy</p>
+        </div>
+      </div>
+    </div>
+  }
+
+  <div class="px-4 mt-4">
+    @if (loading()) {
+      <div class="text-center py-8 text-gray-500">Loading leaderboard...</div>
+    } @else if (entries().length === 0) {
+      <div class="text-center py-8 text-gray-400">No leaderboard data available</div>
+    } @else {
+      @for (entry of entries(); track entry.userId) {
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-2 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <span class="text-lg font-bold min-w-[40px]">{{ getMedalEmoji(entry.rank) }}</span>
+            <div>
+              <p class="font-semibold text-gray-800 text-sm">{{ entry.username }}</p>
+              <p class="text-xs text-gray-500">{{ entry.totalPredictions }} predictions</p>
+            </div>
+          </div>
+          <span class="text-lg font-bold text-cyan-600">{{ entry.totalPoints }}</span>
+        </div>
+      }
+    }
+  </div>
+</div>

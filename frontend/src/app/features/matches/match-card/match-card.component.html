@@ -1,0 +1,33 @@
+<div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-3">
+  <div class="flex items-center justify-between mb-3">
+    <span class="text-xs px-2 py-1 rounded-full font-medium" [class]="getStatusBadgeClass()">
+      {{ getStatusLabel() }}
+    </span>
+    <span class="text-xs text-gray-500">{{ match().kickoffTime | date:'MMM d, HH:mm' }}</span>
+  </div>
+
+  <div class="flex items-center justify-between">
+    <div class="flex-1 text-right">
+      <p class="font-semibold text-gray-800 text-sm">{{ match().homeTeam }}</p>
+    </div>
+    <div class="mx-4 text-center min-w-[60px]">
+      @if (match().isFinished || match().status === 'IN_PLAY') {
+        <span class="text-lg font-bold text-gray-800">{{ match().homeScore }} - {{ match().awayScore }}</span>
+      } @else {
+        <span class="text-sm text-gray-400">vs</span>
+      }
+    </div>
+    <div class="flex-1 text-left">
+      <p class="font-semibold text-gray-800 text-sm">{{ match().awayTeam }}</p>
+    </div>
+  </div>
+
+  @if (!match().isFinished && match().status !== 'IN_PLAY') {
+    <button
+      (click)="onPredict()"
+      class="w-full mt-3 py-2 bg-cyan-500 text-white text-sm font-medium rounded-lg hover:bg-cyan-600 transition-colors"
+    >
+      Make Prediction
+    </button>
+  }
+</div>

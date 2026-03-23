@@ -1,0 +1,93 @@
+<div class="min-h-screen bg-gray-50 pb-20">
+  @if (match(); as m) {
+    <div class="bg-white px-4 py-4 shadow-sm">
+      <button (click)="goBack()" class="text-gray-600 mb-3 flex items-center gap-1 text-sm">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+        </svg>
+        Back
+      </button>
+
+      <div class="text-center">
+        <h2 class="text-lg font-bold text-gray-800">{{ m.homeTeam }} vs {{ m.awayTeam }}</h2>
+        <div class="mt-2 inline-block bg-cyan-50 text-cyan-600 px-3 py-1 rounded-full text-sm font-medium">
+          {{ countdown() }}
+        </div>
+      </div>
+    </div>
+
+    <div class="px-4 mt-6">
+      @if (error()) {
+        <div class="bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm">{{ error() }}</div>
+      }
+      @if (success()) {
+        <div class="bg-green-50 text-green-600 p-3 rounded-lg mb-4 text-sm">{{ success() }}</div>
+      }
+
+      <div class="bg-white rounded-xl shadow-sm p-6">
+        <div class="flex items-center justify-between mb-6">
+          <div class="text-center flex-1">
+            <p class="text-sm font-semibold text-gray-700 mb-3">{{ m.homeTeam }}</p>
+            <div class="flex items-center justify-center gap-3">
+              <button
+                (click)="adjustScore('home', -1)"
+                class="w-10 h-10 rounded-lg bg-cyan-500 text-white font-bold text-lg flex items-center justify-center hover:bg-cyan-600 transition-colors"
+              >-</button>
+              <span class="text-2xl font-bold text-gray-800 w-8 text-center">{{ homeScore() }}</span>
+              <button
+                (click)="adjustScore('home', 1)"
+                class="w-10 h-10 rounded-lg bg-cyan-500 text-white font-bold text-lg flex items-center justify-center hover:bg-cyan-600 transition-colors"
+              >+</button>
+            </div>
+          </div>
+
+          <div class="text-gray-400 text-lg font-bold mx-4">-</div>
+
+          <div class="text-center flex-1">
+            <p class="text-sm font-semibold text-gray-700 mb-3">{{ m.awayTeam }}</p>
+            <div class="flex items-center justify-center gap-3">
+              <button
+                (click)="adjustScore('away', -1)"
+                class="w-10 h-10 rounded-lg bg-cyan-500 text-white font-bold text-lg flex items-center justify-center hover:bg-cyan-600 transition-colors"
+              >-</button>
+              <span class="text-2xl font-bold text-gray-800 w-8 text-center">{{ awayScore() }}</span>
+              <button
+                (click)="adjustScore('away', 1)"
+                class="w-10 h-10 rounded-lg bg-cyan-500 text-white font-bold text-lg flex items-center justify-center hover:bg-cyan-600 transition-colors"
+              >+</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-blue-50 rounded-lg p-4 mb-6">
+          <h3 class="text-sm font-semibold text-blue-800 mb-2">Points Breakdown</h3>
+          <ul class="text-xs text-blue-700 space-y-1">
+            <li>Exact score: 3 points</li>
+            <li>Correct goal difference: 2 points</li>
+            <li>Correct outcome: 1 point</li>
+          </ul>
+        </div>
+
+        <button
+          (click)="savePrediction()"
+          [disabled]="loading() || countdown() === 'Deadline passed'"
+          class="w-full py-3 bg-cyan-500 text-white font-semibold rounded-lg hover:bg-cyan-600 disabled:opacity-50 transition-colors"
+        >
+          {{ loading() ? 'Saving...' : existingPrediction() ? 'Update Prediction' : 'Save Prediction' }}
+        </button>
+
+        @if (existingPrediction()) {
+          <button
+            (click)="deletePrediction()"
+            [disabled]="loading()"
+            class="w-full mt-2 py-3 bg-red-50 text-red-600 font-semibold rounded-lg hover:bg-red-100 disabled:opacity-50 transition-colors"
+          >
+            Delete Prediction
+          </button>
+        }
+      </div>
+    </div>
+  } @else {
+    <div class="text-center py-8 text-gray-500">Loading match...</div>
+  }
+</div>

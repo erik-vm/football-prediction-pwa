@@ -1,0 +1,7 @@
+@if (authService.isAuthenticated()) {
+  <app-header />
+}
+<router-outlet />
+@if (authService.isAuthenticated()) {
+  <app-bottom-nav />
+}

@@ -1,0 +1,49 @@
+<div class="pb-20">
+  <div class="px-4 pt-4">
+    <select
+      [(ngModel)]="selectedCompetition"
+      (ngModelChange)="onCompetitionChange()"
+      class="w-full px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-400"
+    >
+      @for (comp of competitions(); track comp.code) {
+        <option [value]="comp.code">{{ comp.name }}</option>
+      }
+    </select>
+  </div>
+
+  <div class="flex border-b border-gray-200 mt-4 px-4">
+    @for (tab of ['upcoming', 'live', 'completed']; track tab) {
+      <button
+        (click)="setTab($any(tab))"
+        class="flex-1 py-3 text-sm font-medium text-center transition-colors"
+        [class]="activeTab() === tab ? 'text-cyan-500 border-b-2 border-cyan-500' : 'text-gray-500'"
+      >
+        {{ tab === 'upcoming' ? 'Upcoming' : tab === 'live' ? 'Live' : 'Completed' }}
+      </button>
+    }
+  </div>
+
+  <div class="px-4 mt-3">
+    <select
+      [(ngModel)]="selectedMatchday"
+      (ngModelChange)="onMatchdayChange()"
+      class="w-full px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-400"
+    >
+      @for (day of matchdays(); track day) {
+        <option [value]="day">Matchday {{ day }}</option>
+      }
+    </select>
+  </div>
+
+  <div class="px-4 mt-4">
+    @if (loading()) {
+      <div class="text-center py-8 text-gray-500">Loading matches...</div>
+    } @else if (matches().length === 0) {
+      <div class="text-center py-8 text-gray-400">No matches found</div>
+    } @else {
+      @for (match of matches(); track match.id) {
+        <app-match-card [match]="match" (predict)="onPredict($event)" />
+      }
+    }
+  </div>
+</div>
