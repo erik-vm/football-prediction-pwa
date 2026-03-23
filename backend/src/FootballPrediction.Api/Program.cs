@@ -1,10 +1,15 @@
+using System.Text;
 using System.Text.Json.Serialization;
+using FluentValidation;
 using FootballPrediction.Application.Interfaces.Repositories;
 using FootballPrediction.Application.Interfaces.Services;
+using FootballPrediction.Application.Validators;
 using FootballPrediction.Infrastructure.Data;
 using FootballPrediction.Infrastructure.Repositories;
 using FootballPrediction.Infrastructure.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,7 +32,33 @@ builder.Services.AddScoped<ITournamentRepository, TournamentRepository>();
 builder.Services.AddScoped<IMatchRepository, MatchRepository>();
 builder.Services.AddScoped<IPredictionRepository, PredictionRepository>();
 builder.Services.AddScoped<IGameWeekRepository, GameWeekRepository>();
+
 builder.Services.AddScoped<IScoringService, ScoringService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
+
+builder.Services.AddValidatorsFromAssemblyContaining<RegisterRequestValidator>();
+
+var jwtSecretKey = builder.Configuration["JWT:SecretKey"]
+    ?? throw new InvalidOperationException("JWT SecretKey not configured");
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ClockSkew = TimeSpan.Zero,
+            ValidIssuer = builder.Configuration["JWT:Issuer"],
+            ValidAudience = builder.Configuration["JWT:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecretKey))
+        };
+    });
+
+builder.Services.AddAuthorization();
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
@@ -43,6 +74,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 app.MapGet("/health", () => Results.Ok("Healthy"));
