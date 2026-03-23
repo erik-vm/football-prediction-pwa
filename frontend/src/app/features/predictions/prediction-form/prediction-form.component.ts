@@ -30,7 +30,7 @@ export class PredictionFormComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    const matchId = Number(this.route.snapshot.paramMap.get('matchId'));
+    const matchId = this.route.snapshot.paramMap.get('matchId') ?? '';
     this.loadMatch(matchId);
     this.loadExistingPrediction(matchId);
   }
@@ -39,26 +39,17 @@ export class PredictionFormComponent implements OnInit, OnDestroy {
     if (this.countdownInterval) clearInterval(this.countdownInterval);
   }
 
-  private loadMatch(matchId: number): void {
-    this.matchService.getUpcoming().subscribe({
-      next: (matches) => {
-        const found = matches.find(m => m.id === matchId);
-        if (found) {
-          this.match.set(found);
-          this.startCountdown(found.kickoffTime);
-        } else {
-          this.matchService.getFinished().subscribe({
-            next: (finished) => {
-              const f = finished.find(m => m.id === matchId);
-              if (f) this.match.set(f);
-            }
-          });
-        }
-      }
+  private loadMatch(matchId: string): void {
+    this.matchService.getById(matchId).subscribe({
+      next: (match) => {
+        this.match.set(match);
+        this.startCountdown(match.kickoffTime);
+      },
+      error: () => this.error.set('Match not found')
     });
   }
 
-  private loadExistingPrediction(matchId: number): void {
+  private loadExistingPrediction(matchId: string): void {
     this.predictionService.getByMatch(matchId).subscribe({
       next: (prediction) => {
         this.existingPrediction.set(prediction);

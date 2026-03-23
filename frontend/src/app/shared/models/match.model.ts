@@ -1,7 +1,7 @@
 export interface MatchDto {
-  id: number;
-  tournamentId: number;
-  gameWeekId: number;
+  id: string;
+  tournamentId: string;
+  gameWeekId: string | null;
   homeTeam: string;
   awayTeam: string;
   kickoffTime: string;

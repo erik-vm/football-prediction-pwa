@@ -7,6 +7,10 @@ import { MatchDto } from '../../shared/models/match.model';
 export class MatchService {
   constructor(private api: ApiService) {}
 
+  getById(id: string): Observable<MatchDto> {
+    return this.api.get<MatchDto>(`/matches/${id}`);
+  }
+
   getUpcoming(): Observable<MatchDto[]> {
     return this.api.get<MatchDto[]>('/matches/upcoming');
   }

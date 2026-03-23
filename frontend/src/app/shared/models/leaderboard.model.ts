@@ -1,5 +1,5 @@
 export interface LeaderboardEntryDto {
-  userId: number;
+  userId: string;
   username: string;
   totalPoints: number;
   totalPredictions: number;

@@ -1,11 +1,11 @@
 export interface TournamentDto {
-  id: number;
+  id: string;
   name: string;
   code: string;
   season: string;
   startDate: string;
   endDate: string;
-  country: string;
-  type: string;
-  logoUrl: string;
+  country: string | null;
+  type: string | null;
+  logoUrl: string | null;
 }

@@ -11,7 +11,7 @@ export class PredictionService {
     return this.api.get<PredictionDto[]>('/predictions/my');
   }
 
-  getByMatch(matchId: number): Observable<PredictionDto> {
+  getByMatch(matchId: string): Observable<PredictionDto> {
     return this.api.get<PredictionDto>(`/predictions/match/${matchId}`);
   }
 
@@ -19,11 +19,11 @@ export class PredictionService {
     return this.api.post<PredictionDto>('/predictions', request);
   }
 
-  update(id: number, request: PredictionRequest): Observable<PredictionDto> {
+  update(id: string, request: PredictionRequest): Observable<PredictionDto> {
     return this.api.put<PredictionDto>(`/predictions/${id}`, request);
   }
 
-  delete(id: number): Observable<void> {
+  delete(id: string): Observable<void> {
     return this.api.delete<void>(`/predictions/${id}`);
   }
 }

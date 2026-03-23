@@ -12,7 +12,7 @@ export interface LoginRequest {
 export interface AuthResponse {
   accessToken: string;
   refreshToken: string;
-  userId: number;
+  userId: string;
   username: string;
   email: string;
   isAdmin: boolean;

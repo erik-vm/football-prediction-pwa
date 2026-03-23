@@ -1,9 +1,9 @@
 import { MatchDto } from './match.model';
 
 export interface PredictionDto {
-  id: number;
-  userId: number;
-  matchId: number;
+  id: string;
+  userId: string;
+  matchId: string;
   homeScore: number;
   awayScore: number;
   pointsEarned: number | null;
@@ -15,8 +15,8 @@ export interface PredictionDto {
 }
 
 export interface PredictionRequest {
-  userId?: number;
-  matchId: number;
+  userId?: string;
+  matchId: string;
   homeScore: number;
   awayScore: number;
 }
