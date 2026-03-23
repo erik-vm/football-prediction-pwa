@@ -15,7 +15,7 @@ using Microsoft.IdentityModel.Tokens;
 var builder = WebApplication.CreateBuilder(args);
 
 var connStr = builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? builder.Configuration["DATABASE_URL"] ?? "";
+    ?? Environment.GetEnvironmentVariable("DATABASE_URL") ?? "";
 
 if (connStr.StartsWith("postgres://") || connStr.StartsWith("postgresql://"))
 {
