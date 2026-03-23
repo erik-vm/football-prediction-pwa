@@ -10,11 +10,16 @@ public class MatchController : ControllerBase
 {
     private readonly IMatchService _matchService;
     private readonly IMatchResultService _matchResultService;
+    private readonly IFootballDataService _footballDataService;
 
-    public MatchController(IMatchService matchService, IMatchResultService matchResultService)
+    public MatchController(
+        IMatchService matchService,
+        IMatchResultService matchResultService,
+        IFootballDataService footballDataService)
     {
         _matchService = matchService;
         _matchResultService = matchResultService;
+        _footballDataService = footballDataService;
     }
 
     [HttpGet]
@@ -62,6 +67,20 @@ public class MatchController : ControllerBase
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id) =>
         await _matchService.DeleteAsync(id) ? NoContent() : NotFound();
+
+    [HttpPost("sync")]
+    public async Task<IActionResult> Sync()
+    {
+        await _footballDataService.SyncAllCompetitionsAsync();
+        return Ok(new { message = "Sync completed" });
+    }
+
+    [HttpPost("cleanup-duplicates")]
+    public async Task<IActionResult> CleanupDuplicates()
+    {
+        await _footballDataService.CleanupDuplicatesAsync();
+        return Ok(new { message = "Cleanup completed" });
+    }
 
     [HttpPost("{id:guid}/result")]
     public async Task<IActionResult> SetResult(Guid id, [FromBody] MatchResultRequest request)

@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.Json.Serialization;
 using FluentValidation;
+using FootballPrediction.Api.BackgroundJobs;
 using FootballPrediction.Application.Interfaces.Repositories;
 using FootballPrediction.Application.Interfaces.Services;
 using FootballPrediction.Application.Validators;
@@ -39,6 +40,14 @@ builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<ITournamentService, TournamentService>();
 builder.Services.AddScoped<IMatchService, MatchService>();
 builder.Services.AddScoped<IMatchResultService, MatchResultService>();
+builder.Services.AddScoped<IPredictionService, PredictionService>();
+builder.Services.AddScoped<ILeaderboardService, LeaderboardService>();
+builder.Services.AddScoped<IResultProcessingService, ResultProcessingService>();
+builder.Services.AddHttpClient<FootballDataService>();
+builder.Services.AddScoped<IFootballDataService, FootballDataService>();
+
+builder.Services.AddHostedService<FootballDataSyncJob>();
+builder.Services.AddHostedService<ResultProcessingBackgroundJob>();
 
 builder.Services.AddValidatorsFromAssemblyContaining<RegisterRequestValidator>();
 
@@ -63,6 +72,18 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.SetIsOriginAllowed(origin =>
+                origin.Contains("vercel.app") || origin.Contains("localhost"))
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials();
+    });
+});
+
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
@@ -78,6 +99,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
 
