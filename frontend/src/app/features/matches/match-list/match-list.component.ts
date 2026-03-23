@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { MatchCardComponent } from '../match-card/match-card.component';
 import { MatchService } from '../../../core/services/match.service';
 import { PredictionService } from '../../../core/services/prediction.service';
+import { StorageService } from '../../../core/services/storage.service';
 import { MatchDto } from '../../../shared/models/match.model';
 import { PredictionDto } from '../../../shared/models/prediction.model';
 
@@ -37,9 +38,13 @@ export class MatchListComponent implements OnInit {
   selectedMatchday = 0;
   loading = signal(false);
 
+  private readonly COMP_KEY = 'last_selected_competition';
+  private readonly PREFS_KEY = 'selected_competitions';
+
   constructor(
     private matchService: MatchService,
     private predictionService: PredictionService,
+    private storage: StorageService,
     private router: Router
   ) {}
 
@@ -65,11 +70,20 @@ export class MatchListComponent implements OnInit {
   private loadCompetitions(): void {
     this.matchService.getCompetitions().subscribe({
       next: (codes) => {
+        const preferredCodes = this.storage.getJson<string[]>(this.PREFS_KEY);
+        const filtered = preferredCodes && preferredCodes.length > 0
+          ? codes.filter(c => preferredCodes.includes(c))
+          : codes;
+
         this.competitions.set(
-          codes.map(code => ({ code, name: COMPETITION_NAMES[code] || code }))
+          filtered.map(code => ({ code, name: COMPETITION_NAMES[code] || code }))
         );
-        if (codes.length > 0) {
-          this.selectedCompetition = codes[0];
+
+        if (filtered.length > 0) {
+          const lastSelected = this.storage.get(this.COMP_KEY);
+          this.selectedCompetition = lastSelected && filtered.includes(lastSelected)
+            ? lastSelected
+            : filtered[0];
           this.loadNearestMatchday();
         }
       }
@@ -121,6 +135,7 @@ export class MatchListComponent implements OnInit {
   }
 
   onCompetitionChange(): void {
+    this.storage.set(this.COMP_KEY, this.selectedCompetition);
     this.loadNearestMatchday();
   }
 
