@@ -1,6 +1,6 @@
-# Error Prevention Guide v4.0
+# Error Prevention Guide v5.0
 
-**Validated across 2 development cycles. Each error cost 15-60 minutes to resolve.**
+**Validated across 3 development cycles. Each error cost 15-60 minutes to resolve.**
 
 ## Category: Tooling
 
@@ -152,4 +152,94 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 ```csharp
 public Tournament? Tournament { get; set; }
 public GameWeek? GameWeek { get; set; }
+```
+
+## Category: Frontend Models & Types (v3 cycle)
+
+### ERROR 19: Frontend Model IDs Must Be Strings (GUIDs)
+**Symptom**: `NaN` in API URLs, 404 errors when navigating to prediction form
+**Root Cause**: Backend uses `Guid` (serialized as string), frontend models typed IDs as `number`
+**Prevention**: ALL entity IDs in frontend models must be `string`, never `number`:
+```typescript
+// WRONG
+export interface MatchDto { id: number; tournamentId: number; }
+// CORRECT
+export interface MatchDto { id: string; tournamentId: string; }
+```
+**Applies to**: MatchDto, PredictionDto, PredictionRequest, TournamentDto, LeaderboardEntryDto, AuthResponse (userId)
+
+### ERROR 20: 204 NoContent Response Body Is Null
+**Symptom**: `TypeError: Cannot read properties of null` in subscribe next handler
+**Root Cause**: API returns 204 (no body) when resource doesn't exist yet (e.g., no prediction for match). The Observable emits `null` which is passed to the `next` callback.
+**Prevention**: When an endpoint may return 204, always guard for null in the subscriber:
+```typescript
+// WRONG
+next: (prediction) => {
+  this.homeScore.set(prediction.homeScore); // crashes if null
+}
+// CORRECT
+next: (prediction) => {
+  if (!prediction) return;
+  this.homeScore.set(prediction.homeScore);
+}
+```
+**Also consider**: Use 204 instead of 404 for "not found but expected" cases (e.g., no prediction yet) to avoid browser console errors.
+
+### ERROR 21: Match Card Must Show Existing Predictions
+**Symptom**: User makes prediction, returns to match list, no visual feedback that prediction was made
+**Root Cause**: Match card component didn't receive or display prediction data
+**Prevention**: Match list must:
+1. Fetch user predictions on init via `GET /predictions/my`
+2. Build a `Map<matchId, PredictionDto>` for O(1) lookup
+3. Pass prediction to each match card as an input
+4. Card shows prediction score, points (if scored), and "Edit Prediction" button
+5. Cards with predictions should be visually distinct (different background/border)
+
+### ERROR 22: Competition Dropdown Must Persist Selection
+**Symptom**: User selects Premier League, makes prediction, returns — dropdown resets to first competition (alphabetical = Bundesliga)
+**Root Cause**: `selectedCompetition` reset to `codes[0]` on every `ngOnInit`
+**Prevention**: Save selected competition to `localStorage` on change, restore on init:
+```typescript
+private readonly COMP_KEY = 'last_selected_competition';
+
+// On init: restore
+const lastSelected = this.storage.get(this.COMP_KEY);
+this.selectedCompetition = lastSelected && filtered.includes(lastSelected)
+  ? lastSelected : filtered[0];
+
+// On change: persist
+this.storage.set(this.COMP_KEY, this.selectedCompetition);
+```
+**Applies to**: Match list AND leaderboard (both share same key).
+
+### ERROR 23: User Preferences Must Filter Competition Dropdowns
+**Symptom**: User deselects leagues in Settings, but all leagues still appear in match list and leaderboard dropdowns
+**Root Cause**: Match list fetched competitions from API without filtering by user preferences
+**Prevention**:
+1. Preferences page saves selected competition codes to `localStorage` key `selected_competitions`
+2. Preferences must save initial state on first visit (not just on toggle)
+3. Match list and leaderboard must read `selected_competitions` and filter the API response
+4. Handle edge case: if `selected_competitions` is null (never visited preferences), show all
+5. If `selected_competitions` is empty array (user deselected all), show all as fallback
+
+### ERROR 24: Desktop Layout Must Be Constrained
+**Symptom**: Content stretches full-width on desktop, poor readability
+**Root Cause**: No max-width container on the app layout
+**Prevention**: Wrap `<router-outlet>` in a centered max-width container:
+```html
+<div class="max-w-lg mx-auto">
+  <router-outlet />
+</div>
+```
+This gives mobile-first design (full width on small screens) while constraining content on desktop.
+
+### ERROR 25: Frontend Environment Must Match Backend Port
+**Symptom**: Frontend API calls fail with connection refused
+**Root Cause**: `environment.ts` apiUrl port doesn't match backend's `launchSettings.json` port
+**Prevention**: Check `Properties/launchSettings.json` for actual port and match it in `environment.ts`:
+```bash
+# Verify backend port
+cat backend/src/FootballPrediction.Api/Properties/launchSettings.json | grep applicationUrl
+# Update frontend to match
+# environment.ts: apiUrl: 'http://localhost:<PORT>'
 ```

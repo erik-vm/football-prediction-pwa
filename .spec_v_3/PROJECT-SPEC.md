@@ -182,10 +182,14 @@
 
 ### Match List (`/matches`) - Protected
 - Three tabs: Upcoming | Live | Completed (with counts)
-- Competition selector dropdown (filtered by user preferences)
+- Competition selector dropdown (filtered by user preferences from localStorage)
+- **Competition selection persisted to localStorage** — restored when returning to page
 - Matchday filter dropdown
 - Auto-selects nearest matchday for active tab
 - Match cards show: teams, time/score, status badge, prediction if exists
+- **Cards with predictions**: cyan background, show prediction score (e.g. "Your prediction: 2-1"), points badge if scored, "Edit Prediction" outline button
+- **Cards without predictions**: white background, solid "Make Prediction" button
+- Fetch user predictions on init via GET /predictions/my, build Map for O(1) lookup
 - Click predict button → navigate to prediction form
 
 ### Prediction Form (`/predictions/new?matchId=`) - Protected
@@ -201,7 +205,8 @@
 - List of user's predictions with match info and points earned
 
 ### Leaderboard (`/leaderboard`)
-- Competition selector
+- Competition selector (filtered by user preferences, selection persisted to localStorage)
+- **Shares `last_selected_competition` key with match list** for consistent UX
 - Current user stats card (rank, points, predictions, accuracy %)
 - Ranked list with medals for top 3
 - Highlights current user's row
@@ -212,7 +217,9 @@
 ### Preferences (`/preferences`) - Protected
 - User info display
 - Competition checkboxes (select which competitions to show)
-- Persists to localStorage
+- Persists to localStorage key `selected_competitions` on every toggle
+- **Must save initial state on first visit** (all selected) so other pages can read it
+- Match list and leaderboard filter their dropdowns by this preference
 
 ### Header (all pages when logged in)
 - App title (link to /matches)
@@ -223,6 +230,11 @@
 
 ### Bottom Navigation (mobile)
 - Matches | Tournaments | Leaderboard | Predictions | Preferences
+
+### App Layout
+- `<router-outlet>` wrapped in `max-w-lg mx-auto` for desktop readability
+- Mobile-first: full width on small screens, centered constrained width on desktop
+- Header and bottom nav span full width outside the container
 
 ## Frontend Services
 
@@ -241,22 +253,23 @@
 ## Frontend Models
 
 ```typescript
+// CRITICAL: All IDs are strings (backend Guid serializes as string). Never use number for IDs.
+
 // Auth
-RegisterRequest { username, email, password }
-LoginRequest { email, password }
-AuthResponse { accessToken, refreshToken, userId, username, email, isAdmin }
+RegisterRequest { username: string, email: string, password: string }
+LoginRequest { email: string, password: string }
+AuthResponse { accessToken: string, refreshToken: string, userId: string, username: string, email: string, isAdmin: boolean }
 
 // Match
-Match { id, tournamentId, gameWeekId, homeTeam, awayTeam, kickoffTime, homeScore, awayScore, isFinished, status, competitionCode, matchday, createdAt, updatedAt }
-Tournament { id, name, season, description, isActive, createdAt, updatedAt }
-GameWeek { id, tournamentId, weekNumber, startDate, endDate, createdAt, updatedAt }
+Match { id: string, tournamentId: string, gameWeekId: string | null, homeTeam: string, awayTeam: string, kickoffTime: string, homeScore: number | null, awayScore: number | null, isFinished: boolean, status: string, competitionCode: string, season: string, matchday: number }
+Tournament { id: string, name: string, code: string, season: string, startDate: string, endDate: string, country: string | null, type: string | null, logoUrl: string | null }
 
 // Prediction
-Prediction { id, userId, matchId, homeScore, awayScore, pointsEarned, status, createdAt, updatedAt }
-PredictionRequest { userId?, matchId, homeScore, awayScore }
+Prediction { id: string, userId: string, matchId: string, homeScore: number, awayScore: number, pointsEarned: number | null, status: string, competitionCode: string, createdAt: string, updatedAt: string, match?: Match }
+PredictionRequest { userId?: string, matchId: string, homeScore: number, awayScore: number }
 
 // Leaderboard
-LeaderboardEntry { userId, username, totalPoints, totalPredictions, averagePoints, rank }
+LeaderboardEntry { userId: string, username: string, totalPoints: number, totalPredictions: number, averagePoints: number, accuracy: number, rank: number }
 ```
 
 ## Supported Competitions
