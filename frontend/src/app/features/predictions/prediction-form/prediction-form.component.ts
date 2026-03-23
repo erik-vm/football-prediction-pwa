@@ -52,6 +52,7 @@ export class PredictionFormComponent implements OnInit, OnDestroy {
   private loadExistingPrediction(matchId: string): void {
     this.predictionService.getByMatch(matchId).subscribe({
       next: (prediction) => {
+        if (!prediction) return;
         this.existingPrediction.set(prediction);
         this.homeScore.set(prediction.homeScore);
         this.awayScore.set(prediction.awayScore);
