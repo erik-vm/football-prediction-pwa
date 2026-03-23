@@ -41,7 +41,7 @@ public class PredictionController : ControllerBase
     public async Task<IActionResult> GetByMatch(Guid matchId)
     {
         var result = await _service.GetByMatchAndUserAsync(matchId, GetUserId());
-        return result == null ? NotFound() : Ok(result);
+        return result == null ? NoContent() : Ok(result);
     }
 
     [HttpPost]
