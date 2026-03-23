@@ -42,7 +42,7 @@
       <div class="text-center py-8 text-gray-400">No matches found</div>
     } @else {
       @for (match of matches(); track match.id) {
-        <app-match-card [match]="match" (predict)="onPredict($event)" />
+        <app-match-card [match]="match" [prediction]="getPrediction(match.id)" (predict)="onPredict($event)" />
       }
     }
   </div>

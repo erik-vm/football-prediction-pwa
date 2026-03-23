@@ -3,7 +3,9 @@ import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MatchCardComponent } from '../match-card/match-card.component';
 import { MatchService } from '../../../core/services/match.service';
+import { PredictionService } from '../../../core/services/prediction.service';
 import { MatchDto } from '../../../shared/models/match.model';
+import { PredictionDto } from '../../../shared/models/prediction.model';
 
 type Tab = 'upcoming' | 'live' | 'completed';
 
@@ -30,14 +32,34 @@ export class MatchListComponent implements OnInit {
   matches = signal<MatchDto[]>([]);
   competitions = signal<CompetitionOption[]>([]);
   matchdays = signal<number[]>([]);
+  predictions = signal<Map<string, PredictionDto>>(new Map());
   selectedCompetition = '';
   selectedMatchday = 0;
   loading = signal(false);
 
-  constructor(private matchService: MatchService, private router: Router) {}
+  constructor(
+    private matchService: MatchService,
+    private predictionService: PredictionService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     this.loadCompetitions();
+    this.loadUserPredictions();
+  }
+
+  private loadUserPredictions(): void {
+    this.predictionService.getMyPredictions().subscribe({
+      next: (preds) => {
+        const map = new Map<string, PredictionDto>();
+        preds.forEach(p => map.set(p.matchId, p));
+        this.predictions.set(map);
+      }
+    });
+  }
+
+  getPrediction(matchId: string): PredictionDto | null {
+    return this.predictions().get(matchId) ?? null;
   }
 
   private loadCompetitions(): void {

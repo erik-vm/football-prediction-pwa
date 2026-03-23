@@ -1,7 +1,9 @@
 @if (authService.isAuthenticated()) {
   <app-header />
 }
-<router-outlet />
+<div class="max-w-lg mx-auto">
+  <router-outlet />
+</div>
 @if (authService.isAuthenticated()) {
   <app-bottom-nav />
 }

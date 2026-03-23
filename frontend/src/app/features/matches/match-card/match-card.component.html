@@ -1,4 +1,7 @@
-<div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-3">
+<div
+  class="rounded-xl shadow-sm border p-4 mb-3 transition-all"
+  [class]="hasPrediction() ? 'bg-cyan-50 border-cyan-200' : 'bg-white border-gray-100'"
+>
   <div class="flex items-center justify-between mb-3">
     <span class="text-xs px-2 py-1 rounded-full font-medium" [class]="getStatusBadgeClass()">
       {{ getStatusLabel() }}
@@ -22,12 +25,29 @@
     </div>
   </div>
 
+  @if (hasPrediction()) {
+    <div class="mt-3 flex items-center justify-center gap-2 text-sm">
+      <span class="text-cyan-700 font-medium">Your prediction:</span>
+      <span class="bg-white border border-cyan-300 rounded-lg px-3 py-1 font-bold text-cyan-800">
+        {{ prediction()!.homeScore }} - {{ prediction()!.awayScore }}
+      </span>
+      @if (prediction()!.pointsEarned !== null) {
+        <span class="bg-cyan-600 text-white rounded-full px-2 py-0.5 text-xs font-bold">
+          +{{ prediction()!.pointsEarned }} pts
+        </span>
+      }
+    </div>
+  }
+
   @if (!match().isFinished && match().status !== 'IN_PLAY') {
     <button
       (click)="onPredict()"
-      class="w-full mt-3 py-2 bg-cyan-500 text-white text-sm font-medium rounded-lg hover:bg-cyan-600 transition-colors"
+      class="w-full mt-3 py-2 text-sm font-medium rounded-lg transition-colors"
+      [class]="hasPrediction()
+        ? 'bg-white border border-cyan-400 text-cyan-600 hover:bg-cyan-50'
+        : 'bg-cyan-500 text-white hover:bg-cyan-600'"
     >
-      Make Prediction
+      {{ hasPrediction() ? 'Edit Prediction' : 'Make Prediction' }}
     </button>
   }
 </div>
