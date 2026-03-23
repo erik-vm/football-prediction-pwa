@@ -1,5 +1,9 @@
 using System.Text.Json.Serialization;
+using FootballPrediction.Application.Interfaces.Repositories;
+using FootballPrediction.Application.Interfaces.Services;
 using FootballPrediction.Infrastructure.Data;
+using FootballPrediction.Infrastructure.Repositories;
+using FootballPrediction.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,6 +21,13 @@ if (connStr.StartsWith("postgres://") || connStr.StartsWith("postgresql://"))
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connStr));
+
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<ITournamentRepository, TournamentRepository>();
+builder.Services.AddScoped<IMatchRepository, MatchRepository>();
+builder.Services.AddScoped<IPredictionRepository, PredictionRepository>();
+builder.Services.AddScoped<IGameWeekRepository, GameWeekRepository>();
+builder.Services.AddScoped<IScoringService, ScoringService>();
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
