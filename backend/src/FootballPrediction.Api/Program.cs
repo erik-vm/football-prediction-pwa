@@ -36,6 +36,9 @@ builder.Services.AddScoped<IGameWeekRepository, GameWeekRepository>();
 builder.Services.AddScoped<IScoringService, ScoringService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
+builder.Services.AddScoped<ITournamentService, TournamentService>();
+builder.Services.AddScoped<IMatchService, MatchService>();
+builder.Services.AddScoped<IMatchResultService, MatchResultService>();
 
 builder.Services.AddValidatorsFromAssemblyContaining<RegisterRequestValidator>();
 
