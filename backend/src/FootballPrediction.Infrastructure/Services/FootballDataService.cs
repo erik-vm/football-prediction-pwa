@@ -257,6 +257,8 @@ public class FootballDataService : IFootballDataService
             }
         }
         await _context.SaveChangesAsync();
+
+        await ScorePendingPredictionsAsync(competitionCode);
     }
 
     public async Task<int> CleanupDuplicatesAsync()

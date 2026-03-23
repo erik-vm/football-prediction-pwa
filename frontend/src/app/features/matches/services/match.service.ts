@@ -45,4 +45,8 @@ export class MatchService {
   getNearestMatchday(competitionCode: string, tab: string): Observable<number | null> {
     return this.api.get<number | null>(`matches/nearest-matchday?competitionCode=${competitionCode}&tab=${tab}`);
   }
+
+  syncMatches(): Observable<{ message: string }> {
+    return this.api.post<{ message: string }>('matches/sync', {});
+  }
 }

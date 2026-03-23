@@ -1,6 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { MatchService } from '../../../features/matches/services/match.service';
 
 @Component({
   selector: 'app-header',
@@ -10,6 +11,12 @@ import { AuthService } from '../../../core/services/auth.service';
     <header class="bg-gray-900 text-white px-4 py-3 flex justify-between items-center">
       <a routerLink="/matches" class="text-lg font-bold">Football Prediction Game</a>
       <div class="flex items-center gap-3">
+        <button (click)="syncData()" class="text-gray-300 hover:text-white" [class.animate-spin]="isSyncing()" title="Sync match data">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+        </button>
         <button (click)="toggleTheme()" class="text-gray-300 hover:text-white">
           @if (isDark()) {
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -42,9 +49,11 @@ import { AuthService } from '../../../core/services/auth.service';
 })
 export class HeaderComponent {
   private authService = inject(AuthService);
+  private matchService = inject(MatchService);
   private router = inject(Router);
 
   isDark = signal(localStorage.getItem('theme') === 'dark');
+  isSyncing = signal(false);
 
   constructor() {
     this.applyTheme();
@@ -58,6 +67,18 @@ export class HeaderComponent {
 
   private applyTheme(): void {
     document.documentElement.classList.toggle('dark', this.isDark());
+  }
+
+  syncData(): void {
+    if (this.isSyncing()) return;
+    this.isSyncing.set(true);
+    this.matchService.syncMatches().subscribe({
+      next: () => {
+        this.isSyncing.set(false);
+        window.location.reload();
+      },
+      error: () => this.isSyncing.set(false)
+    });
   }
 
   logout(): void {
