@@ -40,13 +40,19 @@ export class PreferencesComponent implements OnInit {
 
   ngOnInit(): void {
     this.username.set(this.authService.user()?.username || '');
-    const saved = this.storage.getJson<string[]>(this.PREFS_KEY) || [];
+    const saved = this.storage.getJson<string[]>(this.PREFS_KEY);
+    const isFirstTime = saved === null;
+
     this.competitions.set(
       ALL_COMPETITIONS.map(c => ({
         ...c,
-        selected: saved.length === 0 || saved.includes(c.code)
+        selected: isFirstTime || saved!.includes(c.code)
       }))
     );
+
+    if (isFirstTime) {
+      this.savePreferences();
+    }
   }
 
   toggleCompetition(code: string): void {
