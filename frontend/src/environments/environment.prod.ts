@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://football-prediction-api.onrender.com'
+  apiUrl: 'https://football-prediction-pwa.onrender.com'
 };
